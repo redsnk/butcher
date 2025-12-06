@@ -6,7 +6,10 @@ struct _PE *pe;
 
     pe = GetPE("/home/alex/src/butcher/samples/api.node");
     if (pe != NULL) {
-		char *me = GetMemoryPE(pe,0,0);
+		uint8_t *m = GetMemoryPE(pe,0x180002240,0x400);
+        if (m != NULL) {
+            free(m);
+        }
 		FreePE(pe);
 	}
     return (0);

@@ -8,12 +8,74 @@ struct _ms_dos_stub {
 	int32_t off_signature;
 };
 
+struct _COFF_File_Header {
+	uint16_t Machine;
+	uint16_t NumberOfSections;
+	uint32_t TimeDateStamp;
+	uint32_t PointerToSymbolTable;
+	uint32_t NumberOfSymbols;
+	uint16_t SizeOfOptionalHeader;
+	uint16_t Characteristics;
+};
+
+#define MAGIC_PE32		0x10b
+#define MAGIC_PE32PLUS	0x20b
+
+struct _Optional_Header_Standard_Fields {
+	uint16_t Magic;
+	uint8_t MajorLinkerVersion;
+	uint8_t MinorLinkerVersion;
+	uint32_t SizeOfCode;
+	uint32_t SizeOfInitializedData;
+	uint32_t SizeOfUninitializedData;
+	uint32_t AddressOfEntryPoint;
+	uint32_t BaseOfCode;
+	// PE32 only
+	uint32_t BaseOfData;
+};
+
+struct _Optional_Header_Windows_Specific_Fields_PE32 {
+	uint32_t ImageBase;
+	// [...]
+};
+
+struct _Optional_Header_Windows_Specific_Fields_PE32PLUS {
+	uint64_t ImageBase;
+	// [...]
+};
+
+union _Optional_Header_Windows_Specific_Fields {
+	struct _Optional_Header_Windows_Specific_Fields_PE32 pe32;
+	struct _Optional_Header_Windows_Specific_Fields_PE32PLUS pe32plus;
+};
+
+#define MAX_HEADERS		96	
+
+struct _Section_Header {
+	char Name[8];
+	uint32_t VirtualSize;
+	uint32_t VirtualAddress;
+	uint32_t SizeOfRawData;
+	uint32_t PointerToRawData;
+	uint32_t PointerToRelocations;
+	uint32_t PointerToLinenumbers;
+	uint16_t NumberOfRelocations;
+	uint16_t NumberOfLinenumbers;
+	uint32_t Characteristics;
+};
+
 struct _PE {
+	FILE *f;
 	struct _ms_dos_stub ms_dos_stub;
+	int32_t signature;
+	struct _COFF_File_Header COFF_File_Header;
+	struct _Optional_Header_Standard_Fields Optional_Header_Standard_Fields;
+	union _Optional_Header_Windows_Specific_Fields Optional_Header_Windows_Specific_Fields;
+	struct _Section_Header Sections[MAX_HEADERS];
 };
 
 struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
-char *GetMemoryPE (struct _PE *pe, int64_t offset, int64_t size);
+uint8_t *GetMemoryPE (struct _PE *pe, int64_t addr, int64_t size);
 
 #endif	// _PE_H
