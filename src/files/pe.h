@@ -1,7 +1,10 @@
 #ifndef _PE_H
 #define _PE_H
 
-#include "../../global.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 
 struct _ms_dos_stub {
 	unsigned char head[0x3c-1];
