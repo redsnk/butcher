@@ -19,8 +19,9 @@ class Code {
     public:
         struct _subcode *subcodes;
         int count;
+        uint64_t ep;
 
-        Code();
+        Code(uint64_t addr);
         ~Code();
         void AddSubcode (struct _subcode sc);
         int HasAddr (uint64_t addr);
@@ -38,6 +39,7 @@ class Butcher {
         virtual int IsRet(cs_insn insn) = 0;
         virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
+        virtual uint8_t *PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);
         Code *GetCode(Code *c,uint64_t address, int max_subcode);
