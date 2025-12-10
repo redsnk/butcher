@@ -1,32 +1,26 @@
-
-// https://www.capstone-engine.org/documentation.html
+/ https://www.capstone-engine.org/documentation.html
 // https://www.capstone-engine.org/lang_c.html
 
-#include "pe_x64.h"
-#include "../files/pe.h"
-#include <capstone/capstone.h>
+#include "butcher.hpp"
 
-char *Cut_pe_x64(char *file_name,uint64_t address,char *func_name) {
-struct _PE *pe;
-csh handle;
+uint8_t *Butcher::Cut(char *file_name,uint64_t address,char *func_name) {
 cs_insn *insn;
 size_t count;
 uint64_t addr;
 int lexit;
 
-    pe = GetPE(file_name);
-    if (pe != NULL) {
-        if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) == CS_ERR_OK) {
+    if (OpenFile(file_name)) {
+        if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
             addr = address;
             lexit = false;
             while (!lexit) {
-                uint8_t *m = GetMemoryPE(pe,addr,0x400);
+                uint8_t *m = GetMemory(addr,0x400);
                 if (m != NULL) {
                     count = cs_disasm(handle, m, 0x400, addr, 0, &insn);
                     if (count) {
                         for (int n = 0; (!lexit) && (n < count); n++) {
-                            printf("0x%"PRIx64":\t%s\t\t%s\n", insn[n].address, insn[n].mnemonic,insn[n].op_str);
+                            printf("0x%x:\t%s\t\t%s\n", insn[n].address, insn[n].mnemonic,insn[n].op_str);
                             if (insn[n].detail->groups_count > 0) {
                                 for (int i=0;i <  insn[n].detail->groups_count;i++) {
                                     if (insn[n].detail->groups[i] == X86_GRP_RET) {
@@ -50,7 +44,7 @@ int lexit;
             }
             
         }
-        FreePE(pe);
-    }  
+        CloseFile();
+    }
+    return (NULL);
 }
-

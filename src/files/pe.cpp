@@ -1,6 +1,6 @@
 // https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
 
-#include "pe.h"
+#include "pe.hpp"
 
 struct _PE *GetPE (char *name) {
 FILE *f;
@@ -10,7 +10,7 @@ int b;
 
 	f = fopen(name,"r");
 	if (f!= NULL) {
-		pe = malloc(sizeof(struct _PE));
+		pe = (struct _PE *) malloc(sizeof(struct _PE));
 		if (pe != NULL) {
 			// FILE
 			pe->f = f;
@@ -104,7 +104,7 @@ uint64_t GetImageBase (struct _PE *pe) {
 uint8_t *GetMemoryPE (struct _PE *pe, int64_t addr, int64_t size) {
 int n;
 uint64_t base, start, end, offset;
-char *m;
+uint8_t *m;
 long l;
 
 	for (n=0;n<pe->COFF_File_Header.NumberOfSections;n++) {
@@ -112,7 +112,7 @@ long l;
 		start = base+pe->Sections[n].VirtualAddress;
 		end = start+pe->Sections[n].VirtualSize;
 		if ((addr >= start) && (addr < end) && (size <= (end-start))) {
-			m = malloc(size);
+			m = (uint8_t *) malloc(size);
 			if (m != NULL) {
 				// TODO: check SizeOfRawData overflow
 				offset = pe->Sections[n].PointerToRawData+(addr-start);

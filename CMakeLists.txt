@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Butcher VERSION 0.1.0 LANGUAGES C)
+project(Butcher VERSION 0.1.0 LANGUAGES CXX)
 
-add_executable(Butcher main.c src/files/pe.c src/butcher.c src/arch/pe_x64.c)
+add_executable(Butcher main.cpp src/files/pe.cpp src/butcher.cpp src/arch/pe_x64.cpp)
 TARGET_LINK_LIBRARIES(Butcher capstone)
 
 include(CTest)
