@@ -126,6 +126,11 @@ struct _PE {
 	struct _IMAGE_DATA_DIRECTORY Directories[MAX_DATA_DIRECTORIES];
 };
 
+#define EXPORT_TABLE	0
+#define IMPORT_TABLE	1
+#define RESORCE_TABLE	2
+//[...]
+
 struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
 uint8_t *GetMemoryPE (struct _PE *pe, int64_t addr, int64_t size);
