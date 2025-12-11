@@ -39,17 +39,62 @@ struct _Optional_Header_Standard_Fields {
 
 struct _Optional_Header_Windows_Specific_Fields_PE32 {
 	uint32_t ImageBase;
-	// [...]
+	uint32_t SectionAlignament;
+	uint32_t FileAlignament;
+	uint16_t MajorOperartingSystemVersion;
+	uint16_t MinorOperatingSystemVersion;
+	uint16_t MajorImageVersion;
+	uint16_t MinorImageVersion;
+	uint16_t MajorSusbystemVersion;
+	uint16_t MinorSubsystemVersion;
+	uint32_t Win32VersionValue;
+	uint32_t SizeOfImage;
+	uint32_t SizeOfHeaders;
+	uint32_t CheckSum;
+	uint16_t Subsystem;
+	uint16_t DllCharacteristics;
+	uint32_t SizeOfStackReserve;
+	uint32_t SizeOfStackCommit;
+	uint32_t SizeOfHeapReserve;
+	uint32_t SizeOfHeapCommit;
+	uint32_t LoaderFlags;
+	uint32_t NumberOfRvaAndSizes;
 };
 
 struct _Optional_Header_Windows_Specific_Fields_PE32PLUS {
 	uint64_t ImageBase;
-	// [...]
+	uint32_t SectionAlignament;
+	uint32_t FileAlignament;
+	uint16_t MajorOperartingSystemVersion;
+	uint16_t MinorOperatingSystemVersion;
+	uint16_t MajorImageVersion;
+	uint16_t MinorImageVersion;
+	uint16_t MajorSusbystemVersion;
+	uint16_t MinorSubsystemVersion;
+	uint32_t Win32VersionValue;
+	uint32_t SizeOfImage;
+	uint32_t SizeOfHeaders;
+	uint32_t CheckSum;
+	uint16_t Subsystem;
+	uint16_t DllCharacteristics;
+	uint64_t SizeOfStackReserve;
+	uint64_t SizeOfStackCommit;
+	uint64_t SizeOfHeapReserve;
+	uint64_t SizeOfHeapCommit;
+	uint32_t LoaderFlags;
+	uint32_t NumberOfRvaAndSizes;
 };
 
 union _Optional_Header_Windows_Specific_Fields {
 	struct _Optional_Header_Windows_Specific_Fields_PE32 pe32;
 	struct _Optional_Header_Windows_Specific_Fields_PE32PLUS pe32plus;
+};
+
+#define MAX_DATA_DIRECTORIES	256
+
+struct _IMAGE_DATA_DIRECTORY {
+	uint32_t VirtualAddress;
+    uint32_t Size;
 };
 
 #define MAX_HEADERS		96	
@@ -73,8 +118,12 @@ struct _PE {
 	int32_t signature;
 	struct _COFF_File_Header COFF_File_Header;
 	struct _Optional_Header_Standard_Fields Optional_Header_Standard_Fields;
+	int pe32;
 	union _Optional_Header_Windows_Specific_Fields Optional_Header_Windows_Specific_Fields;
+	int num_sections;
 	struct _Section_Header Sections[MAX_HEADERS];
+	int num_directories;
+	struct _IMAGE_DATA_DIRECTORY Directories[MAX_DATA_DIRECTORIES];
 };
 
 struct _PE *GetPE (char *name);

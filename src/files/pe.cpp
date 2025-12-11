@@ -26,11 +26,13 @@ int b;
 							// COFF File Header
 							l = fread(&pe->COFF_File_Header,1,sizeof(struct _COFF_File_Header),f);
 							if (l == sizeof(struct _COFF_File_Header)) {
+								pe->num_sections = pe->COFF_File_Header.NumberOfSections;
 								lsections = ftell(f) + pe->COFF_File_Header.SizeOfOptionalHeader;
 								// Optional Header Standard Fields
 								l = fread(&pe->Optional_Header_Standard_Fields,1,sizeof(struct _Optional_Header_Standard_Fields)-4,f);
 								if (l == sizeof(struct _Optional_Header_Standard_Fields)-4) {
-									if (pe->Optional_Header_Standard_Fields.Magic == MAGIC_PE32) {
+									pe->pe32 = (pe->Optional_Header_Standard_Fields.Magic == MAGIC_PE32);
+									if (pe->pe32) {
 										l = fread(&pe->Optional_Header_Standard_Fields.BaseOfData,1,4,f);
 										if (l != 4) {
 											printf("GetPE error: fread _Optional_Header_Standard_Fields.BaseOfData\n");
@@ -40,7 +42,7 @@ int b;
 										}
 									}
 									// Optional Header Windows Specific Fields
-									if (pe->Optional_Header_Standard_Fields.Magic == MAGIC_PE32) {
+									if (pe->pe32) {
 										l = fread(&pe->Optional_Header_Windows_Specific_Fields.pe32,1,sizeof(struct _Optional_Header_Windows_Specific_Fields_PE32),f);
 										b = (l == sizeof(struct _Optional_Header_Windows_Specific_Fields_PE32));
 									} else {
@@ -48,14 +50,21 @@ int b;
 										b = (l == sizeof(struct _Optional_Header_Windows_Specific_Fields_PE32PLUS));
 									}
 									if (b) {
-										// sections
-										fseek(f,lsections,SEEK_SET);
-										lmax = pe->COFF_File_Header.NumberOfSections*sizeof(struct _Section_Header);
-										l = fread(&pe->Sections,1,lmax,f);
-										if (l == lmax) {
-											return (pe);
+										// Directories
+										pe->num_directories = (pe->pe32)?pe->Optional_Header_Windows_Specific_Fields.pe32.NumberOfRvaAndSizes:pe->Optional_Header_Windows_Specific_Fields.pe32plus.NumberOfRvaAndSizes;
+										l = fread(&pe->Directories,1,sizeof(struct _IMAGE_DATA_DIRECTORY)*pe->num_directories,f);
+										if (l == (sizeof(struct _IMAGE_DATA_DIRECTORY)*pe->num_directories)) {
+											// sections
+											fseek(f,lsections,SEEK_SET);
+											lmax = pe->num_sections*sizeof(struct _Section_Header);
+											l = fread(&pe->Sections,1,lmax,f);
+											if (l == lmax) {
+												return (pe);
+											} else {
+												printf("GetPE error: fread Sections\n");
+											}
 										} else {
-											printf("GetPE error: fread Sections\n");
+											printf("GetPE error: fread _IMAGE_DATA_DIRECTORY\n");
 										}
 									} else {
 										printf("GetPE error: fread _Optional_Header_Windows_Specific_Fields\n");

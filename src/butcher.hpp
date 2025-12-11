@@ -15,6 +15,9 @@ struct _subcode {
     size_t count;
 };
 
+#define INIT_MEM_GETCODE (1024*10)
+#define STEP_MEM_GETCODE (1024*10)
+
 class Code {
     public:
         struct _subcode *subcodes;
@@ -39,11 +42,12 @@ class Butcher {
         virtual int IsRet(cs_insn insn) = 0;
         virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
+        virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
         virtual uint8_t *PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);
-        Code *GetCode(Code *c,uint64_t address, int max_subcode);
-        uint8_t *Cut(char *file_name,uint64_t address,char *func_name);
+        Code *GetCode(Code *c,uint64_t address);
+        uint8_t *Cut(char *file_name,uint64_t address);
 };
 
 #endif // _BUTCHER_H

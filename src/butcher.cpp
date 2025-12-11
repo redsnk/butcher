@@ -9,6 +9,14 @@ Code::Code(uint64_t a) {
 }
 
 void Code::AddSubcode (struct _subcode sc) {
+    for (int n=0;n<count;n++) {
+        if((sc.first < subcodes[n].first) && (subcodes[n].first <= sc.last)) {
+            // Same code but sc bigger
+            cs_free(subcodes[n].insn, subcodes[n].count);
+            subcodes[n] = sc;
+            return;
+        }
+    }
     if (!count) {
         subcodes = (struct _subcode *) malloc(sizeof(struct _subcode));
     } else {
@@ -32,7 +40,7 @@ int n,i;
     for (n=0;n<count;n++) {
         printf("==== SC(%i) ====\n",n);
         for (i=0;i<subcodes[n].count;i++) {
-            printf("0x%x:\t%s\t\t%s\n", subcodes[n].insn[i].address, subcodes[n].insn[i].mnemonic,subcodes[n].insn[i].op_str);
+            printf("0x%llx:\t%s\t\t%s\n", subcodes[n].insn[i].address, subcodes[n].insn[i].mnemonic,subcodes[n].insn[i].op_str);
             if (subcodes[n].insn[i].address == subcodes[n].last) {
                 break;
             }
@@ -64,12 +72,13 @@ int Butcher::IsGroup (cs_insn insn, int group) {
     return (false);
 }
 
-Code *Butcher::GetCode(Code *c,uint64_t address,int max_subcode) {
+Code *Butcher::GetCode(Code *c,uint64_t address) {
 int lexit;
 struct _subcode sc;
 int n;
 std::list<uint64_t> l;
 uint64_t addr;
+int max_subcode = INIT_MEM_GETCODE;
 
     if (c == NULL) {
         c = new Code(address);
@@ -85,7 +94,7 @@ uint64_t addr;
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
-                    //printf("0x%x:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    //printf("0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // Explore later 
                         l.push_back(addr);
@@ -100,12 +109,22 @@ uint64_t addr;
                         lexit = true;
                         break;
                     }
+                    if (IsInt(sc.insn[n],&addr)) {
+                        // End subcode
+                        sc.last = sc.insn[n].address;
+                        lexit = true;
+                        break;
+                    }
                 }
                 if (!lexit) {
-                    sc.last = sc.insn[n-1].address;
+                    // more code
+                    cs_free(sc.insn, sc.count);
+                    max_subcode += STEP_MEM_GETCODE;
+                } else {
+                    // done
+                    c->AddSubcode(sc);
                 }
-                c->AddSubcode(sc);
-                sc.first = sc.last + sc.insn[n-1].size;
+                //sc.first = sc.last + sc.insn[n-1].size;
             } else {
                 break;
             }
@@ -115,12 +134,12 @@ uint64_t addr;
     }
     for (uint64_t a : l) {
         // Explore new addresses
-        c = GetCode(c,a,max_subcode);
+        c = GetCode(c,a);
     }
     return (c);
 }
 
-uint8_t *Butcher::Cut(char *file_name,uint64_t address,char *func_name) {
+uint8_t *Butcher::Cut(char *file_name,uint64_t address) {
 //cs_insn *insn;
 //size_t count;
 //uint64_t addr;
@@ -130,7 +149,7 @@ uint8_t *p = NULL;
     if (OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
-            Code *c = GetCode(NULL,address,0x4000);
+            Code *c = GetCode(NULL,address);
             //c->Print();
             p = PrintCodeC(c);
             delete c;

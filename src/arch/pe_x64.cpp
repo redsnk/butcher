@@ -35,6 +35,10 @@ int Pe_x64::IsCall(cs_insn insn, uint64_t *addr) {
     return (false);
 }
 
+int Pe_x64::IsInt(cs_insn insn, uint64_t *num) {
+    return(IsGroup(insn,X86_GRP_INT));
+}
+
 int Pe_x64::IsJmp(cs_insn insn, uint64_t *addr) {
     if (IsGroup(insn,X86_GRP_JUMP)) {
         if (insn.detail->x86.op_count == 1) {
@@ -53,11 +57,11 @@ int Pe_x64::IsJmp(cs_insn insn, uint64_t *addr) {
 #include <stdio.h>\n\
 #include <stdint.h>\n\
 \n\
-#define MAX_STACK 1024\n\
+#define MAX_STACK 10240\n\
 \n\
 struct _regs {\n\
     uint64_t rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;\n\
-    uint64_t stack[MAX_STACK];\n\
+    uint8_t stack[MAX_STACK];\n\
 \n\
 };\n\
 \n"
@@ -67,13 +71,13 @@ int main (int argc, char **argv) {\n\
 struct _regs r;\n\
 \n\
     r.rsp = (uint64_t)(r.stack+(MAX_STACK/2));\n\
-    func_0x%x(&r);\n\
+    func_0x%llx(&r);\n\
     return (0);\n\
 }\n\
 \n"
 
 #define C_FUNC_HEADER "\
-void func_0x%x(struct _regs *r) {\n\
+void func_0x%llx(struct _regs *r) {\n\
 "
 
 #define C_FUNC_FOOTER "\
@@ -86,7 +90,7 @@ uint8_t *Pe_x64::PrintSubCodeC(struct _subcode *sc) {
         if (sc->insn[n].address > sc->last) {
             break;
         }
-        printf("    //0x%x:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
+        printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
     }
     printf(C_FUNC_FOOTER);
     return (NULL);
