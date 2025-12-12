@@ -52,37 +52,47 @@ int Pe_x64::IsJmp(cs_insn insn, uint64_t *addr) {
 }
 
 #define C_HEADER "\
-#include <stddef.h>\n\
-#include <stdlib.h>\n\
-#include <stdio.h>\n\
-#include <stdint.h>\n\
-\n\
-#define MAX_STACK 10240\n\
-\n\
-struct _regs {\n\
-    uint64_t rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;\n\
-    uint8_t stack[MAX_STACK];\n\
-\n\
-};\n\
+#include \"x64.h\"\n\
 \n"
 
 #define C_FOOTER "\
 int main (int argc, char **argv) {\n\
-struct _regs r;\n\
+struct _cpu cpu;\n\
 \n\
-    r.rsp = (uint64_t)(r.stack+(MAX_STACK/2));\n\
-    func_0x%llx(&r);\n\
+    init(&cpu);\n\
+    func_0x%llx(&cpu);\n\
     return (0);\n\
 }\n\
 \n"
 
 #define C_FUNC_HEADER "\
-void func_0x%llx(struct _regs *r) {\n\
+void func_0x%llx(struct _cpu *cpu) {\n\
 "
 
 #define C_FUNC_FOOTER "\
 }\n\
 \n"
+
+uint8_t *Pe_x64::PrintInst(cs_insn *insn) {
+    switch (insn->id) {
+        case X86_INS_PUSH:
+            printf("    push(cpu,\"%s\");",insn->op_str);
+            break;
+        case X86_INS_LEA:
+            if ((insn->detail->x86.operands[0].type == X86_OP_REG) || (insn->detail->x86.operands[1].type == X86_OP_MEM && handle,insn->detail->x86.operands[1].mem.index == X86_REG_INVALID)) {
+                printf("    lea(cpu,\"%s\",\"%s\",0x%llx);",    cs_reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                cs_reg_name(handle,insn->detail->x86.operands[1].mem.base),
+                                                                insn->detail->x86.operands[1].mem.disp);
+                break;
+            }
+            printf("    error: X86_INS_LEA");
+            break;
+        default:
+            printf("    printf(\"Error: PrintIns\\n\");exit(1);");
+            break;
+    }
+    return (NULL);
+}
 
 uint8_t *Pe_x64::PrintSubCodeC(struct _subcode *sc) {
     printf(C_FUNC_HEADER,sc->first);
@@ -90,6 +100,7 @@ uint8_t *Pe_x64::PrintSubCodeC(struct _subcode *sc) {
         if (sc->insn[n].address > sc->last) {
             break;
         }
+        PrintInst(&sc->insn[n]);
         printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
     }
     printf(C_FUNC_FOOTER);
@@ -104,4 +115,3 @@ uint8_t *Pe_x64::PrintCodeC(Code *c) {
     printf(C_FOOTER,c->ep);
     return (NULL);
 }
-
