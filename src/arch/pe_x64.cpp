@@ -51,6 +51,10 @@ int Pe_x64::IsJmp(cs_insn insn, uint64_t *addr) {
     return (false);
 }
 
+int Pe_x64::IsImport(cs_insn insn, char **name) {
+    return (false);
+}
+
 #define C_HEADER "\
 #include \"x64.h\"\n\
 \n"
@@ -94,11 +98,17 @@ uint8_t *Pe_x64::PrintInst(cs_insn *insn) {
     return (NULL);
 }
 
-uint8_t *Pe_x64::PrintSubCodeC(struct _subcode *sc) {
+uint8_t *Pe_x64::PrintSubCodeC(Code *c,int num) {
+struct _subcode *sc;
+
+    sc = &c->subcodes[num];
     printf(C_FUNC_HEADER,sc->first);
     for (int n=0;n<sc->count;n++) {
         if (sc->insn[n].address > sc->last) {
             break;
+        }
+        if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
+            printf("label_0x%llx:\n",sc->insn[n].address);
         }
         PrintInst(&sc->insn[n]);
         printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
@@ -110,7 +120,7 @@ uint8_t *Pe_x64::PrintSubCodeC(struct _subcode *sc) {
 uint8_t *Pe_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->count;n++) {
-        PrintSubCodeC(&c->subcodes[n]);
+        PrintSubCodeC(c,n);
     }
     printf(C_FOOTER,c->ep);
     return (NULL);

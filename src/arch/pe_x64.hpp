@@ -19,9 +19,11 @@ class Pe_x64 : public Butcher {
         int IsCall(cs_insn insn, uint64_t *addr);
         int IsJmp(cs_insn insn, uint64_t *addr);
         int IsInt(cs_insn insn, uint64_t *num);
+        int IsImport(cs_insn insn, char **name);
+
         uint8_t *PrintInst(cs_insn *insn);
         uint8_t *PrintCodeC(Code *c);
-        uint8_t *PrintSubCodeC(struct _subcode *sc);
+        uint8_t *PrintSubCodeC(Code *c,int num);
 };
 
 #endif // PE_X64_H

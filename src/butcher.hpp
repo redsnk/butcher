@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <list>
+#include <algorithm>
 #include <capstone/capstone.h>
 
 struct _subcode {
@@ -23,6 +24,7 @@ class Code {
         struct _subcode *subcodes;
         int count;
         uint64_t ep;
+        std::list<uint64_t> labels;
 
         Code(uint64_t addr);
         ~Code();
@@ -34,7 +36,7 @@ class Code {
 class Butcher {
     public:
         csh handle;
-
+        //
         virtual int OpenFile(char *file_name) = 0;
         virtual cs_err Cs_open(void) = 0;
         virtual void CloseFile(void) = 0;
@@ -43,6 +45,7 @@ class Butcher {
         virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
+        virtual int IsImport(cs_insn insn, char **name) = 0;
         virtual uint8_t *PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);

@@ -76,7 +76,8 @@ Code *Butcher::GetCode(Code *c,uint64_t address) {
 int lexit;
 struct _subcode sc;
 int n;
-std::list<uint64_t> l;
+std::list<uint64_t> calls;
+std::list<uint64_t> jmps;
 uint64_t addr;
 int max_subcode = INIT_MEM_GETCODE;
 
@@ -97,11 +98,12 @@ int max_subcode = INIT_MEM_GETCODE;
                     //printf("0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // Explore later 
-                        l.push_back(addr);
+                        calls.push_back(addr);
                     }
                     if (IsJmp(sc.insn[n],&addr)) {
-                        // Explore later
-                        l.push_back(addr);
+                        // TODO: check out of code jmps
+                        jmps.push_back(addr);
+                        c->labels.push_back(addr);
                     }
                     if (IsRet(sc.insn[n])) {
                         // End subcode
@@ -132,7 +134,7 @@ int max_subcode = INIT_MEM_GETCODE;
             break;
         }
     }
-    for (uint64_t a : l) {
+    for (uint64_t a : calls) {
         // Explore new addresses
         c = GetCode(c,a);
     }
