@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <cstring>
 #include "../butcher.hpp"
 
 class Pe_x64 : public Butcher {
@@ -21,9 +22,10 @@ class Pe_x64 : public Butcher {
         int IsInt(cs_insn insn, uint64_t *num);
         int IsImport(cs_insn insn, char **name);
 
-        uint8_t *PrintInst(cs_insn *insn);
-        uint8_t *PrintCodeC(Code *c);
-        uint8_t *PrintSubCodeC(Code *c,int num);
+        int PrintInst(struct _subcode *sc,int num);
+        int PrintExtra(struct _subcode *sc,int num);
+        void PrintCodeC(Code *c);
+        void PrintSubCodeC(Code *c,int num);
 };
 
 #endif // PE_X64_H

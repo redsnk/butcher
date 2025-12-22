@@ -46,11 +46,11 @@ class Butcher {
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
         virtual int IsImport(cs_insn insn, char **name) = 0;
-        virtual uint8_t *PrintCodeC(Code *c) = 0;
+        virtual void PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);
         Code *GetCode(Code *c,uint64_t address);
-        uint8_t *Cut(char *file_name,uint64_t address);
+        void Cut(char *file_name,uint64_t address);
 };
 
 #endif // _BUTCHER_H

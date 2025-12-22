@@ -77,6 +77,7 @@ void func_0x%llx(struct _cpu *cpu) {\n\
 }\n\
 \n"
 
+/*
 uint8_t *Pe_x64::PrintInst(cs_insn *insn) {
     switch (insn->id) {
         case X86_INS_PUSH:
@@ -91,37 +92,100 @@ uint8_t *Pe_x64::PrintInst(cs_insn *insn) {
             }
             printf("    error: X86_INS_LEA");
             break;
+        case X86_INS_SUB:
+            break;
         default:
             printf("    printf(\"Error: PrintIns\\n\");exit(1);");
             break;
     }
     return (NULL);
 }
+*/
 
-uint8_t *Pe_x64::PrintSubCodeC(Code *c,int num) {
+const char *reg_name(csh handle,int id_reg) {
+    if (id_reg == X86_REG_INVALID) {
+        return ("");
+    }
+    return(cs_reg_name(handle,id_reg));
+}
+
+int Pe_x64::PrintExtra(struct _subcode *sc,int num) {
+    return (num);
+}
+
+int Pe_x64::PrintInst(struct _subcode *sc,int num) {
+int n;
+char subname[1024];
+char params[1024];
+char buffer[1024];
+cs_insn *insn;
+
+    int ret = PrintExtra(sc,num);
+    if (ret > num) {
+        return (ret);
+    }
+    subname[0] = 0;
+    params[0] = 0;
+    insn = &sc->insn[num];
+    for (n=0;n<insn->detail->x86.op_count;n++) {
+        switch (insn->detail->x86.operands[n].type) {
+            case X86_OP_REG:
+                strcat(subname,"r");
+                sprintf(buffer,"\"%s\",",reg_name(handle,insn->detail->x86.operands[n].reg));
+                strcat(params,buffer);
+                break;
+            case X86_OP_IMM:
+                strcat(subname,"i");
+                sprintf(buffer,"0x%llx,",insn->detail->x86.operands[n].imm);
+                strcat(params,buffer);
+                break;
+            case X86_OP_MEM:
+                strcat(subname,"m");
+                sprintf(buffer,"\"%s\",\"%s\",%i,0x%llx,",reg_name(handle,insn->detail->x86.operands[n].mem.base),
+                                                reg_name(handle,insn->detail->x86.operands[n].mem.index),
+                                                insn->detail->x86.operands[n].mem.scale,
+                                                insn->detail->x86.operands[n].mem.disp);
+                strcat(params,buffer);
+                break;
+            default:
+                strcat(subname,"e");
+                break;
+        }
+    }
+    int l = strlen(params);
+    if (l) {
+        params[l-1] = 0;
+    }
+    if (insn->detail->x86.op_count) {
+        printf("    %s_%s(cpu,%s);",insn->mnemonic,subname,params);
+    } else {
+        printf("    %s(cpu);",insn->mnemonic);
+    }
+    return (num+1);
+}
+
+void Pe_x64::PrintSubCodeC(Code *c,int num) {
 struct _subcode *sc;
 
     sc = &c->subcodes[num];
     printf(C_FUNC_HEADER,sc->first);
-    for (int n=0;n<sc->count;n++) {
+    for (int n=0;n<sc->count;) {
         if (sc->insn[n].address > sc->last) {
             break;
         }
         if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
             printf("label_0x%llx:\n",sc->insn[n].address);
         }
-        PrintInst(&sc->insn[n]);
+        n = PrintInst(sc,n);
         printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
     }
     printf(C_FUNC_FOOTER);
-    return (NULL);
 }
 
-uint8_t *Pe_x64::PrintCodeC(Code *c) {
+void Pe_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->count;n++) {
         PrintSubCodeC(c,n);
     }
     printf(C_FOOTER,c->ep);
-    return (NULL);
 }

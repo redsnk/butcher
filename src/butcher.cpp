@@ -141,22 +141,20 @@ int max_subcode = INIT_MEM_GETCODE;
     return (c);
 }
 
-uint8_t *Butcher::Cut(char *file_name,uint64_t address) {
+void Butcher::Cut(char *file_name,uint64_t address) {
 //cs_insn *insn;
 //size_t count;
 //uint64_t addr;
 //int lexit;
-uint8_t *p = NULL;
 
     if (OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
             Code *c = GetCode(NULL,address);
             //c->Print();
-            p = PrintCodeC(c);
+            PrintCodeC(c);
             delete c;
         }
         CloseFile();
     }
-    return (p);
 }

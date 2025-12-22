@@ -37,15 +37,36 @@ union _reg {
 	struct _r8 r8;
 };
 
+union _eflags {
+  	struct {
+    	uint32_t CF 	: 1;
+    	uint32_t _u1 	: 1;
+		uint32_t PF		: 1;
+		uint32_t _u2 	: 1;
+		uint32_t AF		: 1;
+		uint32_t _u3 	: 1;
+		uint32_t ZF		: 1;
+		uint32_t SF		: 1;
+		uint32_t TF		: 1;
+		uint32_t IF		: 1;
+		uint32_t DF		: 1;
+		uint32_t OF		: 1;
+  	};
+  	uint32_t r32;
+};
+
 #define MEM_SIZE		(1024*10)
 
 struct _cpu {
     union _reg rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;
+	union _eflags eflags;
 	uint8_t mem[MEM_SIZE];
 };
 
 void init(struct _cpu *cpu);
-void push(struct _cpu *cpu,char *reg);
-void lea(struct _cpu *cpu,char *rdst,char *rsrc,uint64_t disp);
+void push_r(struct _cpu *cpu,char *reg);
+void pop_r(struct _cpu *cpu,char *reg);
+void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
+void sub_ri(struct _cpu *cpu,char *reg,uint64_t i);
 
 #endif // _X64_H
