@@ -72,12 +72,14 @@ struct _cpu {
 };
 
 void init(struct _cpu *cpu);
+void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+int get_z(struct _cpu *cpu);
 void push_r(struct _cpu *cpu,char *reg);
 void pop_r(struct _cpu *cpu,char *reg);
 void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);

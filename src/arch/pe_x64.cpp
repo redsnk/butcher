@@ -59,6 +59,9 @@ int Pe_x64::IsImport(cs_insn insn, char **name) {
 #include \"x64.h\"\n\
 \n"
 
+#define C_FUNC_PROTO "\
+void func_0x%llx(struct _cpu *cpu);\n"
+
 #define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
 struct _cpu cpu;\n\
@@ -118,6 +121,27 @@ cs_insn *insn;
 
     insn = &sc->insn[num];
     switch (insn->id) {
+        case X86_INS_RET:
+            // ignore
+            num++;
+            break;
+        case X86_INS_JMP:
+            if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
+                printf("    goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+                printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                num++;
+            }
+            break;
+        case X86_INS_JE:
+            printf("    if (get_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+            num++;
+            break;
+        case X86_INS_JNE:
+            printf("    if (!get_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+            num++;
+            break;
         case X86_INS_MOV:
             if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
@@ -132,6 +156,27 @@ cs_insn *insn;
                     printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
                     num++;
                 }
+            }
+            break;
+        case X86_INS_CALL:
+            if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
+                printf("    func_0x%llx(cpu);",insn->detail->x86.operands[0].imm);
+                printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                num++;
+            } else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                    uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                    /*
+                    uint64_t *n = (uint64_t *) GetMemoryPE(pe,addr,8);
+                    printf("value = 0x%llx\n",*n);
+                    */
+                    struct _import_name in;
+                    if (GetImportFunction (pe,addr,&in)) {
+                        printf("    %s(); // %s ",in.func_name,in.lib_name);
+                        printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                    }
+
+                }             
             }
             break;
     }
@@ -226,6 +271,10 @@ char sub[128];
 
 void Pe_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
+    for (int n=0;n<c->subcod_count;n++) {
+        printf(C_FUNC_PROTO,c->subcodes[n].first);
+    }
+    printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
         PrintSubCodeC(c,n);
     }

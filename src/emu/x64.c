@@ -193,6 +193,14 @@ void *ret;
 	return (NULL);
 }
 
+void set_z(struct _cpu *cpu,uint64_t i) {
+	cpu->eflags.ZF = (i == 0);
+}
+
+int get_z(struct _cpu *cpu) {
+	return(cpu->eflags.ZF);
+}
+
 void push(struct _cpu *cpu,int bits,uint64_t n) {
 	switch (bits) {
 		case 16:
@@ -352,15 +360,19 @@ int b;
 	switch (b) {
 		case 8:
 			*((uint8_t *)r) -= i;
+			set_z(cpu,*((uint8_t *)r));
 			break;
 		case 16:
 			*((uint16_t *)r) -= i;
+			set_z(cpu,*((uint16_t *)r));
 			break;
 		case 32:
 			*((uint32_t *)r) -= i;
+			set_z(cpu,*((uint32_t *)r));
 			break;
 		case 64:
 			*((uint64_t *)r) -= i;
+			set_z(cpu,*((uint64_t *)r));
 			break;
 		default:
 			panic("sub_ri bits","");

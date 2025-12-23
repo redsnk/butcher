@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <cstring>
 
 struct _ms_dos_stub {
 	unsigned char head[0x3c-1];
@@ -131,8 +132,28 @@ struct _PE {
 #define RESORCE_TABLE	2
 //[...]
 
+#define MAX_IMPORT_NAME	(256)
+
+struct _import_name {
+	char lib_name[MAX_IMPORT_NAME];
+	char func_name[MAX_IMPORT_NAME];
+};
+
+struct _import_directory_entry {
+	uint32_t import_lookup_table;
+	uint32_t time_data_stamp;
+	uint32_t forwarder_chain;
+	uint32_t name;
+	uint32_t import_address_table;
+};
+
+struct _import_directory_table {
+	struct _import_directory_entry entry[0];
+};
+
 struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
 uint8_t *GetMemoryPE (struct _PE *pe, int64_t addr, int64_t size);
+int GetImportFunction (struct _PE *pe, int64_t addr, struct _import_name *in);
 
 #endif	// _PE_H
