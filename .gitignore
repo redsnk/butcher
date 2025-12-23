@@ -1,4 +1,4 @@
 samples/*
 build/*
-src/emu/test
-src/emu/test.c
+src/test/test
+src/test/test.c
