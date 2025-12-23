@@ -5,11 +5,12 @@
 
 Code::Code(uint64_t a) {
     ep = a;
-    count = 0;
+    subcod_count = 0;
+    submem_count = 0;
 }
 
 void Code::AddSubcode (struct _subcode sc) {
-    for (int n=0;n<count;n++) {
+    for (int n=0;n<subcod_count;n++) {
         if((sc.first < subcodes[n].first) && (subcodes[n].first <= sc.last)) {
             // Same code but sc bigger
             cs_free(subcodes[n].insn, subcodes[n].count);
@@ -17,16 +18,34 @@ void Code::AddSubcode (struct _subcode sc) {
             return;
         }
     }
-    if (!count) {
+    if (!subcod_count) {
         subcodes = (struct _subcode *) malloc(sizeof(struct _subcode));
     } else {
-        subcodes = (struct _subcode *) realloc(subcodes, sizeof(struct _subcode)*(count+1));
+        subcodes = (struct _subcode *) realloc(subcodes, sizeof(struct _subcode)*(subcod_count+1));
     }
-    subcodes[count++] = sc;
+    subcodes[subcod_count++] = sc;
+}
+
+void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
+    for(int n=0;n<submem_count;n++) {
+        if ((submems[n].addr >= address) && ((submems[n].addr+submems[n].size) <= (address+size))) {
+            return;
+        }
+    }
+    if (!submem_count) {
+        submems = (struct _submem *) malloc(sizeof(struct _submem));
+    } else {
+        submems = (struct _submem *) realloc(submems, sizeof(struct _submem)*(submem_count+1));
+    }
+    submems[submem_count].mem = (uint8_t *) malloc(size);
+    memcpy(submems[submem_count].mem,mem,size);
+    submems[submem_count].size = size;
+    submems[submem_count].addr = address;
+    submem_count++;
 }
 
 int Code::HasAddr (uint64_t addr) {
-    for (int n=0;n<count;n++) {
+    for (int n=0;n<subcod_count;n++) {
         if ((addr >= subcodes[n].first) && (addr <= subcodes[n].last)) {
             return (true);
         }
@@ -37,7 +56,7 @@ int Code::HasAddr (uint64_t addr) {
 void Code::Print (void) {
 int n,i;
 
-    for (n=0;n<count;n++) {
+    for (n=0;n<subcod_count;n++) {
         printf("==== SC(%i) ====\n",n);
         for (i=0;i<subcodes[n].count;i++) {
             printf("0x%llx:\t%s\t\t%s\n", subcodes[n].insn[i].address, subcodes[n].insn[i].mnemonic,subcodes[n].insn[i].op_str);
@@ -51,11 +70,17 @@ int n,i;
 Code::~Code() {
 int n;
 
-    if (count > 0) {
-        for (n=0;n<count;n++) {
+    if (subcod_count > 0) {
+        for (n=0;n<subcod_count;n++) {
             cs_free(subcodes[n].insn, subcodes[n].count);
         }
         free(subcodes);
+    }
+    if (submem_count > 0) {
+        for (n=0;n<submem_count;n++) {
+            free(submems[n].mem);
+        }
+        free(submems);
     }
 }
 
@@ -119,7 +144,7 @@ int max_subcode = INIT_MEM_GETCODE;
                     }
                 }
                 if (!lexit) {
-                    // more code
+                    // not enough space, try wtih more
                     cs_free(sc.insn, sc.count);
                     max_subcode += STEP_MEM_GETCODE;
                 } else {

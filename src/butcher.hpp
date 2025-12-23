@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <list>
 #include <algorithm>
+#include <cstring>
 #include <capstone/capstone.h>
 
 struct _subcode {
@@ -16,19 +17,28 @@ struct _subcode {
     size_t count;
 };
 
+struct _submem {
+    uint64_t addr;
+    uint64_t size;
+    uint8_t *mem;
+};
+
 #define INIT_MEM_GETCODE (1024*10)
 #define STEP_MEM_GETCODE (1024*10)
 
 class Code {
     public:
         struct _subcode *subcodes;
-        int count;
+        int subcod_count;
+        struct _submem *submems;
+        int submem_count;
         uint64_t ep;
         std::list<uint64_t> labels;
 
         Code(uint64_t addr);
         ~Code();
         void AddSubcode (struct _subcode sc);
+        void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
         int HasAddr (uint64_t addr);
         void Print (void);
 };

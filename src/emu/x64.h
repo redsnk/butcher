@@ -55,18 +55,36 @@ union _eflags {
   	uint32_t r32;
 };
 
-#define MEM_SIZE		(1024*10)
+#define STACK_ADDR		0xF000
+#define STACK_SIZE		(1024*10)
+
+struct _mem {
+	uint64_t addr;
+	uint64_t size;
+	uint8_t *mem;
+};
 
 struct _cpu {
     union _reg rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;
 	union _eflags eflags;
-	uint8_t mem[MEM_SIZE];
+	struct _mem *mems;
+	int mem_count;
 };
 
 void init(struct _cpu *cpu);
+void panic(char *str1,char *str2);
+void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
+void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
+uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
 void push_r(struct _cpu *cpu,char *reg);
 void pop_r(struct _cpu *cpu,char *reg);
 void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
 void sub_ri(struct _cpu *cpu,char *reg,uint64_t i);
+void xor_rr(struct _cpu *cpu,char *regd,char *regs);
+void mov_rr(struct _cpu *cpu,char *regd,char *regs);
+void mov_mr(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,char *reg);
+void mov_mi(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int64_t i);
 
 #endif // _X64_H

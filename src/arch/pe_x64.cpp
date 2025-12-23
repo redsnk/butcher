@@ -59,12 +59,16 @@ int Pe_x64::IsImport(cs_insn insn, char **name) {
 #include \"x64.h\"\n\
 \n"
 
-#define C_FOOTER "\
+#define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
 struct _cpu cpu;\n\
 \n\
     init(&cpu);\n\
+"
+
+#define C_FOOTER_2 "\
     func_0x%llx(&cpu);\n\
+    end(&cpu);\n\
     return (0);\n\
 }\n\
 \n"
@@ -109,19 +113,41 @@ const char *reg_name(csh handle,int id_reg) {
     return(cs_reg_name(handle,id_reg));
 }
 
-int Pe_x64::PrintExtra(struct _subcode *sc,int num) {
+int Pe_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
+cs_insn *insn;
+
+    insn = &sc->insn[num];
+    switch (insn->id) {
+        case X86_INS_MOV:
+            if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
+                if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
+                    // mov rax, qword ptr [rip + 0x1dc97]
+                    uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
+                    uint8_t *mem = GetMemoryPE(pe,addr,8);
+                    if (mem != NULL) {
+                        c->AddSubMem(addr,mem,8);
+                        free(mem);
+                    }
+                    printf("    cpu->%s.r64 = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                    printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                    num++;
+                }
+            }
+            break;
+    }
     return (num);
 }
 
-int Pe_x64::PrintInst(struct _subcode *sc,int num) {
+int Pe_x64::PrintInst(Code *c,struct _subcode *sc,int num) {
 int n;
 char subname[1024];
 char params[1024];
 char buffer[1024];
 cs_insn *insn;
 
-    int ret = PrintExtra(sc,num);
+    int ret = PrintExtra(c,sc,num);
     if (ret > num) {
+        // Done, next instruction
         return (ret);
     }
     subname[0] = 0;
@@ -161,6 +187,7 @@ cs_insn *insn;
     } else {
         printf("    %s(cpu);",insn->mnemonic);
     }
+    printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
     return (num+1);
 }
 
@@ -176,16 +203,35 @@ struct _subcode *sc;
         if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
             printf("label_0x%llx:\n",sc->insn[n].address);
         }
-        n = PrintInst(sc,n);
-        printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
+        n = PrintInst(c,sc,n);
+        //printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
     }
     printf(C_FUNC_FOOTER);
 }
 
+void Pe_x64::PrintSubMemC(Code *c,int num) {
+struct _submem *sm;
+char sub[128];
+
+    sm = &c->submems[num];
+    char *buffer = (char *) malloc((sm->size*4)+128);
+    buffer[0] = 0;
+    for (int n=0;n<sm->size;n++) {
+        sprintf(sub,"\\x%02x",sm->mem[n]);
+        strcat(buffer,sub);
+    }
+    printf("    add_mem (&cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
+    free(buffer);
+}
+
 void Pe_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
-    for (int n=0;n<c->count;n++) {
+    for (int n=0;n<c->subcod_count;n++) {
         PrintSubCodeC(c,n);
     }
-    printf(C_FOOTER,c->ep);
+    printf(C_FOOTER_1);
+    for (int n=0;n<c->submem_count;n++) {
+        PrintSubMemC(c,n);
+    }
+    printf(C_FOOTER_2,c->ep);
 }
