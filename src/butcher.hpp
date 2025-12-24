@@ -10,7 +10,11 @@
 #include <cstring>
 #include <capstone/capstone.h>
 
+#define SUBCODE_TOP     0
+
 struct _subcode {
+    int id;
+    int parent;
     uint64_t first;
     uint64_t last;
     cs_insn *insn;
@@ -23,11 +27,13 @@ struct _submem {
     uint8_t *mem;
 };
 
-#define INIT_MEM_GETCODE (1024*10)
-#define STEP_MEM_GETCODE (1024*10)
+#define INIT_MEM_GETCODE (1024)
+#define STEP_MEM_GETCODE (1024)
+#define MAX_MEM_GETCODE (10*1024)
 
 class Code {
     public:
+        int next_id;
         struct _subcode *subcodes;
         int subcod_count;
         struct _submem *submems;
@@ -37,9 +43,10 @@ class Code {
 
         Code(uint64_t addr);
         ~Code();
-        void AddSubcode (struct _subcode sc);
+        void AddSubcode (struct _subcode *sc,int parent);
         void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
         int HasAddr (uint64_t addr);
+        int HasSubcode (uint64_t addr);
         void Print (void);
 };
 
@@ -59,7 +66,7 @@ class Butcher {
         virtual void PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);
-        Code *GetCode(Code *c,uint64_t address);
+        Code *GetCode(Code *c,uint64_t address,int parent);
         void Cut(char *file_name,uint64_t address);
 };
 

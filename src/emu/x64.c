@@ -197,7 +197,7 @@ void set_z(struct _cpu *cpu,uint64_t i) {
 	cpu->eflags.ZF = (i == 0);
 }
 
-int get_z(struct _cpu *cpu) {
+int flag_z(struct _cpu *cpu) {
 	return(cpu->eflags.ZF);
 }
 
@@ -278,6 +278,10 @@ uint64_t ret = 0;
 			panic("get_mem bits","");
 	}
 	return (ret);
+}
+
+void call_from_iat (char *lib,char *func) {
+	panic("call_from_iat","not implemented");
 }
 
 // ---------------------------------------------
@@ -482,6 +486,31 @@ uint32_t i32;
 			panic("mov_mi bits","");
 	}
 	print_cpu(cpu);	
+}
+
+void movabs_ri(struct _cpu *cpu,char *reg,uint64_t i) {
+void *r;
+int b;
+
+	printf("movabs %s,0x%llx\n",reg,i);
+	r = get_reg(cpu,reg,&b);
+	switch (b) {
+		case 8:
+			*((uint8_t *)r) = i;
+			break;
+		case 16:
+			*((uint16_t *)r) = i;
+			break;
+		case 32:
+			*((uint32_t *)r) = i;
+			break;
+		case 64:
+			*((uint64_t *)r) = i;
+			break;
+		default:
+			panic("movabs bits","");
+	}
+	print_cpu(cpu);
 }
 
 

@@ -122,7 +122,8 @@ cs_insn *insn;
     insn = &sc->insn[num];
     switch (insn->id) {
         case X86_INS_RET:
-            // ignore
+            printf("    return;");
+            printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             num++;
             break;
         case X86_INS_JMP:
@@ -133,12 +134,12 @@ cs_insn *insn;
             }
             break;
         case X86_INS_JE:
-            printf("    if (get_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    if (flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             num++;
             break;
         case X86_INS_JNE:
-            printf("    if (!get_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    if (!flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             num++;
             break;
@@ -172,8 +173,9 @@ cs_insn *insn;
                     */
                     struct _import_name in;
                     if (GetImportFunction (pe,addr,&in)) {
-                        printf("    %s(); // %s ",in.func_name,in.lib_name);
+                        printf("    call_from_iat(\"%s\",\"%s\");",in.lib_name,in.func_name);
                         printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                        num++;
                     }
 
                 }             
@@ -238,18 +240,28 @@ cs_insn *insn;
 
 void Pe_x64::PrintSubCodeC(Code *c,int num) {
 struct _subcode *sc;
+int id;
 
-    sc = &c->subcodes[num];
+    id = c->subcodes[num].id;
+    //sc = &c->subcodes[num];
     printf(C_FUNC_HEADER,sc->first);
-    for (int n=0;n<sc->count;) {
-        if (sc->insn[n].address > sc->last) {
-            break;
+    for (int m=0;m<c->subcod_count;m++) {
+        sc = &c->subcodes[m];
+        if ((sc->id == id) || (sc->parent == id)) {
+            if (sc->parent != SUBCODE_TOP) {
+                printf("    // --------------------------------------------------------------\n");
+            }
+            for (int n=0;n<sc->count;) {
+                if (sc->insn[n].address > sc->last) {
+                    break;
+                }
+                if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
+                    printf("label_0x%llx:\n",sc->insn[n].address);
+                }
+                n = PrintInst(c,sc,n);
+                //printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
+            }
         }
-        if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
-            printf("label_0x%llx:\n",sc->insn[n].address);
-        }
-        n = PrintInst(c,sc,n);
-        //printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
     }
     printf(C_FUNC_FOOTER);
 }
@@ -276,7 +288,9 @@ void Pe_x64::PrintCodeC(Code *c) {
     }
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
-        PrintSubCodeC(c,n);
+        if (c->subcodes[n].parent == SUBCODE_TOP) {
+            PrintSubCodeC(c,n);
+        }
     }
     printf(C_FOOTER_1);
     for (int n=0;n<c->submem_count;n++) {

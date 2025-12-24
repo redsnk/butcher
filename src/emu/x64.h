@@ -78,8 +78,9 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
+void call_from_iat (char *lib,char *func);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
-int get_z(struct _cpu *cpu);
+int flag_z(struct _cpu *cpu);
 void push_r(struct _cpu *cpu,char *reg);
 void pop_r(struct _cpu *cpu,char *reg);
 void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
@@ -88,5 +89,6 @@ void xor_rr(struct _cpu *cpu,char *regd,char *regs);
 void mov_rr(struct _cpu *cpu,char *regd,char *regs);
 void mov_mr(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,char *reg);
 void mov_mi(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int64_t i);
+void movabs_ri(struct _cpu *cpu,char *reg,uint64_t i);
 
 #endif // _X64_H
