@@ -110,7 +110,7 @@ uint64_t GetImageBase (struct _PE *pe) {
 	return (pe->Optional_Header_Windows_Specific_Fields.pe32plus.ImageBase);
 }
 
-uint8_t *GetMemoryPE (struct _PE *pe, int64_t addr, int64_t size) {
+uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read) {
 int n;
 uint64_t base, start, end, offset;
 uint8_t *m;
@@ -120,7 +120,16 @@ long l;
 		base = GetImageBase(pe);
 		start = base+pe->Sections[n].VirtualAddress;
 		end = start+pe->Sections[n].VirtualSize;
-		if ((addr >= start) && (addr < end) && (size <= (end-start))) {
+		if ((addr >= start) && (addr < end)) {
+			// addr inside the section
+			if ((end-addr) < size) {
+				// not enought size
+				size = end-addr-1;
+				if (!size) {
+					// size == 0
+					return (NULL);
+				}
+			}
 			m = (uint8_t *) malloc(size);
 			if (m != NULL) {
 				// TODO: check SizeOfRawData overflow
@@ -129,6 +138,7 @@ long l;
 				if (l != -1) {
 					l = fread(m,1,size,pe->f);
 					if (l == size) {
+						*read = size;
 						return (m);
 					} else {
 						printf("GetMemoryPE error: fread\n");
@@ -144,13 +154,15 @@ long l;
 	return (NULL);
 }
 
-int GetImportFunction (struct _PE *pe,int64_t addr,struct _import_name *in) {
+int GetImportFunction (struct _PE *pe,uint64_t addr,struct _import_name *in) {
+uint64_t read;
+
 	uint64_t base = GetImageBase(pe);
-	struct _import_directory_table *table = (struct _import_directory_table *) GetMemoryPE (pe,base+pe->Directories[IMPORT_TABLE].VirtualAddress,pe->Directories[IMPORT_TABLE].Size);
-	if (table != NULL) {
+	struct _import_directory_table *table = (struct _import_directory_table *) GetMemoryPE (pe,base+pe->Directories[IMPORT_TABLE].VirtualAddress,pe->Directories[IMPORT_TABLE].Size,&read);
+	if ((table != NULL) && (read == pe->Directories[IMPORT_TABLE].Size)) {
 		int n = 0;
 		while (table->entry[n].import_lookup_table) {
-			uint8_t *name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME);
+			uint8_t *name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME,&read);
 			if (name != NULL) {
 				//printf("%s\n",name);
 				int m = 0;
@@ -158,15 +170,15 @@ int GetImportFunction (struct _PE *pe,int64_t addr,struct _import_name *in) {
 				uint64_t iat = base+table->entry[n].import_address_table;
 				while (true) {
 					uint64_t entry = iat+(m*8);
-					uint64_t *value = (uint64_t *) GetMemoryPE (pe,entry,8);
-					if (value == NULL) {
+					uint64_t *value = (uint64_t *) GetMemoryPE (pe,entry,8,&read);
+					if ((value == NULL) || (read != 8) || (*value == 0)) {
 						break;
 					}
 					if (entry == addr) {
 						// found
 						strcpy (in->lib_name,(const char *) name);
 						uint64_t vad = (*value) & 0xffffffff;
-						uint8_t *func = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME);
+						uint8_t *func = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME,&read);
 						if (func != NULL) {
 							strcpy (in->func_name,(const char *)(func+2));
 							free (func);

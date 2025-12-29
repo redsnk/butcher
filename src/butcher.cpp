@@ -117,7 +117,7 @@ struct _subcode sc;
 int n;
 std::list<uint64_t> calls;
 std::list<uint64_t> jmps;
-uint64_t addr;
+uint64_t addr,read;
 int max_subcode = INIT_MEM_GETCODE;
 
     if (c == NULL) {
@@ -130,8 +130,9 @@ int max_subcode = INIT_MEM_GETCODE;
     sc.first = address;
     lexit = false;
     while (!lexit) {
-        uint8_t *m = GetMemory(sc.first,max_subcode);
-        if (m != NULL) {
+        uint8_t *m = GetMemory(sc.first,max_subcode,&read);
+        // TODO: read < max_subcode
+        if ((m != NULL) && (read == max_subcode)) {
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
@@ -193,7 +194,7 @@ int max_subcode = INIT_MEM_GETCODE;
         }
     }
     for (uint64_t a : calls) {
-        // Explore new addresses
+        // Explore new addresses for calls
         c = GetCode(c,a,SUBCODE_TOP);
     }
     return (c);

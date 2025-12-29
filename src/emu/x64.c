@@ -201,6 +201,10 @@ int flag_z(struct _cpu *cpu) {
 	return(cpu->eflags.ZF);
 }
 
+int flag_c(struct _cpu *cpu) {
+	return(cpu->eflags.CF);
+}
+
 void push(struct _cpu *cpu,int bits,uint64_t n) {
 	switch (bits) {
 		case 16:
@@ -513,4 +517,65 @@ int b;
 	print_cpu(cpu);
 }
 
+void mov_ri(struct _cpu *cpu,char *reg,uint64_t i) {
+	return(movabs_ri(cpu,reg,i));
+}
+
+void mov_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp) {
+void *r;
+int b;
+uint64_t mem;
+
+	printf("mov %s,[%s+%s*%i+0x%llx]\n",reg,base,index,mult,disp);
+	r = get_reg(cpu,reg,&b);
+	mem = get_ins_mem(cpu,base,index,mult,disp);
+	switch (b) {
+		case 16:
+			check_ptr(cpu,mem,2);
+			*((uint16_t *)r) = *((uint16_t *) mem);
+			break;
+		case 32:
+			check_ptr(cpu,mem,4);
+			*((uint32_t *)r) = *((uint32_t *) mem);
+			break;
+		case 64:
+			check_ptr(cpu,mem,4);
+			*((uint64_t *)r) = *((uint64_t *) mem);
+			break;
+		default:
+			panic("mov_rm bits","");
+	}
+	print_cpu(cpu);
+}
+
+void test_rr(struct _cpu *cpu,char *regd,char *regs) {
+void *rd,*rs;
+int bs,bd;
+
+	// TODO: The OF and CF flags are set to 0. The SF, ZF, and PF flags are set according to the result (see the “Operation” section above). The state of the AF flag is undefined.
+	printf("test %s,%s\n",regd,regs);
+	rd = get_reg(cpu,regd,&bd);
+	rs = get_reg(cpu,regs,&bs);
+	switch (bd) {
+		case 8:
+			uint8_t r = *((uint8_t *)rd) & *((uint8_t *)rs);
+			set_z(cpu,r);
+			break;
+		case 16:
+			uint16_t r = *((uint16_t *)rd) & *((uint16_t *)rs);
+			set_z(cpu,r);
+			break;
+		case 32:
+			uint32_t r = *((uint32_t *)rd) & *((uint32_t *)rs);
+			set_z(cpu,r);
+			break;
+		case 64:
+			uint64_t r = *((uint64_t *)rd) & *((uint64_t *)rs);
+			set_z(cpu,r);
+			break;
+		default:
+			panic("test_rr bits","");
+	}
+	print_cpu(cpu);	
+}
 

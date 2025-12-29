@@ -71,6 +71,11 @@ struct _cpu {
 	int mem_count;
 };
 
+#define UNKNOWN_R(f) void f##_r(struct _cpu *cpu,char *reg){panic(#f"_r not defined","");}
+#define UNKNOWN_M(f) void f##_m(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp){panic(#f"_m not defined","");}
+#define UNKNOWN_RM(f) void f##_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp){panic(#f"_rm not defined","");}
+
+
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
@@ -81,6 +86,7 @@ void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
 void call_from_iat (char *lib,char *func);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
 int flag_z(struct _cpu *cpu);
+int flag_c(struct _cpu *cpu);
 void push_r(struct _cpu *cpu,char *reg);
 void pop_r(struct _cpu *cpu,char *reg);
 void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
@@ -90,5 +96,13 @@ void mov_rr(struct _cpu *cpu,char *regd,char *regs);
 void mov_mr(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,char *reg);
 void mov_mi(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int64_t i);
 void movabs_ri(struct _cpu *cpu,char *reg,uint64_t i);
+void mov_ri(struct _cpu *cpu,char *reg,uint64_t i);
+void mov_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
+void test_rr(struct _cpu *cpu,char *regd,char *regs);
+
+UNKNOWN_R(jmp)
+UNKNOWN_R(call)
+UNKNOWN_M(call)
+UNKNOWN_RM(movsd)
 
 #endif // _X64_H

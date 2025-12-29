@@ -57,7 +57,7 @@ class Butcher {
         virtual int OpenFile(char *file_name) = 0;
         virtual cs_err Cs_open(void) = 0;
         virtual void CloseFile(void) = 0;
-        virtual uint8_t *GetMemory(uint64_t addr,uint64_t size) = 0;
+        virtual uint8_t *GetMemory(uint64_t addr,uint64_t size,uint64_t *read) = 0;
         virtual int IsRet(cs_insn insn) = 0;
         virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;

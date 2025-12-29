@@ -15,7 +15,7 @@ class Pe_x64 : public Butcher {
         int OpenFile(char *file_name);
         cs_err Cs_open(void);
         void CloseFile(void);
-        uint8_t *GetMemory(uint64_t addr,uint64_t size);
+        uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
         int IsRet(cs_insn insn);
         int IsCall(cs_insn insn, uint64_t *addr);
         int IsJmp(cs_insn insn, uint64_t *addr);

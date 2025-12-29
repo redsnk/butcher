@@ -15,8 +15,8 @@ cs_err Pe_x64::Cs_open(void) {
     return(cs_open(CS_ARCH_X86, CS_MODE_64, &handle));
 }
 
-uint8_t *Pe_x64::GetMemory(uint64_t addr,uint64_t size) {
-    return(GetMemoryPE(pe,addr,size));
+uint8_t *Pe_x64::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
+    return(GetMemoryPE(pe,addr,size,read));
 }
 
 int Pe_x64::IsRet(cs_insn insn) {
@@ -118,6 +118,7 @@ const char *reg_name(csh handle,int id_reg) {
 
 int Pe_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
+uint64_t read;
 
     insn = &sc->insn[num];
     switch (insn->id) {
@@ -143,13 +144,23 @@ cs_insn *insn;
             printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             num++;
             break;
+        case X86_INS_JA:
+            printf("    if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+            num++;
+            break;
+        case X86_INS_JAE:
+            printf("    if (!flag_c(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
+            printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+            num++;
+            break;
         case X86_INS_MOV:
             if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
                     // mov rax, qword ptr [rip + 0x1dc97]
                     uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
-                    uint8_t *mem = GetMemoryPE(pe,addr,8);
-                    if (mem != NULL) {
+                    uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
+                    if ((mem != NULL) && (read == 8)) {
                         c->AddSubMem(addr,mem,8);
                         free(mem);
                     }
@@ -243,8 +254,7 @@ struct _subcode *sc;
 int id;
 
     id = c->subcodes[num].id;
-    //sc = &c->subcodes[num];
-    printf(C_FUNC_HEADER,sc->first);
+    printf(C_FUNC_HEADER,c->subcodes[num].first);
     for (int m=0;m<c->subcod_count;m++) {
         sc = &c->subcodes[m];
         if ((sc->id == id) || (sc->parent == id)) {
