@@ -241,9 +241,11 @@ cs_insn *insn;
         params[l-1] = 0;
     }
     if (insn->detail->x86.op_count) {
-        printf("    %s_%s(cpu,%s);",insn->mnemonic,subname,params);
+        //printf("    %s_%s(cpu,%s);",insn->mnemonic,subname,params);
+        printf("    op_%s(cpu,\"%s\",%s);",subname,insn->mnemonic,params);
     } else {
-        printf("    %s(cpu);",insn->mnemonic);
+        //printf("    %s(cpu);",insn->mnemonic);
+        printf("    op(cpu,\"%s\");",insn->mnemonic);
     }
     printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
     return (num+1);

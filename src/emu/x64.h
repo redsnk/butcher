@@ -71,11 +71,6 @@ struct _cpu {
 	int mem_count;
 };
 
-#define UNKNOWN_R(f) void f##_r(struct _cpu *cpu,char *reg){panic(#f"_r not defined","");}
-#define UNKNOWN_M(f) void f##_m(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp){panic(#f"_m not defined","");}
-#define UNKNOWN_RM(f) void f##_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp){panic(#f"_rm not defined","");}
-
-
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
@@ -87,22 +82,18 @@ void call_from_iat (char *lib,char *func);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
-void push_r(struct _cpu *cpu,char *reg);
-void pop_r(struct _cpu *cpu,char *reg);
-void lea_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
-void sub_ri(struct _cpu *cpu,char *reg,uint64_t i);
-void xor_rr(struct _cpu *cpu,char *regd,char *regs);
-void mov_rr(struct _cpu *cpu,char *regd,char *regs);
-void mov_mr(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,char *reg);
-void mov_mi(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int64_t i);
-void movabs_ri(struct _cpu *cpu,char *reg,uint64_t i);
-void mov_ri(struct _cpu *cpu,char *reg,uint64_t i);
-void mov_rm(struct _cpu *cpu,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
-void test_rr(struct _cpu *cpu,char *regd,char *regs);
 
-UNKNOWN_R(jmp)
-UNKNOWN_R(call)
-UNKNOWN_M(call)
-UNKNOWN_RM(movsd)
+void op(struct _cpu *cpu,char *op);
+void op_r(struct _cpu *cpu,char *op,char *reg);
+void op_rr(struct _cpu *cpu,char *op,char *regd,char *regs);
+void op_ri(struct _cpu *cpu,char *op,char *reg,uint64_t i);
+void op_rm(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp);
+void op_mr(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,char *reg);
+void op_mi(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i);
+void op_m(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp);
+void op_i(struct _cpu *cpu,char *op,uint64_t i);
+void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i);
+void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
+void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
 #endif // _X64_H
