@@ -10,24 +10,32 @@ Code::Code(uint64_t a) {
     submem_count = 0;
 }
 
-void Code::AddSubcode (struct _subcode *sc, int parent) {
-    /*
+void Code::NewSubCode (struct _subcode *sc) {
+    sc->id = next_id++;
+}
+
+void Code::AddSubcode (struct _subcode *sc) {
     for (int n=0;n<subcod_count;n++) {
-        if((sc.first < subcodes[n].first) && (subcodes[n].first <= sc.last)) {
-            // Same code but sc bigger
-            cs_free(subcodes[n].insn, subcodes[n].count);
-            subcodes[n] = sc;
+        if((sc->first >= subcodes[n].first) && (subcodes[n].last <= sc->last)) {
+            // Subcode included in the old one, discard it
             return;
         }
     }
-    */
+    for (int n=0;n<subcod_count;n++) {
+        if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last)) {
+            // Old subcode included in this one, replace it
+            cs_free(subcodes[n].insn, subcodes[n].count);
+            subcodes[n] = *sc;
+            return;
+        }
+    }
     if (!subcod_count) {
         subcodes = (struct _subcode *) malloc(sizeof(struct _subcode));
     } else {
         subcodes = (struct _subcode *) realloc(subcodes, sizeof(struct _subcode)*(subcod_count+1));
     }
-    sc->id = next_id++;
-    sc->parent = parent;
+    //sc->id = next_id++;
+    //sc->parent = parent;
     subcodes[subcod_count++] = *sc;
 }
 
@@ -115,19 +123,25 @@ Code *Butcher::GetCode(Code *c,uint64_t address,int parent) {
 int lexit;
 struct _subcode sc;
 int n;
-std::list<uint64_t> calls;
-std::list<uint64_t> jmps;
+std::set<uint64_t> calls;
+std::set<uint64_t> jmps;
 uint64_t addr,read;
 int max_subcode = INIT_MEM_GETCODE;
 
     if (c == NULL) {
         c = new Code(address);
     }
-    if (c->HasSubcode(address)) {
+    if (addr == 0x18000359f) {
+        printf("*** Match\n");
+    }
+    if (c->HasAddr(address)) {
+        printf("*** GetCode repeated 0x%llx\n",address);
         return (c);
     }
-    //printf("*** GetCode 0x%llx\n",address);
+    c->NewSubCode(&sc);
+    sc.parent = parent;
     sc.first = address;
+    printf("*** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
         uint8_t *m = GetMemory(sc.first,max_subcode,&read);
@@ -136,15 +150,20 @@ int max_subcode = INIT_MEM_GETCODE;
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
-                    //printf("0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    printf("0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // New subcode 
-                        calls.push_back(addr);
+                        //calls.push_back(addr);
+                        printf("*** Add call 0x%llx\n",addr);
+                        calls.insert(addr);
                     }
                     if (IsJmp(sc.insn[n],&addr)) {
                         //printf("jmp 0x%llx\n",addr);
-                        jmps.push_back(addr);
-                        c->labels.push_back(addr);
+                        //jmps.push_back(addr);
+                        printf("*** Add jmp 0x%llx\n",addr);
+                        jmps.insert(addr);
+                        //c->labels.push_back(addr);
+                        c->labels.insert(addr);
                     }
                     if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr)) {
                         /*
@@ -160,6 +179,7 @@ int max_subcode = INIT_MEM_GETCODE;
                         if (lend) {
                         */
                         // End subcode
+                        printf("*** End of subcode 0x%llx\n",sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;
                         break;
@@ -167,8 +187,8 @@ int max_subcode = INIT_MEM_GETCODE;
                     }
                 }
                 if (max_subcode > MAX_MEM_GETCODE) {
-                    // No more code
-                    sc.last = sc.insn[n-1].address;
+                    // No more code, maximun reached
+                    sc.last = sc.insn[n].address;
                     lexit = true;
                 }
                 if (!lexit) {
@@ -177,8 +197,8 @@ int max_subcode = INIT_MEM_GETCODE;
                     max_subcode += STEP_MEM_GETCODE;
                 } else {
                     // Done
-                    //printf("Add subcode 0x%llx %li\n",sc.first,sc.last-sc.first);
-                    c->AddSubcode(&sc,parent);
+                    printf("*** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
+                    c->AddSubcode(&sc);
                 }
             } else {
                 break;
