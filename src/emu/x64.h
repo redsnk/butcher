@@ -77,7 +77,6 @@ void panic(char *str1,char *str2);
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
-void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
 void call_from_iat (char *lib,char *func);
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
