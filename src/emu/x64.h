@@ -79,7 +79,15 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void check_ptr (struct _cpu *cpu,uint64_t addr,int size);
 void call_from_iat (char *lib,char *func);
+uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
+uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
+uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+void *get_reg(struct _cpu *cpu,char *reg,int *bits);
+uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
+uint16_t *get_reg_16(struct _cpu *cpu,char *reg);
+uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
+uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
 

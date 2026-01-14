@@ -48,8 +48,7 @@ class Code {
         void NewSubCode (struct _subcode *sc);
         void AddSubcode (struct _subcode *sc);
         void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
-        int HasAddr (uint64_t addr);
-        int HasSubcode (uint64_t addr);
+        int HasAddr (uint64_t addr,int parent);
         void Print (void);
 };
 

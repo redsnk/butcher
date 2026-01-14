@@ -164,7 +164,24 @@ uint64_t read;
                         c->AddSubMem(addr,mem,8);
                         free(mem);
                     }
-                    printf("    cpu->%s.r64 = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                    //printf("    cpu->%s.r64 = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                    switch (insn->detail->x86.operands[0].size) {
+                        case 1:
+                            printf("    *(get_reg_8(cpu,\"%s\")) = byte_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                            break;
+                        case 2:
+                            printf("    *(get_reg_16(cpu,\"%s\")) = word_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                            break;
+                        case 4:
+                            printf("    *(get_reg_32(cpu,\"%s\")) = dword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                            break;
+                        case 8:
+                            printf("    *(get_reg_64(cpu,\"%s\")) = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
+                            break;
+                        default:
+                            printf("*** PrintExtra error bits\n");
+                            break;
+                    }
                     printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
                     num++;
                 }

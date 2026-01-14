@@ -15,18 +15,21 @@ void Code::NewSubCode (struct _subcode *sc) {
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
-    for (int n=0;n<subcod_count;n++) {
-        if((sc->first >= subcodes[n].first) && (subcodes[n].last <= sc->last)) {
-            // Subcode included in the old one, discard it
-            return;
-        }
-    }
-    for (int n=0;n<subcod_count;n++) {
-        if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last)) {
-            // Old subcode included in this one, replace it
-            cs_free(subcodes[n].insn, subcodes[n].count);
-            subcodes[n] = *sc;
-            return;
+    if (sc->parent != SUBCODE_TOP) {
+        for (int n=0;n<subcod_count;n++) {
+            if ((sc->parent == subcodes[n].id) || (sc->parent == subcodes[n].parent)) {
+                // Parent or same parent
+                if((sc->first >= subcodes[n].first) && (sc->last <= subcodes[n].last)) {
+                    // Subcode included in the old one, discard it
+                    return;
+                }
+                if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last)) {
+                    // Old subcode included in this one, replace it
+                    cs_free(subcodes[n].insn, subcodes[n].count);
+                    subcodes[n] = *sc;
+                    return;
+                }
+            }
         }
     }
     if (!subcod_count) {
@@ -57,19 +60,23 @@ void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
     submem_count++;
 }
 
-int Code::HasAddr (uint64_t addr) {
-    for (int n=0;n<subcod_count;n++) {
-        if ((addr >= subcodes[n].first) && (addr <= subcodes[n].last)) {
-            return (true);
+int Code::HasAddr (uint64_t addr,int parent) {
+    if (parent != SUBCODE_TOP) {
+        // jmp
+        for (int n=0;n<subcod_count;n++) {
+            if ((parent == subcodes[n].id) || (parent == subcodes[n].parent)) {
+                if ((addr >= subcodes[n].first) && (addr <= subcodes[n].last)) {
+                    return (true);
+                }
+            }
         }
     }
-    return (false);
-}
-
-int Code::HasSubcode (uint64_t addr) {
-    for (int n=0;n<subcod_count;n++) {
-        if (addr == subcodes[n].first) {
-            return (true);
+    else {
+        // call
+        for (int n=0;n<subcod_count;n++) {
+            if ((subcodes[n].parent == SUBCODE_TOP) && (addr == subcodes[n].first)) {
+                return (true);
+            }
         }
     }
     return (false);
@@ -128,20 +135,20 @@ std::set<uint64_t> jmps;
 uint64_t addr,read;
 int max_subcode = INIT_MEM_GETCODE;
 
+    if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
+        printf("// test\n");
+    }
     if (c == NULL) {
         c = new Code(address);
     }
-    if (addr == 0x18000359f) {
-        printf("*** Match\n");
-    }
-    if (c->HasAddr(address)) {
-        printf("*** GetCode repeated 0x%llx\n",address);
+    if (c->HasAddr(address,parent)) {
+        //printf("*** GetCode repeated 0x%llx\n",address);
         return (c);
     }
     c->NewSubCode(&sc);
     sc.parent = parent;
     sc.first = address;
-    printf("*** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
+    //printf("*** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
         uint8_t *m = GetMemory(sc.first,max_subcode,&read);
@@ -150,17 +157,17 @@ int max_subcode = INIT_MEM_GETCODE;
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
-                    printf("0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    //printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // New subcode 
                         //calls.push_back(addr);
-                        printf("*** Add call 0x%llx\n",addr);
+                        //printf("*** Add call 0x%llx\n",addr);
                         calls.insert(addr);
                     }
                     if (IsJmp(sc.insn[n],&addr)) {
                         //printf("jmp 0x%llx\n",addr);
                         //jmps.push_back(addr);
-                        printf("*** Add jmp 0x%llx\n",addr);
+                        //printf("*** Add jmp 0x%llx\n",addr);
                         jmps.insert(addr);
                         //c->labels.push_back(addr);
                         c->labels.insert(addr);
@@ -179,7 +186,7 @@ int max_subcode = INIT_MEM_GETCODE;
                         if (lend) {
                         */
                         // End subcode
-                        printf("*** End of subcode 0x%llx\n",sc.first);
+                        //printf("*** End of subcode 0x%llx\n",sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;
                         break;
@@ -197,7 +204,7 @@ int max_subcode = INIT_MEM_GETCODE;
                     max_subcode += STEP_MEM_GETCODE;
                 } else {
                     // Done
-                    printf("*** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
+                    //printf("*** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
                     c->AddSubcode(&sc);
                 }
             } else {

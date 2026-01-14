@@ -83,6 +83,27 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	panic("set_mem","");
 }
 
+uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr) {
+uint8_t value;
+
+	get_mem (cpu,addr,1,(uint8_t *)&value);
+	return (value);
+}
+
+uint16_t word_ptr(struct _cpu *cpu,uint64_t addr) {
+uint16_t value;
+
+	get_mem (cpu,addr,2,(uint8_t *)&value);
+	return (value);
+}
+
+uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr) {
+uint32_t value;
+
+	get_mem (cpu,addr,4,(uint8_t *)&value);
+	return (value);
+}
+
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr) {
 uint64_t value;
 
@@ -168,29 +189,42 @@ void *ret;
 		f = reg[0];
 		l = reg[len-1];
 		if ((f == 'r') && (l != 'd') && (l != 'w') && (l != 'b')) {
-			*bits = 64;
+			if (bits != NULL) *bits = 64;
 			return (&r->r64);
 		}
 		else if ((f == 'e') || (l == 'd')) {
-			*bits = 32;
+			if (bits != NULL) *bits = 32;
 			return (&r->r32.l);
 		}
 		else if (l == 'h') {
-			*bits = 8;
+			if (bits != NULL) *bits = 8;
 			return (&r->r8.h);
 		}
 		else if (l == 'l') { 
-			*bits = 8;
+			if (bits != NULL) *bits = 8;
 			return (&r->r8.l);
 		}
 		else {
-			*bits = 16;
+			if (bits != NULL) *bits = 16;
 			return (&r->r16.l);
 		}
 		return (r);
 
 	}
 	return (NULL);
+}
+
+uint8_t *get_reg_8(struct _cpu *cpu,char *reg) {
+	return ((uint8_t *)get_reg(cpu,reg,NULL));
+}
+uint16_t *get_reg_16(struct _cpu *cpu,char *reg) {
+	return ((uint16_t *)get_reg(cpu,reg,NULL));
+}
+uint32_t *get_reg_32(struct _cpu *cpu,char *reg) {
+	return ((uint32_t *)get_reg(cpu,reg,NULL));
+}
+uint64_t *get_reg_64(struct _cpu *cpu,char *reg) {
+	return ((uint64_t *)get_reg(cpu,reg,NULL));
 }
 
 void set_z(struct _cpu *cpu,uint64_t i) {
@@ -356,6 +390,7 @@ void op_r_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r) {\
 	}								\
 }
 
+OP_R(8)
 OP_R(16)
 OP_R(32)
 OP_R(64)
@@ -367,6 +402,9 @@ int b;
 	printf("%s %s\n",op,reg);
 	r = get_reg(cpu,reg,&b);
 	switch (b) {
+		case 8:
+			op_r_8(cpu,op,(uint8_t *)r);
+			break;
 		case 16:
 			op_r_16(cpu,op,(uint16_t *)r);
 			break;
@@ -512,13 +550,13 @@ uint64_t mem;
 	mem = get_ins_mem(cpu,base,index,mult,disp);
 	switch (b) {
 		case 16:
-			op_rm_16(cpu,op,mem,(uint16_t *)r);
+			op_rm_16(cpu,op,(uint16_t *)r,mem);
 			break;
 		case 32:
-			op_rm_32(cpu,op,mem,(uint32_t *)r);
+			op_rm_32(cpu,op,(uint32_t *)r,mem);
 			break;
 		case 64:
-			op_rm_64(cpu,op,mem,(uint64_t *)r);
+			op_rm_64(cpu,op,(uint64_t *)r,mem);
 			break;
 		default:
 			panic("op_rm bits","");
@@ -535,7 +573,7 @@ void op_mr_##bits(struct _cpu *cpu,char *op,uint64_t mem,uint##bits##_t *r) {\
 	}										\
 	else if (!strcmp(op,"cmp")) {			\
 		uint##bits##_t i;					\
-		get_mem(cpu,mem,bits/8,(uint8_t *)i);	\
+		get_mem(cpu,mem,bits/8,(uint8_t *)&i);	\
 		op_cmp_##bits(cpu,i,*r);			\
 	} 										\
 	else {									\
@@ -599,6 +637,9 @@ uint64_t mem;
 	printf("%s [%s+%s*%i+0x%llx],%llx\n",op,base,index,mult,disp,i);
 	mem = get_ins_mem(cpu,base,index,mult,disp);
 	switch (b) {
+		case 8:
+			op_mi_8(cpu,op,mem,(uint8_t)i);
+			break;
 		case 16:
 			op_mi_16(cpu,op,mem,(uint16_t)i);
 			break;
@@ -621,6 +662,7 @@ void op_m_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
 	panic("op_m_"#bits" error",op);	\
 }
 
+OP_M(8)
 OP_M(16)
 OP_M(32)
 OP_M(64)
@@ -632,6 +674,9 @@ uint64_t mem;
 	printf("%s [%s+%s*%i+0x%llx]\n",op,base,index,mult,disp);
 	mem = get_ins_mem(cpu,base,index,mult,disp);
 	switch (b) {
+		case 8:
+			op_m_8(cpu,op,mem);
+			break;
 		case 16:
 			op_m_16(cpu,op,mem);
 			break;
@@ -654,6 +699,7 @@ void op_i_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
 	panic("op_i_"#bits" error",op);	\
 }
 
+OP_I(8)
 OP_I(16)
 OP_I(32)
 OP_I(64)
@@ -663,6 +709,9 @@ int b=0;
 
 	printf("%s %llx\n",op,i);
 	switch (b) {
+		case 8:
+			op_i_8(cpu,op,i);
+			break;
 		case 16:
 			op_i_16(cpu,op,i);
 			break;
@@ -723,6 +772,7 @@ void op_mm_##bits(struct _cpu *cpu,char *op,uint64_t memd,uint64_t mems) {\
 	panic("op_mm_"#bits" error",op);	\
 }
 
+OP_MM(8)
 OP_MM(16)
 OP_MM(32)
 OP_MM(64)
@@ -735,6 +785,9 @@ uint64_t memd,mems;
 	memd = get_ins_mem(cpu,based,indexd,multd,dispd);
 	mems = get_ins_mem(cpu,bases,indexs,mults,disps);
 	switch (b) {
+		case 8:
+			op_mm_8(cpu,op,memd,mems);
+			break;
 		case 16:
 			op_mm_16(cpu,op,memd,mems);
 			break;
@@ -757,10 +810,10 @@ void op_rrri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t 
 	panic("op_rrri_"#bits" error",op);	\
 }
 
-OP_RRI(8)
-OP_RRI(16)
-OP_RRI(32)
-OP_RRI(64)
+OP_RRRI(8)
+OP_RRRI(16)
+OP_RRRI(32)
+OP_RRRI(64)
 
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i) {
 void *rd,*rs,*re;
