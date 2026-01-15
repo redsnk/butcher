@@ -130,6 +130,36 @@ struct _PE {
 #define EXPORT_TABLE	0
 #define IMPORT_TABLE	1
 #define RESORCE_TABLE	2
+/*
+96/112
+	8
+	Export Table
+	The export table address and size. For more information see .edata Section (Image Only).
+104/120
+	8
+	Import Table
+	The import table address and size. For more information, see The .idata Section.
+112/128
+	8
+	Resource Table
+	The resource table address and size. For more information, see The .rsrc Section.
+120/136
+	8
+	Exception Table
+	The exception table address and size. For more information, see The .pdata Section.
+128/144
+	8
+	Certificate Table
+	The attribute certificate table address and size. For more information, see The Attribute Certificate Table (Image Only).
+136/152
+	8
+	Base Relocation Table
+	The base relocation table address and size. For more information, see The .reloc Section (Image Only).
+144/160
+	8
+	Debug
+	The debug data starting address and size. For more information, see The .debug Section.
+*/
 //[...]
 
 #define MAX_IMPORT_NAME	(256)

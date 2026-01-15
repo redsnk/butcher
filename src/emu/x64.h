@@ -71,6 +71,83 @@ struct _cpu {
 	int mem_count;
 };
 
+// 64
+#define _rax	(cpu->rax.r64)
+#define _rbx	(cpu->rbx.r64)
+#define _rcx	(cpu->rcx.r64)
+#define _rdx	(cpu->rdx.r64)
+#define _r8		(cpu->r8.r64)
+#define _r9		(cpu->r9.r64)
+#define _r10	(cpu->r10.r64)
+#define _r11	(cpu->r11.r64)
+#define _r12	(cpu->r12.r64)
+#define _r13	(cpu->r13.r64)
+#define _r14	(cpu->r14.r64)
+#define _r15	(cpu->r15.r64)
+#define _rsi	(cpu->rsi.r64)
+#define _rdi	(cpu->rdi.r64)
+#define _rbp	(cpu->rbp.r64)
+#define _rsp	(cpu->rsp.r64)
+
+// 32
+#define _eax	(cpu->rax.r32.l)
+#define _ebx	(cpu->rbx.r32.l)
+#define _ecx	(cpu->rcx.r32.l)
+#define _edx	(cpu->rdx.r32.l)
+#define _r8d	(cpu->r8.r32.l)
+#define _r9d	(cpu->r9.r32.l)
+#define _r10d	(cpu->r10.r32.l)
+#define _r11d	(cpu->r11.r32.l)
+#define _r12d	(cpu->r12.r32.l)
+#define _r13d	(cpu->r13.r32.l)
+#define _r14d	(cpu->r14.r32.l)
+#define _r15d	(cpu->r15.r32.l)
+#define _esi	(cpu->rsi.r32.l)
+#define _edi	(cpu->rdi.r32.l)
+#define _ebp	(cpu->rbp.r32.l)
+#define _esp	(cpu->rsp.r32.l)
+
+// 16
+#define _ax		(cpu->rax.r16.l)
+#define _bx		(cpu->rbx.r16.l)
+#define _cx		(cpu->rcx.r16.l)
+#define _dx		(cpu->rdx.r16.l)
+#define _r8w	(cpu->r8.r16.l)
+#define _r9w	(cpu->r9.r16.l)
+#define _r10w	(cpu->r10.r16.l)
+#define _r11w	(cpu->r11.r16.l)
+#define _r12w	(cpu->r12.r16.l)
+#define _r13w	(cpu->r13.r16.l)
+#define _r14w	(cpu->r14.r16.l)
+#define _r15w	(cpu->r15.r16.l)
+#define _si		(cpu->rsi.r16.l)
+#define _di		(cpu->rdi.r16.l)
+#define _bp		(cpu->rbp.r16.l)
+#define _sp		(cpu->rsp.r16.l)
+
+// 8
+#define _al		(cpu->rax.r8.l)
+#define _bl		(cpu->rbx.r8.l)
+#define _cl		(cpu->rcx.r8.l)
+#define _dl		(cpu->rdx.r8.l)
+#define _ah		(cpu->rax.r8.h)
+#define _bh		(cpu->rbx.r8.h)
+#define _ch		(cpu->rcx.r8.h)
+#define _dh		(cpu->rdx.r8.h)
+#define _r8b	(cpu->r8.r8.l)
+#define _r9b	(cpu->r9.r8.l)
+#define _r10b	(cpu->r10.r8.l)
+#define _r11b	(cpu->r11.r8.l)
+#define _r12b	(cpu->r12.r8.l)
+#define _r13b	(cpu->r13.r8.l)
+#define _r14b	(cpu->r14.r8.l)
+#define _r15b	(cpu->r15.r8.l)
+#define _bpl	(cpu->rbp.r8.l)
+#define _spl	(cpu->rsp.r8.l)
+
+#define _push(x)	op_r(cpu,"push",#x)
+#define _pop(x)		op_r(cpu,"pop",#x)
+
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);

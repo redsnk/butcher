@@ -22,6 +22,7 @@ class Pe_x64 : public Butcher {
         int IsInt(cs_insn insn, uint64_t *num);
         int IsImport(cs_insn insn, char **name);
 
+        void PrintLine(cs_insn *insn,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
         void PrintCodeC(Code *c);
