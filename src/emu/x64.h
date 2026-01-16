@@ -148,6 +148,16 @@ struct _cpu {
 #define _push(x)	op_r(cpu,"push",#x)
 #define _pop(x)		op_r(cpu,"pop",#x)
 
+#define _get_byte_ptr(m)	byte_ptr(cpu,m)
+#define _get_word_ptr(m)	word_ptr(cpu,m)
+#define _get_dword_ptr(m)	dword_ptr(cpu,m)
+#define _get_qword_ptr(m)	qword_ptr(cpu,m)
+
+#define _set_byte_ptr(m,v)	set_byte_ptr(cpu,m,v)
+#define _set_word_ptr(m,v)	set_word_ptr(cpu,m,v)
+#define _set_dword_ptr(m,v)	set_dword_ptr(cpu,m,v)
+#define _set_qword_ptr(m,v)	set_qword_ptr(cpu,m,v)
+
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
@@ -159,6 +169,10 @@ uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
 uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
+void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
+void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
+void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void *get_reg(struct _cpu *cpu,char *reg,int *bits);
 uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
 uint16_t *get_reg_16(struct _cpu *cpu,char *reg);

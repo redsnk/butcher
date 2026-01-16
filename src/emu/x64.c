@@ -107,6 +107,22 @@ uint64_t value;
 	return (value);
 }
 
+void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value) {
+	set_mem (cpu,addr,1,(uint8_t *)&value);
+}
+
+void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value) {
+	set_mem (cpu,addr,2,(uint8_t *)&value);
+}
+
+void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value) {
+	set_mem (cpu,addr,4,(uint8_t *)&value);
+}
+
+void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
+	set_mem (cpu,addr,8,(uint8_t *)&value);
+}
+
 void panic(char *str1,char *str2) {
 	printf("PANIC: %s - %s\n",str1,str2);
 	exit(0);

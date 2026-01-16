@@ -191,6 +191,76 @@ int len;
     }
 }
 
+const char *ptr(cs_insn *insn) {
+    switch (insn->detail->x86.operands[0].size) {
+        case 1:
+            return("byte");
+        case 2:
+            return("word");
+        case 4:
+            return("dword");
+        case 8:
+            return("qword");
+    }
+    return ("ptr_error");
+}
+
+int ClearFlagInst(cs_insn *insn) {
+    switch(insn->id) {
+        case X86_INS_SUB:
+        case X86_INS_ADD:
+        case X86_INS_XOR:
+        case X86_INS_ADC:
+        case X86_INS_SBB:
+        case X86_INS_CMP:
+        case X86_INS_TEST:
+            return (true);
+    }
+    return (false);
+}
+
+int UseFlagInst(cs_insn *insn) {
+    switch(insn->id) {
+        case X86_INS_JA:
+        case X86_INS_JAE:
+        case X86_INS_JB:
+        case X86_INS_JBE:
+        case X86_INS_JE:
+        case X86_INS_JECXZ:
+        case X86_INS_JG:
+        case X86_INS_JGE:
+        case X86_INS_JL:
+        case X86_INS_JLE:
+        case X86_INS_JNE:
+        case X86_INS_JNO:
+        case X86_INS_JNP:
+        case X86_INS_JNS:
+        case X86_INS_JO:
+        case X86_INS_JP:
+        case X86_INS_JRCXZ:
+        case X86_INS_JS:
+            return (true);
+    }
+    return (false);
+}
+
+int FlagsNotUsed(struct _subcode *sc,int num) {
+cs_insn *insn;
+
+    num++;
+    while (num < sc->count) {
+        insn = &sc->insn[num];
+        if (UseFlagInst(insn)) {
+            return (false);
+        }
+        if (ClearFlagInst(insn)) {
+            return (true);
+        }
+        num++;
+    }
+    return (true);
+}
+
 // ---------------------------------------------------------------------------------------------------------
 
 void Pe_x64::PrintLine(cs_insn *insn,const char *format,...) {
@@ -207,46 +277,33 @@ char buffer[256];
 int Pe_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
 uint64_t read;
-//char regs[MAX_REG];
-//char regd[MAX_REG];
 
     insn = &sc->insn[num];
     switch (insn->id) {
         case X86_INS_RET:
-            //printf("    return;");
-            //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+            // ret
             PrintLine(insn,"    return;");
             num++;
             break;
         case X86_INS_JMP:
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-                //printf("    goto label_0x%llx;",insn->detail->x86.operands[0].imm);
-                //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
                 PrintLine(insn,"    goto label_0x%llx;",insn->detail->x86.operands[0].imm);
                 num++;
             }
             break;
         case X86_INS_JE:
-            //printf("    if (flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
-            //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             PrintLine(insn,"    if (flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_JNE:
-            //printf("    if (!flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
-            //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             PrintLine(insn,"    if (!flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_JA:
-            //printf("    if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
-            //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             PrintLine(insn,"    if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_JAE:
-            //printf("    if (!flag_c(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
-            //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
             PrintLine(insn,"    if (!flag_c(cpu)) goto label_0x%llx;",insn->detail->x86.operands[0].imm);
             num++;
             break;
@@ -262,6 +319,51 @@ uint64_t read;
                 num++;
             }
             break;
+        case X86_INS_SUB:
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    //sub		rsp, rax
+                    if (FlagsNotUsed(sc,num)) {
+                        PrintLine(insn,"    _%s -= _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                         reg_name(handle,insn->detail->x86.operands[1].reg));
+                        num++;
+                    }
+                }
+                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                    //sub		rsp, 0x178
+                    if (FlagsNotUsed(sc,num)) {
+                        PrintLine(insn,"    _%s -= %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                            insn->detail->x86.operands[1].imm);
+                        num++;
+                    }
+                }
+            }
+            break;
+        case X86_INS_XOR:
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    //xor		rsp, rax
+                    if (FlagsNotUsed(sc,num)) {
+                        if (handle,insn->detail->x86.operands[0].reg == handle,insn->detail->x86.operands[1].reg) {
+                            PrintLine(insn,"    _%s = 0;",reg_name(handle,insn->detail->x86.operands[0].reg));
+                        }
+                        else {
+                            PrintLine(insn,"    _%s ^= _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                        }
+                        num++;
+                    }
+                }
+                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                    //xor		rsp, 0x178
+                    if (FlagsNotUsed(sc,num)) {
+                        PrintLine(insn,"    _%s ^= %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                            insn->detail->x86.operands[1].imm);
+                        num++;
+                    }
+                }
+            }
+            break;
         case X86_INS_LEA:
             if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
                 // lea		rdx, qword ptr [rip + 0x199f7]
@@ -270,19 +372,22 @@ uint64_t read;
             }
             else {
                 // lea		rbp, qword ptr [rsp - 0x78]
-                PrintLine(insn,"    _%s = _%s + 0x%llx;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                PrintLine(insn,"    _%s = _%s%+lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
                                                         reg_name(handle,insn->detail->x86.operands[1].mem.base),
                                                         insn->detail->x86.operands[1].mem.disp);
             }
+            num++;
+            break;
+        case X86_INS_MOVABS:
+            // movabs		rdx, 0x5f3ae6d888f298a2
+            PrintLine(insn,"    _%s = 0x%llx;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                insn->detail->x86.operands[1].imm);
             num++;
             break;
         case X86_INS_MOV:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     // mov		rsi, rcx
-                    //reg_cpu(handle,insn->detail->x86.operands[0].reg,regd);
-                    //reg_cpu(handle,insn->detail->x86.operands[1].reg,regs);
-                    //PrintLine(insn,"    %s = %s;",regd,regs);
                     PrintLine(insn,"    _%s = _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
                                                     reg_name(handle,insn->detail->x86.operands[1].reg));
                     num++;
@@ -295,67 +400,59 @@ uint64_t read;
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
                     if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
-                        // mov rax, qword ptr [rip + 0x1dc97]
+                        // mov rax, qword ptr [**rip** + 0x1dc97]
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
                         uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
                         if ((mem != NULL) && (read == 8)) {
                             c->AddSubMem(addr,mem,8);
                             free(mem);
                         }
-                        //printf("    cpu->%s.r64 = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                        switch (insn->detail->x86.operands[0].size) {
-                            case 1:
-                                //printf("    *(get_reg_8(cpu,\"%s\")) = byte_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                PrintLine(insn,"    *(get_reg_8(cpu,\"%s\")) = byte_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                break;
-                            case 2:
-                                //printf("    *(get_reg_16(cpu,\"%s\")) = word_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                PrintLine(insn,"    *(get_reg_16(cpu,\"%s\")) = word_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                break;
-                            case 4:
-                                //printf("    *(get_reg_32(cpu,\"%s\")) = dword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                PrintLine(insn,"    *(get_reg_32(cpu,\"%s\")) = dword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                break;
-                            case 8:
-                                //printf("    *(get_reg_64(cpu,\"%s\")) = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                PrintLine(insn,"    *(get_reg_64(cpu,\"%s\")) = qword_ptr(cpu,0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),addr);
-                                break;
-                            default:
-                                printf("*** PrintExtra error bits\n");
-                                break;
-                        }
-                        //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                        PrintLine(insn,"    _%s = _get_%s_ptr(0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                        ptr(insn),addr);
                         num++;
                     }
+                    else {
+                        // mov	rbx, qword ptr [r14 + 8]
+                        PrintLine(insn,"    _%s = _get_%s_ptr(_%s%+lld);",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                        ptr(insn),
+                                                                        reg_name(handle,insn->detail->x86.operands[1].mem.base),
+                                                                        insn->detail->x86.operands[1].mem.disp);
+                        num++;
+                    }
+                }
+            }
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    // mov		qword ptr [rsp + 0x1b0], rdi
+                    PrintLine(insn,"    _set_%s_ptr(_%s%+lld,_%s);",ptr(insn),
+                                                                        reg_name(handle,insn->detail->x86.operands[0].mem.base),
+                                                                        insn->detail->x86.operands[0].mem.disp,
+                                                                        reg_name(handle,insn->detail->x86.operands[1].reg));
+                    num++;
                 }
             }
             break;
         case X86_INS_CALL:
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-                //printf("    func_0x%llx(cpu);",insn->detail->x86.operands[0].imm);
-                //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
+                // call            0x180002240
                 PrintLine(insn,"    func_0x%llx(cpu);",insn->detail->x86.operands[0].imm);
                 num++;
             } else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
                     uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-                    /*
-                    uint64_t *n = (uint64_t *) GetMemoryPE(pe,addr,8);
-                    printf("value = 0x%llx\n",*n);
-                    */
                     struct _import_name in;
                     if (GetImportFunction (pe,addr,&in)) {
-                        //printf("    call_from_iat(\"%s\",\"%s\");",in.lib_name,in.func_name);
-                        //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
                         PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",in.lib_name,in.func_name);
                         num++;
                     }
                     else {
                         uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
                         if (mem != NULL) {
+                            /*
                             PrintLine(insn,"    func_0x%llx(cpu);",*((uint64_t *)mem));
-                            free(mem);
                             num++;
+                            */
+                            free(mem);
                         }
                     }
                 }             
