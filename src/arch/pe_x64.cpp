@@ -94,6 +94,23 @@ const char *reg_name(csh handle,int id_reg) {
     return(cs_reg_name(handle,id_reg));
 }
 
+char *mem_str(csh handle,cs_x86_op op,char *buffer) {
+char tmp[256];
+
+    // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
+    //sprintf(buffer,"%s%+lld",reg_name(handle,op.mem.base),op.mem.disp);
+    sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+    if (op.mem.index != X86_REG_INVALID) {
+        sprintf(tmp,"+_%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        strcat (buffer,tmp);
+    }
+    if (op.mem.disp) {
+        sprintf(tmp,"%+lld",op.mem.disp);
+        strcat (buffer,tmp);
+    }
+    return (buffer);
+}
+
 const char *get_reg64(const char *reg) {
 // rax, eax, ax, ah, al
 #define STRCMPREG(r)	!strcmp(reg,"r"#r"x") || !strcmp(reg,"e"#r"x") || !strcmp(reg,#r"x") || !strcmp(reg,#r"h") || !strcmp(reg,#r"l")
@@ -277,6 +294,7 @@ char buffer[256];
 int Pe_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
 uint64_t read;
+char buffer[256];
 
     insn = &sc->insn[num];
     switch (insn->id) {
@@ -339,6 +357,26 @@ uint64_t read;
                 }
             }
             break;
+        case X86_INS_ADD:
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    //add		rsp, rax
+                    if (FlagsNotUsed(sc,num)) {
+                        PrintLine(insn,"    _%s += _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                         reg_name(handle,insn->detail->x86.operands[1].reg));
+                        num++;
+                    }
+                }
+                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                    //add		rsp, 0x178
+                    if (FlagsNotUsed(sc,num)) {
+                        PrintLine(insn,"    _%s += %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                            insn->detail->x86.operands[1].imm);
+                        num++;
+                    }
+                }
+            }
+            break;
         case X86_INS_XOR:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
@@ -361,6 +399,47 @@ uint64_t read;
                                                             insn->detail->x86.operands[1].imm);
                         num++;
                     }
+                }
+            }
+            break;
+        case X86_INS_TEST:
+            if ((num+1) < sc->count) {
+                cs_insn *next = &sc->insn[num+1];
+                switch (next->id) {
+                    case X86_INS_JNE:
+                        if (FlagsNotUsed(sc,num+1)) {
+                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
+                                        // test		eax, eax
+                                        // jne		0x1800026ce
+                                        PrintLine(insn,"");
+                                        PrintLine(next,"    if (_%s) goto label_0x%llx;",  reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                                            next->detail->x86.operands[0].imm);
+                                        num += 2;
+
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case X86_INS_JE:
+                        if (FlagsNotUsed(sc,num+1)) {
+                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
+                                        // test		eax, eax
+                                        // je		0x1800026ce
+                                        PrintLine(insn,"");
+                                        PrintLine(next,"    if (!_%s) goto label_0x%llx;",  reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                                                            next->detail->x86.operands[0].imm);
+                                        num += 2;
+
+                                    }
+                                }
+                            }
+                        }
+                        break;
                 }
             }
             break;
@@ -413,22 +492,47 @@ uint64_t read;
                     }
                     else {
                         // mov	rbx, qword ptr [r14 + 8]
-                        PrintLine(insn,"    _%s = _get_%s_ptr(_%s%+lld);",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s = _get_%s_ptr(%s);",reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                         ptr(insn),
-                                                                        reg_name(handle,insn->detail->x86.operands[1].mem.base),
-                                                                        insn->detail->x86.operands[1].mem.disp);
+                                                                        mem_str(handle,insn->detail->x86.operands[1],buffer));
                         num++;
                     }
                 }
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    // mov		qword ptr [rsp + 0x1b0], rdi
-                    PrintLine(insn,"    _set_%s_ptr(_%s%+lld,_%s);",ptr(insn),
-                                                                        reg_name(handle,insn->detail->x86.operands[0].mem.base),
-                                                                        insn->detail->x86.operands[0].mem.disp,
-                                                                        reg_name(handle,insn->detail->x86.operands[1].reg));
-                    num++;
+                    if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                        // mov		qword ptr [rip + 0x1d8f1], rax
+                        uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
+                        PrintLine(insn,"    _set_%s_ptr(0x%llx,_%s);",ptr(insn),
+                                                                            addr,
+                                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                        num++;
+                    }
+                    else {
+                        // mov		qword ptr [rsp + 0x1b0], rdi
+                        PrintLine(insn,"    _set_%s_ptr(%s,_%s);",ptr(insn),
+                                                                            mem_str(handle,insn->detail->x86.operands[0],buffer),
+                                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                        num++;
+                    }
+                }
+                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                    if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                        //  mov		dword ptr [rip + 0x1d725], 0xc0000409
+                        uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
+                        PrintLine(insn,"    _set_%s_ptr(0x%llx,0x%llx);",ptr(insn),
+                                                                            addr,
+                                                                            insn->detail->x86.operands[1].imm);
+                        num++;
+                    }
+                    else {
+                        // mov		dword ptr [rbp + 0x58], 0x6c6c642e
+                        PrintLine(insn,"    _set_%s_ptr(%s,0x%llx);",ptr(insn),
+                                                                            mem_str(handle,insn->detail->x86.operands[0],buffer),
+                                                                            insn->detail->x86.operands[1].imm);
+                        num++;
+                    }
                 }
             }
             break;
@@ -442,6 +546,10 @@ uint64_t read;
                     uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     struct _import_name in;
                     if (GetImportFunction (pe,addr,&in)) {
+                        uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
+                        uint64_t t = *((uint64_t *)mem);
+                        printf("0x%llx\n",t);
+                        free(mem);
                         PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",in.lib_name,in.func_name);
                         num++;
                     }
