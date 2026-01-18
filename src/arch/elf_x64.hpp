@@ -1,5 +1,5 @@
-#ifndef PE_X64_H
-#define PE_X64_H
+#ifndef ELF_X64_H
+#define ELF_X64_H
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -7,11 +7,11 @@
 #include <stdint.h>
 #include <cstring>
 #include "../base/base_x64.hpp"
-#include "../files/pe.hpp"
+#include "../files/elf.hpp"
 
-class Pe_x64 : public Base_x64 {
+class Elf_x64 : public Base_x64 {
     public:
-        struct _PE *pe;
+        struct _ELF *elf;
 
         int CheckFile(char *file_name);
         int OpenFile(char *file_name);
@@ -20,4 +20,4 @@ class Pe_x64 : public Base_x64 {
         int IsImportFunction (uint64_t addr, char *lib, char *func);
 };
 
-#endif // PE_X64_H
+#endif // ELF_X64_H

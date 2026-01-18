@@ -1,5 +1,4 @@
 #include "pe_x64.hpp"
-#include "../files/pe.hpp"
 #include <capstone/capstone.h>
 
 int Pe_x64::CheckFile(char *file_name) {

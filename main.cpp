@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "src/arch/pe_x64.hpp"
+#include "src/arch/elf_x64.hpp"
 
-#define MY_VERSION  "v0.01"
+#define MY_VERSION  "v0.02"
 
 #define MAX_STR     (1024)
 
@@ -28,8 +29,12 @@ int butcher(char *path,uint64_t addr) {
     Butcher *b = new Pe_x64();
     if (!b->CheckFile(path)) {
         delete b;
-        printf("Error: format not compatible.");
-        return (0);
+        b = new Elf_x64();
+        if (!b->CheckFile(path)) {
+            delete b;
+            printf("Error: format not compatible.");
+            return (0);
+        }
     }
     b->Cut(path,addr);
     delete b;
