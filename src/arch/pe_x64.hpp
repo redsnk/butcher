@@ -12,6 +12,7 @@ class Pe_x64 : public Base_x64 {
     public:
         struct _PE *pe;
 
+        int CheckFile(char *file_name);
         int OpenFile(char *file_name);
         void CloseFile(void);
         uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);

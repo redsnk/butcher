@@ -61,6 +61,7 @@ class Butcher {
     public:
         csh handle;
         //
+        virtual int CheckFile(char *file_name) = 0;
         virtual int OpenFile(char *file_name) = 0;
         virtual cs_err Cs_open(void) = 0;
         virtual void CloseFile(void) = 0;

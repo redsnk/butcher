@@ -2,6 +2,15 @@
 #include "../files/pe.hpp"
 #include <capstone/capstone.h>
 
+int Pe_x64::CheckFile(char *file_name) {
+    OpenFile(file_name);
+    if (pe != NULL) {
+        CloseFile();
+        return (true);
+    }
+    return (false);
+}
+
 int Pe_x64::OpenFile(char *file_name) {
     pe = GetPE(file_name);
     return(pe != NULL);
