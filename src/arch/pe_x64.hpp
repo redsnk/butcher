@@ -6,28 +6,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <cstring>
-#include "../butcher.hpp"
+#include "../base/base_x64.hpp"
 
-class Pe_x64 : public Butcher {
+class Pe_x64 : public Base_x64 {
     public:
         struct _PE *pe;
 
         int OpenFile(char *file_name);
-        cs_err Cs_open(void);
         void CloseFile(void);
         uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
-        int IsRet(cs_insn insn);
-        int IsCall(cs_insn insn, uint64_t *addr);
-        int IsJmp(cs_insn insn, uint64_t *addr);
-        int IsInt(cs_insn insn, uint64_t *num);
-        int IsImport(cs_insn insn, char **name);
-
-        void PrintLine(cs_insn *insn,const char *format,...);
-        int PrintInst(Code *c,struct _subcode *sc,int num);
-        int PrintExtra(Code *c,struct _subcode *sc,int num);
-        void PrintCodeC(Code *c);
-        void PrintSubCodeC(Code *c,int num);
-        void PrintSubMemC(Code *c,int num);
+        int IsImportFunction (uint64_t addr, char *lib, char *func);
 };
 
 #endif // PE_X64_H

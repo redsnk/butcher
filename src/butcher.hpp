@@ -52,6 +52,11 @@ class Code {
         void Print (void);
 };
 
+class Archive {
+    public:
+
+};
+
 class Butcher {
     public:
         csh handle;
@@ -60,6 +65,7 @@ class Butcher {
         virtual cs_err Cs_open(void) = 0;
         virtual void CloseFile(void) = 0;
         virtual uint8_t *GetMemory(uint64_t addr,uint64_t size,uint64_t *read) = 0;
+        virtual int IsImportFunction (uint64_t addr, char *lib, char *func)= 0;
         virtual int IsRet(cs_insn insn) = 0;
         virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
