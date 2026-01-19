@@ -18,7 +18,18 @@ int l;
 			// Executable Header
 			l = fread(&elf->Ehdr,1,sizeof(union _Elf_Ehdr),f);
 			if (l == sizeof(union _Elf_Ehdr)) {
-
+                // "\x7fELF"
+                if (*((uint32_t *)(elf->Ehdr.Ehdr64.e_ident)) == 0x464C457F) {
+                    if (elf->Ehdr.Ehdr64.e_machine == EM_X86_64) {
+                        return (elf);
+                    }
+                    else {
+                        printf("GetELF error: Architecture not compatible\n");
+                    }
+                }
+                else {
+                    printf("GetELF error: read signature\n");
+                }
             }
             free (elf);
         }

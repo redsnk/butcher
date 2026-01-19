@@ -32,7 +32,7 @@ int butcher(char *path,uint64_t addr) {
         b = new Elf_x64();
         if (!b->CheckFile(path)) {
             delete b;
-            printf("Error: format not compatible.");
+            printf("Error: format not compatible.\n");
             return (0);
         }
     }
