@@ -127,7 +127,7 @@ int Butcher::IsGroup (cs_insn insn, int group) {
 }
 
 Code *Butcher::GetCode(Code *c,uint64_t address,int parent) {
-int lexit;
+int lexit,lend;
 struct _subcode sc;
 int n;
 std::set<uint64_t> calls;
@@ -148,7 +148,7 @@ int max_subcode = INIT_MEM_GETCODE;
     c->NewSubCode(&sc);
     sc.parent = parent;
     sc.first = address;
-    //printf("*** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
+    printf("// *** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
         uint8_t *m = GetMemory(sc.first,max_subcode,&read);
@@ -157,40 +157,37 @@ int max_subcode = INIT_MEM_GETCODE;
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
-                    //printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    lend = false;
+                    printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // New subcode 
-                        //calls.push_back(addr);
-                        //printf("*** Add call 0x%llx\n",addr);
+                        printf("// *** Add call 0x%llx\n",addr);
                         calls.insert(addr);
                     }
-                    if (IsJmp(sc.insn[n],&addr)) {
-                        //printf("jmp 0x%llx\n",addr);
-                        //jmps.push_back(addr);
-                        //printf("*** Add jmp 0x%llx\n",addr);
+                    else if (IsJcc(sc.insn[n],&addr)) {
+                        //printf("jcc 0x%llx\n",addr);
+                        printf("// *** Add jcc 0x%llx\n",addr);
                         jmps.insert(addr);
-                        //c->labels.push_back(addr);
                         c->labels.insert(addr);
                     }
-                    if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr)) {
-                        /*
-                        int lend = true;
-                        for (uint64_t a : jmps) {
-                            if (a > sc.insn[n].address) {
-                                // jmp address greater than this instruction, continue
-                                //printf("jmp 0x%llx > 0x%llx\n",a,sc.insn[n].address);
-                                lend = false;
-                                break;
-                            }
+                    else if (IsJmp(sc.insn[n],&addr)) {
+                        //printf("jmp 0x%llx\n",addr);
+                        if (addr) {
+                            printf("// *** Add jmp 0x%llx\n",addr);
+                            jmps.insert(addr);
+                            c->labels.insert(addr);
                         }
-                        if (lend) {
-                        */
+                        lend = true;
+                    }
+                    else if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr)) {
+                        lend = true;
+                    }
+                    if (lend) {
                         // End subcode
-                        //printf("*** End of subcode 0x%llx\n",sc.first);
+                        printf("// *** End of subcode 0x%llx\n",sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;
                         break;
-                        //}
                     }
                 }
                 if (max_subcode > MAX_MEM_GETCODE) {
@@ -204,7 +201,7 @@ int max_subcode = INIT_MEM_GETCODE;
                     max_subcode += STEP_MEM_GETCODE;
                 } else {
                     // Done
-                    //printf("*** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
+                    printf("// *** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
                     c->AddSubcode(&sc);
                 }
             } else {
@@ -228,11 +225,6 @@ int max_subcode = INIT_MEM_GETCODE;
 }
 
 void Butcher::Cut(char *file_name,uint64_t address) {
-//cs_insn *insn;
-//size_t count;
-//uint64_t addr;
-//int lexit;
-
     if (OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);

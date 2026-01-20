@@ -7,7 +7,7 @@
 struct _ELF *GetELF (char *name) {
 FILE *f;
 struct _ELF *elf;
-int l;
+long l,s;
 
 	f = fopen(name,"r");
 	if (f!= NULL) {
@@ -21,7 +21,27 @@ int l;
                 // "\x7fELF"
                 if (*((uint32_t *)(elf->Ehdr.Ehdr64.e_ident)) == 0x464C457F) {
                     if (elf->Ehdr.Ehdr64.e_machine == EM_X86_64) {
-                        return (elf);
+                        // Program Headers
+                        s = elf->Ehdr.Ehdr64.e_phnum*elf->Ehdr.Ehdr64.e_phentsize;
+                        elf->Phdr = (Elf64_Phdr *) malloc(s);
+                        if (elf->Phdr != NULL) {
+                            if (fseek(f,elf->Ehdr.Ehdr64.e_phoff,SEEK_SET) != -1) {
+                                l = fread(elf->Phdr,1,s,f);
+                                if (l == s) {
+                                    return (elf);
+                                }
+                                else {
+                                    printf("GetELF error: fread Phdr\n");
+                                }
+                            }
+                            else {
+                                printf("GetELF error: fseek Phdr\n");
+                            }
+                            free(elf->Phdr);
+                        }
+                        else {
+                            printf("GetELF error: Phdr malloc\n");
+                        }
                     }
                     else {
                         printf("GetELF error: Architecture not compatible\n");
@@ -40,12 +60,52 @@ int l;
 
 void FreeELF (struct _ELF *elf) {
     if (elf != NULL) {
+        free(elf->Phdr);
 		fclose(elf->f);
 		free(elf);
 	}
 }
 
 uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read) {
+int n;
+uint64_t start, end, offset;
+uint8_t *m;
+long l;
+
+    for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
+        start = elf->Phdr[n].p_vaddr;
+        end = elf->Phdr[n].p_vaddr + elf->Phdr[n].p_memsz - 1; 
+        if ((addr >= start) && (addr < end)) {
+			// addr inside the section
+			if ((end-addr) < size) {
+				// not enought size
+				size = end-addr-1;
+				if (!size) {
+					// size == 0
+					return (NULL);
+				}
+			}
+			m = (uint8_t *) malloc(size);
+			if (m != NULL) {
+				// TODO: check SizeOfRawData overflow
+				offset = elf->Phdr[n].p_offset+(addr-start);
+				l = fseek(elf->f,offset,SEEK_SET);
+				if (l != -1) {
+					l = fread(m,1,size,elf->f);
+					if (l == size) {
+						*read = size;
+						return (m);
+					} else {
+						printf("GetMemoryELF error: fread\n");
+					}
+				} else {
+					printf("GetMemoryELF error: fseek\n");
+				}
+				free(m);		
+			}	
+			break;
+		}
+    }
     return (NULL);
 }
 

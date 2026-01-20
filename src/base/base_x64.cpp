@@ -2,78 +2,6 @@
 #include "../files/pe.hpp"
 #include <capstone/capstone.h>
 
-cs_err Base_x64::Cs_open(void) {
-    return(cs_open(CS_ARCH_X86, CS_MODE_64, &handle));
-}
-
-int Base_x64::IsRet(cs_insn insn) {
-    return(IsGroup(insn,X86_GRP_RET));
-}
-
-int Base_x64::IsCall(cs_insn insn, uint64_t *addr) {
-    if (IsGroup(insn,X86_GRP_CALL)) {
-        if (insn.detail->x86.op_count == 1) {
-            if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
-                *addr = insn.detail->x86.operands[0].imm;
-                return (true);
-            }
-        }
-    }
-    return (false);
-}
-
-int Base_x64::IsInt(cs_insn insn, uint64_t *num) {
-    return(IsGroup(insn,X86_GRP_INT));
-}
-
-int Base_x64::IsJmp(cs_insn insn, uint64_t *addr) {
-    if (IsGroup(insn,X86_GRP_JUMP)) {
-        if (insn.detail->x86.op_count == 1) {
-            if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
-                *addr = insn.detail->x86.operands[0].imm;
-                return (true);
-            }
-        }
-    }
-    return (false);
-}
-
-int Base_x64::IsImport(cs_insn insn, char **name) {
-    return (false);
-}
-
-#define C_HEADER "\
-#include \"x64.h\"\n\
-\n"
-
-#define C_FUNC_PROTO "\
-void func_0x%llx(struct _cpu *cpu);\n"
-
-#define C_FOOTER_1 "\
-int main (int argc, char **argv) {\n\
-struct _cpu cpu;\n\
-\n\
-    init(&cpu);\n\
-"
-
-#define C_FOOTER_2 "\
-    func_0x%llx(&cpu);\n\
-    end(&cpu);\n\
-    return (0);\n\
-}\n\
-\n"
-
-#define C_FUNC_HEADER "\
-void func_0x%llx(struct _cpu *cpu) {\n\
-"
-
-#define C_FUNC_FOOTER "\
-}\n\
-\n"
-
-
-// ---------------------------------------------------------------------------------------------------------
-
 const char *reg_name(csh handle,int id_reg) {
     if (id_reg == X86_REG_INVALID) {
         return ("");
@@ -209,21 +137,7 @@ const char *ptr(cs_insn *insn) {
     return ("ptr_error");
 }
 
-int ClearFlagInst(cs_insn *insn) {
-    switch(insn->id) {
-        case X86_INS_SUB:
-        case X86_INS_ADD:
-        case X86_INS_XOR:
-        case X86_INS_ADC:
-        case X86_INS_SBB:
-        case X86_INS_CMP:
-        case X86_INS_TEST:
-            return (true);
-    }
-    return (false);
-}
-
-int UseFlagInst(cs_insn *insn) {
+int JccInst(cs_insn *insn) {
     switch(insn->id) {
         case X86_INS_JA:
         case X86_INS_JAE:
@@ -248,6 +162,50 @@ int UseFlagInst(cs_insn *insn) {
     return (false);
 }
 
+int ClearFlagInst(cs_insn *insn) {
+    switch(insn->id) {
+        case X86_INS_SUB:
+        case X86_INS_ADD:
+        case X86_INS_XOR:
+        case X86_INS_ADC:
+        case X86_INS_SBB:
+        case X86_INS_CMP:
+        case X86_INS_TEST:
+            return (true);
+    }
+    return (false);
+}
+
+int UseFlagInst(cs_insn *insn) {
+    if (JccInst(insn)) {
+        return (true);
+    }
+    /*
+    switch(insn->id) {
+        case X86_INS_JA:
+        case X86_INS_JAE:
+        case X86_INS_JB:
+        case X86_INS_JBE:
+        case X86_INS_JE:
+        case X86_INS_JECXZ:
+        case X86_INS_JG:
+        case X86_INS_JGE:
+        case X86_INS_JL:
+        case X86_INS_JLE:
+        case X86_INS_JNE:
+        case X86_INS_JNO:
+        case X86_INS_JNP:
+        case X86_INS_JNS:
+        case X86_INS_JO:
+        case X86_INS_JP:
+        case X86_INS_JRCXZ:
+        case X86_INS_JS:
+            return (true);
+    }
+    */
+    return (false);
+}
+
 int FlagsNotUsed(struct _subcode *sc,int num) {
 cs_insn *insn;
 
@@ -264,6 +222,91 @@ cs_insn *insn;
     }
     return (true);
 }
+
+// ---------------------------------------------------------------------------------------------------------
+
+cs_err Base_x64::Cs_open(void) {
+    return(cs_open(CS_ARCH_X86, CS_MODE_64, &handle));
+}
+
+int Base_x64::IsRet(cs_insn insn) {
+    return(IsGroup(insn,X86_GRP_RET));
+}
+
+int Base_x64::IsCall(cs_insn insn, uint64_t *addr) {
+    if (insn.id == X86_INS_CALL) {
+        if (insn.detail->x86.op_count == 1) {
+            if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
+                *addr = insn.detail->x86.operands[0].imm;
+                return (true);
+            }
+        }
+    }
+    return (false);
+}
+
+int Base_x64::IsInt(cs_insn insn, uint64_t *num) {
+    return(IsGroup(insn,X86_GRP_INT));
+}
+
+int Base_x64::IsJmp(cs_insn insn, uint64_t *addr) {
+    *addr = 0;
+    if (insn.id == X86_INS_JMP) {
+        // TODO: [rip + XXXX]
+        if (insn.detail->x86.op_count == 1) {
+            if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
+                *addr = insn.detail->x86.operands[0].imm;
+            }
+        }
+        return (true);
+    }
+    return (false);
+}
+
+int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
+    if (JccInst(&insn)) {
+        if (insn.detail->x86.op_count == 1) {
+            if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
+                *addr = insn.detail->x86.operands[0].imm;
+                return (true);
+            }
+        }
+    }
+    return (false);
+}
+
+int Base_x64::IsImport(cs_insn insn, char **name) {
+    return (false);
+}
+
+#define C_HEADER "\
+#include \"x64.h\"\n\
+\n"
+
+#define C_FUNC_PROTO "\
+void func_0x%llx(struct _cpu *cpu);\n"
+
+#define C_FOOTER_1 "\
+int main (int argc, char **argv) {\n\
+struct _cpu cpu;\n\
+\n\
+    init(&cpu);\n\
+"
+
+#define C_FOOTER_2 "\
+    func_0x%llx(&cpu);\n\
+    end(&cpu);\n\
+    return (0);\n\
+}\n\
+\n"
+
+#define C_FUNC_HEADER "\
+void func_0x%llx(struct _cpu *cpu) {\n\
+"
+
+#define C_FUNC_FOOTER "\
+}\n\
+\n"
 
 // ---------------------------------------------------------------------------------------------------------
 
