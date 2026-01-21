@@ -275,10 +275,6 @@ int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
     return (false);
 }
 
-int Base_x64::IsImport(cs_insn insn, char **name) {
-    return (false);
-}
-
 #define C_HEADER "\
 #include \"x64.h\"\n\
 \n"
@@ -568,39 +564,25 @@ char buffer[256];
             }
             break;
         case X86_INS_CALL:
+            uint64_t addr = 0;
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
-                PrintLine(insn,"    func_0x%llx(cpu);",insn->detail->x86.operands[0].imm);
-                num++;
+                addr = insn->detail->x86.operands[0].imm;
             } else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
-                    uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-                    //struct _import_name in;
-                    //if (GetImportFunction (pe,addr,&in)) {
-                    char lib[256];
-                    char func[256];
-                    if (IsImportFunction(addr,lib,func)) {
-                        //uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
-                        uint8_t *mem = GetMemory(addr,8,&read);
-                        uint64_t t = *((uint64_t *)mem);
-                        //printf("0x%llx\n",t);
-                        free(mem);
-                        //PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",in.lib_name,in.func_name);
-                        PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
-                        num++;
-                    }
-                    else {
-                        //uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
-                        uint8_t *mem = GetMemory(addr,8,&read);
-                        if (mem != NULL) {
-                            /*
-                            PrintLine(insn,"    func_0x%llx(cpu);",*((uint64_t *)mem));
-                            num++;
-                            */
-                            free(mem);
-                        }
-                    }
-                }             
+                    addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                }
+            }
+            if (addr) {
+                char lib[256];
+                char func[256];
+                if (IsImportFunction(addr,lib,func)) {
+                    PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
+                }
+                else {
+                    PrintLine(insn,"    func_0x%llx(cpu);",addr);
+                }
+                num++;
             }
             break;
     }

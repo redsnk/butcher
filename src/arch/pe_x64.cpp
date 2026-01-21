@@ -26,7 +26,7 @@ uint8_t *Pe_x64::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
 int Pe_x64::IsImportFunction (uint64_t addr, char *lib, char *func) {
 struct _import_name in;
         
-    if (GetImportFunction (pe,addr,&in)) {
+    if (GetImportFunctionPE (pe,addr,&in)) {
         strcpy (lib,in.lib_name);
         strcpy (func,in.func_name);
         return (true);

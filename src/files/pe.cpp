@@ -154,7 +154,7 @@ long l;
 	return (NULL);
 }
 
-int GetImportFunction (struct _PE *pe,uint64_t addr,struct _import_name *in) {
+int GetImportFunctionPE (struct _PE *pe,uint64_t addr,struct _import_name *in) {
 uint64_t read;
 
 	uint64_t base = GetImageBase(pe);

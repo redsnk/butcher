@@ -212,6 +212,6 @@ struct _import_directory_table {
 struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
 uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read);
-int GetImportFunction (struct _PE *pe, uint64_t addr, struct _import_name *in);
+int GetImportFunctionPE (struct _PE *pe, uint64_t addr, struct _import_name *in);
 
 #endif	// _PE_H

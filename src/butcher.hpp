@@ -72,7 +72,6 @@ class Butcher {
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJcc(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
-        virtual int IsImport(cs_insn insn, char **name) = 0;
         virtual void PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);

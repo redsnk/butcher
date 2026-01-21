@@ -28,7 +28,27 @@ long l,s;
                             if (fseek(f,elf->Ehdr.Ehdr64.e_phoff,SEEK_SET) != -1) {
                                 l = fread(elf->Phdr,1,s,f);
                                 if (l == s) {
-                                    return (elf);
+                                    // Section Headers
+                                    s = elf->Ehdr.Ehdr64.e_shnum*elf->Ehdr.Ehdr64.e_shentsize;
+                                    elf->Shdr = (Elf64_Shdr *) malloc(s);
+                                    if (elf->Shdr != NULL) {
+                                        if (fseek(f,elf->Ehdr.Ehdr64.e_shoff,SEEK_SET) != -1) {
+                                            l = fread(elf->Phdr,1,s,f);
+                                            if (l == s) {
+                                                return (elf);
+                                            }
+                                            else {
+                                                printf("GetELF error: fread Shdr\n");
+                                            }
+                                        }
+                                        else {
+                                            printf("GetELF error: fseek Shdr\n");
+                                        }
+                                        free(elf->Shdr);
+                                    }
+                                    else {
+                                        printf("GetELF error: Shdr malloc\n");
+                                    }
                                 }
                                 else {
                                     printf("GetELF error: fread Phdr\n");
@@ -61,6 +81,7 @@ long l,s;
 void FreeELF (struct _ELF *elf) {
     if (elf != NULL) {
         free(elf->Phdr);
+        free(elf->Shdr);
 		fclose(elf->f);
 		free(elf);
 	}
@@ -87,7 +108,6 @@ long l;
 			}
 			m = (uint8_t *) malloc(size);
 			if (m != NULL) {
-				// TODO: check SizeOfRawData overflow
 				offset = elf->Phdr[n].p_offset+(addr-start);
 				l = fseek(elf->f,offset,SEEK_SET);
 				if (l != -1) {
@@ -102,14 +122,17 @@ long l;
 					printf("GetMemoryELF error: fseek\n");
 				}
 				free(m);		
-			}	
+			}
+            else {
+                printf("GetMemoryELF error: malloc\n");
+            }
 			break;
 		}
     }
     return (NULL);
 }
 
-int GetImportFunction (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in) {
+int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in) {
     return (false);
 }
 
