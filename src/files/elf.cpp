@@ -4,6 +4,50 @@
 
 #include "elf.hpp"
 
+uint8_t *GetSectionByIndex (struct _ELF *elf,int index,uint64_t *size) {
+uint8_t *mem;
+long l;
+
+    mem = (uint8_t *) malloc(elf->Shdr[index].sh_size);
+    if (mem != NULL) {
+        if (fseek(elf->f,elf->Shdr[index].sh_offset,SEEK_SET) != -1) {
+            *size = elf->Shdr[index].sh_size;
+            l = fread(mem,1,*size,elf->f);
+            if (l == *size) {
+                return (mem);
+            }
+        }
+        free (mem);
+    }
+    return (NULL);
+}
+
+uint8_t *GetSectionByType (struct _ELF *elf,Elf32_Word sh_type,uint64_t *size) {
+int n;
+uint8_t *mem;
+long l;
+
+    for (n=0;n<elf->Ehdr.Ehdr64.e_shnum;n++) {
+        if (elf->Shdr[n].sh_type == sh_type) {
+            return (GetSectionByIndex(elf,n,size));
+        }
+    }
+    return (NULL);
+}
+
+int GetSectionIndexByName (struct _ELF *elf,const char *name) {
+int n;
+char *sname;
+
+    for (n=0;n<elf->Ehdr.Ehdr64.e_shnum;n++) {
+        sname = (char *) (elf->ShStrTable + elf->Shdr[n].sh_name);
+        if (!strcmp(name,sname)) {
+            return (n);
+        }
+    }
+    return (-1);
+}
+
 struct _ELF *GetELF (char *name) {
 FILE *f;
 struct _ELF *elf;
@@ -33,9 +77,34 @@ long l,s;
                                     elf->Shdr = (Elf64_Shdr *) malloc(s);
                                     if (elf->Shdr != NULL) {
                                         if (fseek(f,elf->Ehdr.Ehdr64.e_shoff,SEEK_SET) != -1) {
-                                            l = fread(elf->Phdr,1,s,f);
+                                            l = fread(elf->Shdr,1,s,f);
                                             if (l == s) {
-                                                return (elf);
+                                                // Section Headers string table
+                                                elf->ShStrTable = (char *) GetSectionByIndex(elf,elf->Ehdr.Ehdr64.e_shstrndx,&elf->ShStrTable_size);
+                                                if (elf->ShStrTable != NULL) {
+                                                    // Dynamic linker symbol table
+                                                    elf->DynSymTable = (Elf64_Sym *) GetSectionByType(elf,SHT_DYNSYM,&elf->DynSymTable_size);
+                                                    if (elf->DynSymTable != NULL) {
+                                                        // Dynamic strings table
+                                                        elf->DynStrTable = (char *) GetSectionByType(elf,SHT_STRTAB,&elf->DynStrTable_size);
+                                                        if (elf->DynStrTable != NULL) {
+                                                            // Got.Plt Table
+                                                            elf->GotPltTableIndex = GetSectionIndexByName(elf,".got.plt");
+                                                            if (elf->GotPltTableIndex != -1) {
+                                                                return (elf);
+                                                            }
+                                                            else {
+                                                                printf("GetELF error: GetSectionIndexByName\n");
+                                                            }
+                                                            free(elf->DynStrTable);
+                                                        }
+                                                        free(elf->DynSymTable);
+                                                    }
+                                                    free(elf->ShStrTable);
+                                                }
+                                                else {
+                                                    printf("GetELF error: GetSectionByIndex\n");
+                                                }
                                             }
                                             else {
                                                 printf("GetELF error: fread Shdr\n");
@@ -80,6 +149,9 @@ long l,s;
 
 void FreeELF (struct _ELF *elf) {
     if (elf != NULL) {
+        free(elf->DynStrTable);
+        free(elf->DynSymTable);
+        free(elf->ShStrTable);
         free(elf->Phdr);
         free(elf->Shdr);
 		fclose(elf->f);
@@ -133,6 +205,16 @@ long l;
 }
 
 int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in) {
+uint64_t start,end,index;
+
+    start = elf->Shdr[elf->GotPltTableIndex].sh_offset;
+    end = start + elf->Shdr[elf->GotPltTableIndex].sh_size - 1;
+    if ((addr <= start) && (addr <= end)) {
+        index = (addr-start) / 8;
+        strcpy (in->lib_name,"<none>");
+        strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
+        return (true);
+    }
     return (false);
 }
 

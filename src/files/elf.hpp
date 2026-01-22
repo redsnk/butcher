@@ -23,6 +23,9 @@ typedef uint32_t	Elf64_Word;
 typedef uint64_t	Elf64_Lword;
 typedef uint64_t	Elf64_Xword;
 
+typedef uint16_t Elf32_Section;
+typedef uint16_t Elf64_Section;
+
 #define EI_NIDENT (16)
 
 typedef struct
@@ -400,7 +403,29 @@ typedef struct
 #define SHF_ORDERED	     (1 << 30)	/* Special ordering requirement (Solaris).  */
 #define SHF_EXCLUDE	     (1U << 31)	/* Section is excluded unless referenced or allocated (Solaris).*/
 
-// 
+// Symbols
+
+typedef struct
+{
+  Elf32_Word	st_name;		/* Symbol name (string tbl index) */
+  Elf32_Addr	st_value;		/* Symbol value */
+  Elf32_Word	st_size;		/* Symbol size */
+  unsigned char	st_info;		/* Symbol type and binding */
+  unsigned char	st_other;		/* Symbol visibility */
+  Elf32_Section	st_shndx;		/* Section index */
+} Elf32_Sym;
+
+typedef struct
+{
+  Elf64_Word	st_name;		/* Symbol name (string tbl index) */
+  unsigned char	st_info;		/* Symbol type and binding */
+  unsigned char st_other;		/* Symbol visibility */
+  Elf64_Section	st_shndx;		/* Section index */
+  Elf64_Addr	st_value;		/* Symbol value */
+  Elf64_Xword	st_size;		/* Symbol size */
+} Elf64_Sym;
+
+//
 
 union _Elf_Ehdr {
 	Elf32_Ehdr Ehdr32;
@@ -412,6 +437,13 @@ struct _ELF {
 	_Elf_Ehdr Ehdr;
   Elf64_Phdr *Phdr;
   Elf64_Shdr *Shdr;
+  char *ShStrTable;
+  uint64_t ShStrTable_size;
+  Elf64_Sym *DynSymTable;
+  uint64_t DynSymTable_size;
+  char *DynStrTable;
+  uint64_t DynStrTable_size;
+  int GotPltTableIndex;
 };
 
 #define MAX_IMPORT_NAME	(256)
