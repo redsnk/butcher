@@ -15,6 +15,7 @@
 
 struct _subcode {
     int id;
+    char *name;
     int parent;
     uint64_t first;
     uint64_t last;
@@ -26,6 +27,11 @@ struct _submem {
     uint64_t addr;
     uint64_t size;
     uint8_t *mem;
+};
+
+struct _call {
+    uint64_t addr;
+    char *name;  
 };
 
 #define INIT_MEM_GETCODE (1024)
@@ -70,7 +76,7 @@ class Butcher {
         virtual int IsSymbolFunction (uint64_t addr, char *func)= 0;
         virtual int IsSymbolObject (uint64_t addr, char *name)= 0;
         virtual int IsRet(cs_insn insn) = 0;
-        virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
+        virtual int IsCall(cs_insn insn, uint64_t *addr, char **name) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJcc(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
@@ -78,7 +84,7 @@ class Butcher {
         virtual void PrintCodeC(Code *c) = 0;
         //
         int IsGroup (cs_insn insn, int group);
-        Code *GetCode(Code *c,uint64_t address,int parent);
+        Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);
 };
 

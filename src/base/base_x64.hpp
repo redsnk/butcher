@@ -12,7 +12,7 @@ class Base_x64 : public Butcher {
     public:
         cs_err Cs_open(void);
         int IsRet(cs_insn insn);
-        int IsCall(cs_insn insn, uint64_t *addr);
+        int IsCall(cs_insn insn, uint64_t *addr, char **name);
         int IsJmp(cs_insn insn, uint64_t *addr);
         int IsJcc(cs_insn insn, uint64_t *addr);
         int IsInt(cs_insn insn, uint64_t *num);

@@ -12,6 +12,7 @@ Code::Code(uint64_t a) {
 
 void Code::NewSubCode (struct _subcode *sc) {
     sc->id = next_id++;
+    sc->name = NULL;
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
@@ -102,6 +103,9 @@ int n;
     if (subcod_count > 0) {
         for (n=0;n<subcod_count;n++) {
             cs_free(subcodes[n].insn, subcodes[n].count);
+            if (subcodes[n].name != NULL) {
+                free(subcodes[n].name);
+            }
         }
         free(subcodes);
     }
@@ -126,14 +130,16 @@ int Butcher::IsGroup (cs_insn insn, int group) {
     return (false);
 }
 
-Code *Butcher::GetCode(Code *c,uint64_t address,int parent) {
+Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
 int n;
 std::set<uint64_t> calls;
+//std::set<struct call> calls;
 std::set<uint64_t> jmps;
 uint64_t addr,read;
 int max_subcode = INIT_MEM_GETCODE;
+char *call_name;
 
     if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
         //printf("// test\n");
@@ -159,9 +165,12 @@ int max_subcode = INIT_MEM_GETCODE;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    if (IsCall(sc.insn[n],&addr)) {
+                    if (IsCall(sc.insn[n],&addr,&call_name)) {
                         // New subcode 
                         printf("// *** Add call 0x%llx\n",addr);
+                        struct _call c;
+                        c.addr = addr;
+                        c.name = NULL;
                         calls.insert(addr);
                     }
                     else if (IsJcc(sc.insn[n],&addr)) {
@@ -214,12 +223,12 @@ int max_subcode = INIT_MEM_GETCODE;
     for (uint64_t a : jmps) {
         if ((a < sc.first) || (a > sc.last)) {
             // Jmp outside the subcode, explore child subcode
-            c = GetCode(c,a,(parent==SUBCODE_TOP)?sc.id:parent);
+            c = GetCode(c,a,NULL,(parent==SUBCODE_TOP)?sc.id:parent);
         }
     }
     for (uint64_t a : calls) {
         // Explore new addresses for calls
-        c = GetCode(c,a,SUBCODE_TOP);
+        c = GetCode(c,a,NULL,SUBCODE_TOP);
     }
     return (c);
 }
@@ -235,7 +244,7 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             IsSymbolFunction(0xbf890,func);
             IsSymbolObject(0x11f5f8,func);
             */
-            Code *c = GetCode(NULL,address,SUBCODE_TOP);
+            Code *c = GetCode(NULL,address,NULL,SUBCODE_TOP);
             //c->Print();
             PrintCodeC(c);
             delete c;

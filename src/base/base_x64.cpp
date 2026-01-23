@@ -238,7 +238,7 @@ int Base_x64::IsRet(cs_insn insn) {
     return(IsGroup(insn,X86_GRP_RET));
 }
 
-int Base_x64::IsCall(cs_insn insn, uint64_t *addr) {
+int Base_x64::IsCall(cs_insn insn, uint64_t *addr, char **name) {
     if (insn.id == X86_INS_CALL) {
         if (insn.detail->x86.op_count == 1) {
             if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
@@ -688,7 +688,6 @@ int id;
                     printf("label_0x%llx:\n",sc->insn[n].address);
                 }
                 n = PrintInst(c,sc,n);
-                //printf("    //0x%llx:\t%s\t\t%s\n", sc->insn[n].address, sc->insn[n].mnemonic,sc->insn[n].op_str);
             }
         }
     }
@@ -713,7 +712,9 @@ char sub[128];
 void Base_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
-        printf(C_FUNC_PROTO,c->subcodes[n].first);
+        if (c->subcodes[n].parent == SUBCODE_TOP) {
+            printf(C_FUNC_PROTO,c->subcodes[n].first);
+        }
     }
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {

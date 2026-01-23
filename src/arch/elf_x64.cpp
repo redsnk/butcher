@@ -40,6 +40,7 @@ unsigned char info;
     if (GetSymbolELF(elf,addr,func,&info)) {
         return  (ELF64_ST_TYPE(info) == STT_FUNC);
     }
+    return (false);
 }
 
 int Elf_x64::IsSymbolObject (uint64_t addr, char *name) {
@@ -48,4 +49,5 @@ unsigned char info;
     if (GetSymbolELF(elf,addr,name,&info)) {
         return  (ELF64_ST_TYPE(info) == STT_OBJECT);
     }
+    return (false);
 }
