@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <cstring>
+#include "common.hpp"
 
 typedef uint32_t	Elf32_Addr;
 typedef uint16_t	Elf32_Half;

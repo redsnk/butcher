@@ -434,7 +434,7 @@ char buffer[256];
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     //xor		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
-                        if (handle,insn->detail->x86.operands[0].reg == handle,insn->detail->x86.operands[1].reg) {
+                        if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
                             PrintLine(insn,"    _%s = 0;",reg_name(handle,insn->detail->x86.operands[0].reg));
                         }
                         else {

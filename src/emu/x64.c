@@ -334,6 +334,10 @@ void call_from_iat (char *lib,char *func) {
 	panic("call_from_iat not implemented",func);
 }
 
+void jmp_from_iat (char *lib,char *func) {
+	panic("jmp_from_iat not implemented",func);
+}
+
 // ---------------------------------------------------------------------------------
 
 //TODO: The OF and CF flags are set to 0. The SF, ZF, and PF flags are set according to the result (see the “Operation” section above). The state of the AF flag is undefined.

@@ -173,6 +173,7 @@ void FreeELF (struct _ELF *elf) {
 	}
 }
 
+/*
 uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read) {
 int n;
 uint64_t start, end, offset;
@@ -215,6 +216,20 @@ long l;
             }
 			break;
 		}
+    }
+    return (NULL);
+}
+*/
+
+uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read) {
+int n;
+uint8_t *m;
+
+    for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
+        m = GetMemoryFile(elf->f,addr,size,elf->Phdr[n].p_vaddr,elf->Phdr[n].p_memsz,elf->Phdr[n].p_offset,elf->Phdr[n].p_filesz,read);
+        if (m != NULL) {
+            return (m);
+        }
     }
     return (NULL);
 }

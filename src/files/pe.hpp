@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <cstring>
+#include "common.hpp"
 
 struct _ms_dos_stub {
 	unsigned char head[0x3c-1];

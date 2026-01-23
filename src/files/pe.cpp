@@ -79,7 +79,7 @@ int b;
 							printf("GetPE error: signature doesn't match\n");
 						}
 					} else {
-						printf("GetPE error: read signature\n");
+						fprintf(stderr,"GetPE error: read signature\n");
 					}
 				} else {
 					printf("GetPE error: go to signature\n");
@@ -110,6 +110,7 @@ uint64_t GetImageBase (struct _PE *pe) {
 	return (pe->Optional_Header_Windows_Specific_Fields.pe32plus.ImageBase);
 }
 
+/*
 uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read) {
 int n;
 uint64_t base, start, end, offset;
@@ -151,6 +152,23 @@ long l;
 			}	
 			break;
 		}
+	}
+	return (NULL);
+}
+*/
+
+uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read) {
+int n;
+uint8_t *m;
+uint64_t base;
+
+	for (n=0;n<pe->COFF_File_Header.NumberOfSections;n++) {
+		base = GetImageBase(pe);
+		m = GetMemoryFile(pe->f,addr,size,base+pe->Sections[n].VirtualAddress,pe->Sections[n].VirtualSize,pe->Sections[n].PointerToRawData,pe->Sections[n].SizeOfRawData,read);
+        if (m != NULL) {
+            return (m);
+        }
+		
 	}
 	return (NULL);
 }
