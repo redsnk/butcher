@@ -142,7 +142,7 @@ int max_subcode = INIT_MEM_GETCODE;
         c = new Code(address);
     }
     if (c->HasAddr(address,parent)) {
-        //printf("*** GetCode repeated 0x%llx\n",address);
+        printf("// *** GetCode repeated 0x%llx, exit ...\n",address);
         return (c);
     }
     c->NewSubCode(&sc);
@@ -179,7 +179,7 @@ int max_subcode = INIT_MEM_GETCODE;
                         }
                         lend = true;
                     }
-                    else if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr)) {
+                    else if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
                         lend = true;
                     }
                     if (lend) {
@@ -228,6 +228,13 @@ void Butcher::Cut(char *file_name,uint64_t address) {
     if (OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
+            /*
+            char lib[256];
+            char func[256];
+            IsImportFunction(0x115378,lib,func);
+            IsSymbolFunction(0xbf890,func);
+            IsSymbolObject(0x11f5f8,func);
+            */
             Code *c = GetCode(NULL,address,SUBCODE_TOP);
             //c->Print();
             PrintCodeC(c);

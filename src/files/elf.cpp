@@ -48,6 +48,19 @@ char *sname;
     return (-1);
 }
 
+uint8_t *GetSectionByName (struct _ELF *elf,const char *name,uint64_t *size) {
+int i;
+uint8_t *mem;
+long l;
+
+    i = GetSectionIndexByName(elf,name);
+    if (i != -1) {
+        return (GetSectionByIndex(elf,i,size));
+    }
+    return (NULL);
+}
+
+
 struct _ELF *GetELF (char *name) {
 FILE *f;
 struct _ELF *elf;
@@ -85,8 +98,9 @@ long l,s;
                                                     // Dynamic linker symbol table
                                                     elf->DynSymTable = (Elf64_Sym *) GetSectionByType(elf,SHT_DYNSYM,&elf->DynSymTable_size);
                                                     if (elf->DynSymTable != NULL) {
+                                                        elf->DynSymTable_count = elf->DynSymTable_size/sizeof(Elf64_Sym);
                                                         // Dynamic strings table
-                                                        elf->DynStrTable = (char *) GetSectionByType(elf,SHT_STRTAB,&elf->DynStrTable_size);
+                                                        elf->DynStrTable = (char *) GetSectionByName(elf,".dynstr",&elf->DynStrTable_size);
                                                         if (elf->DynStrTable != NULL) {
                                                             // Got.Plt Table
                                                             elf->GotPltTableIndex = GetSectionIndexByName(elf,".got.plt");
@@ -167,7 +181,8 @@ long l;
 
     for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
         start = elf->Phdr[n].p_vaddr;
-        end = elf->Phdr[n].p_vaddr + elf->Phdr[n].p_memsz - 1; 
+        // TODO: memory size instead of file size
+        end = elf->Phdr[n].p_vaddr + elf->Phdr[n].p_filesz; 
         if ((addr >= start) && (addr < end)) {
 			// addr inside the section
 			if ((end-addr) < size) {
@@ -207,13 +222,27 @@ long l;
 int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in) {
 uint64_t start,end,index;
 
-    start = elf->Shdr[elf->GotPltTableIndex].sh_offset;
+    start = elf->Shdr[elf->GotPltTableIndex].sh_addr;
     end = start + elf->Shdr[elf->GotPltTableIndex].sh_size - 1;
-    if ((addr <= start) && (addr <= end)) {
-        index = (addr-start) / 8;
+    if ((addr >= start) && (addr <= end)) {
+        // TODO; Elf32
+        index = ((addr-start) / 8)+1;
         strcpy (in->lib_name,"<none>");
         strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
         return (true);
+    }
+    return (false);
+}
+
+int GetSymbolELF (struct _ELF *elf,uint64_t addr,char *name,unsigned char *info) {
+int n;
+
+    for (n=0;n<elf->DynSymTable_count;n++) {
+        if (elf->DynSymTable[n].st_value == addr) {
+            strcpy(name,elf->DynStrTable+elf->DynSymTable[n].st_name);
+            *info = elf->DynSymTable[n].st_info;
+            return (true);
+        }
     }
     return (false);
 }

@@ -33,3 +33,11 @@ struct _import_name in;
     }
     return (false);
 }
+
+int Pe_x64::IsSymbolFunction (uint64_t addr, char *func) {
+    return (false);
+}
+
+int Pe_x64::IsSymbolObject (uint64_t addr, char *name) {
+    return (false);
+}

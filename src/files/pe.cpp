@@ -119,7 +119,8 @@ long l;
 	for (n=0;n<pe->COFF_File_Header.NumberOfSections;n++) {
 		base = GetImageBase(pe);
 		start = base+pe->Sections[n].VirtualAddress;
-		end = start+pe->Sections[n].VirtualSize;
+		end = start+pe->Sections[n].SizeOfRawData;
+		// TODO: SizeOfRawData instead of VirtualSize
 		if ((addr >= start) && (addr < end)) {
 			// addr inside the section
 			if ((end-addr) < size) {

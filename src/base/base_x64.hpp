@@ -16,6 +16,7 @@ class Base_x64 : public Butcher {
         int IsJmp(cs_insn insn, uint64_t *addr);
         int IsJcc(cs_insn insn, uint64_t *addr);
         int IsInt(cs_insn insn, uint64_t *num);
+        int IsEnd(cs_insn *insn, int n, int count);
 
         void PrintLine(cs_insn *insn,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);

@@ -14,7 +14,12 @@ char tmp[256];
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
     //sprintf(buffer,"%s%+lld",reg_name(handle,op.mem.base),op.mem.disp);
-    sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+    if (op.mem.base != X86_REG_INVALID) {
+        sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+    }
+    else {
+        buffer[0] = 0;
+    }
     if (op.mem.index != X86_REG_INVALID) {
         sprintf(tmp,"+_%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
         strcat (buffer,tmp);
@@ -249,6 +254,16 @@ int Base_x64::IsInt(cs_insn insn, uint64_t *num) {
     return(IsGroup(insn,X86_GRP_INT));
 }
 
+int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
+    if (insn[n].id == X86_INS_NOP) {
+        if (insn[n].detail->x86.op_count > 0) {
+            // nop             word ptr [rax + rax]
+            return(true);
+        }
+    }
+    return (false);
+}
+
 int Base_x64::IsJmp(cs_insn insn, uint64_t *addr) {
     *addr = 0;
     if (insn.id == X86_INS_JMP) {
@@ -333,6 +348,17 @@ char buffer[256];
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 PrintLine(insn,"    goto label_0x%llx;",insn->detail->x86.operands[0].imm);
                 num++;
+            }
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                    uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                    char lib[256];
+                    char func[256];
+                    if (IsImportFunction(addr,lib,func)) {
+                        PrintLine(insn,"    jmp_from_iat(\"%s\",\"%s\");",lib,func);
+                        num++;
+                    }    
+                }
             }
             break;
         case X86_INS_JE:
@@ -568,21 +594,19 @@ char buffer[256];
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
                 addr = insn->detail->x86.operands[0].imm;
-            } else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                PrintLine(insn,"    func_0x%llx(cpu);",addr);
+                num++;
+            } 
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                    char lib[256];
+                    char func[256];
+                    if (IsImportFunction(addr,lib,func)) {
+                        PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
+                        num++;
+                    }    
                 }
-            }
-            if (addr) {
-                char lib[256];
-                char func[256];
-                if (IsImportFunction(addr,lib,func)) {
-                    PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
-                }
-                else {
-                    PrintLine(insn,"    func_0x%llx(cpu);",addr);
-                }
-                num++;
             }
             break;
     }
