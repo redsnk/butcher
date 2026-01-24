@@ -157,7 +157,7 @@ char *call_name;
     printf("// *** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
-        uint8_t *m = GetMemory(sc.first,max_subcode,&read);
+        uint8_t *m = arch->GetMemory(sc.first,max_subcode,&read);
         // TODO: read < max_subcode
         if ((m != NULL) && (read == max_subcode)) {
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
@@ -234,7 +234,7 @@ char *call_name;
 }
 
 void Butcher::Cut(char *file_name,uint64_t address) {
-    if (OpenFile(file_name)) {
+    if (arch->OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
             /*
@@ -249,6 +249,16 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             PrintCodeC(c);
             delete c;
         }
-        CloseFile();
+        arch->CloseFile();
     }
+}
+
+Butcher::Butcher(Archive *a,Language *l) {
+    lang = l;
+    arch = a;
+}
+
+Butcher::~Butcher() {
+    delete lang;
+    delete arch;
 }

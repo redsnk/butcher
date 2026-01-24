@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cstring>
 #include <capstone/capstone.h>
+#include "arch/archive.hpp"
+#include "lang/language.hpp"
 
 #define SUBCODE_TOP     0
 
@@ -58,15 +60,32 @@ class Code {
         void Print (void);
 };
 
+/*
 class Archive {
+    public:
+        virtual int CheckFile(char *file_name);
+        virtual int OpenFile(char *file_name);
+        virtual void CloseFile(void);
+        virtual uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
+        virtual int IsImportFunction (uint64_t addr, char *lib, char *func);
+        virtual int IsSymbolFunction (uint64_t addr, char *func);
+        virtual int IsSymbolObject (uint64_t addr, char *name);
+};
+
+
+class Language {
     public:
 
 };
+*/
 
 class Butcher {
     public:
         csh handle;
-        //
+        Archive *arch;
+        Language *lang;
+
+        /*
         virtual int CheckFile(char *file_name) = 0;
         virtual int OpenFile(char *file_name) = 0;
         virtual cs_err Cs_open(void) = 0;
@@ -75,6 +94,8 @@ class Butcher {
         virtual int IsImportFunction (uint64_t addr, char *lib, char *func)= 0;
         virtual int IsSymbolFunction (uint64_t addr, char *func)= 0;
         virtual int IsSymbolObject (uint64_t addr, char *name)= 0;
+        */
+        virtual cs_err Cs_open(void) = 0;
         virtual int IsRet(cs_insn insn) = 0;
         virtual int IsCall(cs_insn insn, uint64_t *addr, char **name) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
@@ -83,6 +104,8 @@ class Butcher {
         virtual int IsEnd(cs_insn *insn, int n, int count) = 0;
         virtual void PrintCodeC(Code *c) = 0;
         //
+        Butcher(Archive *a,Language *l);
+        ~Butcher();
         int IsGroup (cs_insn insn, int group);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);

@@ -18,6 +18,7 @@ class Base_x64 : public Butcher {
         int IsInt(cs_insn insn, uint64_t *num);
         int IsEnd(cs_insn *insn, int n, int count);
 
+        using Butcher::Butcher;
         void PrintLine(cs_insn *insn,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);

@@ -1,17 +1,17 @@
-#ifndef PE_X64_H
-#define PE_X64_H
+#ifndef ARCH_ELF_H
+#define ARCH_ELF_H
 
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <cstring>
-#include "../base/base_x64.hpp"
-#include "../files/pe.hpp"
+#include "archive.hpp"
+#include "../files/elf.hpp"
 
-class Pe_x64 : public Base_x64 {
+class Arch_Elf: public Archive {
     public:
-        struct _PE *pe;
+        struct _ELF *elf;
 
         int CheckFile(char *file_name);
         int OpenFile(char *file_name);
@@ -22,4 +22,4 @@ class Pe_x64 : public Base_x64 {
         int IsSymbolObject (uint64_t addr, char *name);
 };
 
-#endif // PE_X64_H
+#endif // ARCH_ELF_H

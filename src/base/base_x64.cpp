@@ -354,7 +354,7 @@ char buffer[256];
                     uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     char lib[256];
                     char func[256];
-                    if (IsImportFunction(addr,lib,func)) {
+                    if (arch->IsImportFunction(addr,lib,func)) {
                         PrintLine(insn,"    jmp_from_iat(\"%s\",\"%s\");",lib,func);
                         num++;
                     }    
@@ -534,7 +534,7 @@ char buffer[256];
                         // mov rax, qword ptr [**rip** + 0x1dc97]
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
                         //uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
-                        uint8_t *mem = GetMemory(addr,8,&read);
+                        uint8_t *mem = arch->GetMemory(addr,8,&read);
                         if ((mem != NULL) && (read == 8)) {
                             c->AddSubMem(addr,mem,8);
                             free(mem);
@@ -602,7 +602,7 @@ char buffer[256];
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     char lib[256];
                     char func[256];
-                    if (IsImportFunction(addr,lib,func)) {
+                    if (arch->IsImportFunction(addr,lib,func)) {
                         PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
                         num++;
                     }    

@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
-#include "src/arch/pe_x64.hpp"
-#include "src/arch/elf_x64.hpp"
+//#include "src/arch/pe_x64.hpp"
+//#include "src/arch/elf_x64.hpp"
+#include "src/arch/arch_elf.hpp"
+#include "src/arch/arch_pe.hpp"
+#include "src/lang/lang_c.hpp"
+#include "src/base/base_x64.hpp"
 
 #define MY_VERSION  "v0.02"
 
@@ -26,6 +30,12 @@ uint64_t n;
 }
 
 int butcher(char *path,uint64_t addr) {
+Butcher *b;
+Language *l;
+Archive *a;
+
+
+    /*
     Butcher *b = new Pe_x64();
     if (!b->CheckFile(path)) {
         delete b;
@@ -36,6 +46,20 @@ int butcher(char *path,uint64_t addr) {
             return (0);
         }
     }
+    */
+    l = new Lang_C();
+    a = new Arch_Pe();
+    if (!a->CheckFile(path)) {
+        delete a;
+        a = new Arch_Elf();
+        if (!a->CheckFile(path)) {
+            delete a;
+            delete l;
+            printf("Error: format not compatible.\n");
+            return (0);
+        }
+    }
+    b = new Base_x64(a,l);
     b->Cut(path,addr);
     delete b;
     return (1);
