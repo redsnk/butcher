@@ -491,6 +491,6 @@ struct _ELF *GetELF (char *name);
 void FreeELF (struct _ELF *elf);
 uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read);
 int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in);
-int GetSymbolELF (struct _ELF *elf,uint64_t addr,char *name,unsigned char *info);
+int GetSymbolELF (struct _ELF *elf,uint64_t addr,char **name,unsigned char *info);
 
 #endif	// _ELF_H

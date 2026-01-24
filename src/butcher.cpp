@@ -97,6 +97,17 @@ int n,i;
     }
 }
 
+char *Code::GetFunctionName (uint64_t addr) {
+int n;
+
+    for (n=0;n<subcod_count;n++) {
+        if ((subcodes[n].parent == SUBCODE_TOP) && (subcodes[n].first == addr) && (subcodes[n].name != NULL)) {
+            return (strdup(subcodes[n].name));
+        }
+    }
+    return (NULL);
+}
+
 Code::~Code() {
 int n;
 
@@ -134,12 +145,12 @@ Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
 int n;
-std::set<uint64_t> calls;
-//std::set<struct call> calls;
+//std::set<uint64_t> calls;
+struct _call *calls;
+int ncalls = 0;
 std::set<uint64_t> jmps;
 uint64_t addr,read;
 int max_subcode = INIT_MEM_GETCODE;
-char *call_name;
 
     if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
         //printf("// test\n");
@@ -152,6 +163,7 @@ char *call_name;
         return (c);
     }
     c->NewSubCode(&sc);
+    sc.name = name;
     sc.parent = parent;
     sc.first = address;
     printf("// *** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
@@ -165,13 +177,25 @@ char *call_name;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    if (IsCall(sc.insn[n],&addr,&call_name)) {
+                    if (IsCall(sc.insn[n],&addr)) {
                         // New subcode 
-                        printf("// *** Add call 0x%llx\n",addr);
-                        struct _call c;
-                        c.addr = addr;
-                        c.name = NULL;
-                        calls.insert(addr);
+                        //printf("// *** Add call 0x%llx\n",addr);
+                        //calls.insert(addr);
+                        if (!ncalls) {
+                            calls = (struct _call *) malloc(sizeof(struct _call));
+                        }
+                        else {
+                            calls = (struct _call *) realloc(calls,sizeof(struct _call)*(ncalls+1));
+                        }
+                        calls[ncalls].addr = addr;
+                        calls[ncalls].name = NULL;
+                        if (arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                            printf("// *** Add call 0x%llx(%s)\n",addr,calls[ncalls].name);
+                        }
+                        else {
+                            printf("// *** Add call 0x%llx\n",addr);
+                        }
+                        ncalls++;
                     }
                     else if (IsJcc(sc.insn[n],&addr)) {
                         //printf("jcc 0x%llx\n",addr);
@@ -226,9 +250,18 @@ char *call_name;
             c = GetCode(c,a,NULL,(parent==SUBCODE_TOP)?sc.id:parent);
         }
     }
+    /*
     for (uint64_t a : calls) {
         // Explore new addresses for calls
         c = GetCode(c,a,NULL,SUBCODE_TOP);
+    }
+    */
+    for (int n=0;n<ncalls;n++) {
+        // Explore new addresses for calls
+        c = GetCode(c,calls[n].addr,calls[n].name,SUBCODE_TOP);
+    }
+    if (ncalls) {
+        free (calls);
     }
     return (c);
 }

@@ -249,12 +249,13 @@ uint64_t start,end,index;
     return (false);
 }
 
-int GetSymbolELF (struct _ELF *elf,uint64_t addr,char *name,unsigned char *info) {
+int GetSymbolELF (struct _ELF *elf,uint64_t addr,char **name,unsigned char *info) {
 int n;
 
     for (n=0;n<elf->DynSymTable_count;n++) {
         if (elf->DynSymTable[n].st_value == addr) {
-            strcpy(name,elf->DynStrTable+elf->DynSymTable[n].st_name);
+            //strcpy(name,elf->DynStrTable+elf->DynSymTable[n].st_name);
+            *name = strdup(elf->DynStrTable+elf->DynSymTable[n].st_name);
             *info = elf->DynSymTable[n].st_info;
             return (true);
         }

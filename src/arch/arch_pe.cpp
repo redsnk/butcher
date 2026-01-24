@@ -23,21 +23,21 @@ uint8_t *Arch_Pe::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryPE(pe,addr,size,read));
 }
 
-int Arch_Pe::IsImportFunction (uint64_t addr, char *lib, char *func) {
+int Arch_Pe::IsImportFunction (uint64_t addr, char **lib, char **func) {
 struct _import_name in;
         
     if (GetImportFunctionPE (pe,addr,&in)) {
-        strcpy (lib,in.lib_name);
-        strcpy (func,in.func_name);
+        *lib = strdup(in.lib_name);
+        *func = strdup(in.func_name);
         return (true);
     }
     return (false);
 }
 
-int Arch_Pe::IsSymbolFunction (uint64_t addr, char *func) {
+int Arch_Pe::IsSymbolFunction (uint64_t addr, char **func) {
     return (false);
 }
 
-int Arch_Pe::IsSymbolObject (uint64_t addr, char *name) {
+int Arch_Pe::IsSymbolObject (uint64_t addr, char **name) {
     return (false);
 }

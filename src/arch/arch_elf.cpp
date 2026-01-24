@@ -23,18 +23,18 @@ uint8_t *Arch_Elf::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryELF(elf,addr,size,read));
 }
 
-int Arch_Elf::IsImportFunction (uint64_t addr, char *lib, char *func) {
+int Arch_Elf::IsImportFunction (uint64_t addr, char **lib, char **func) {
 struct _elf_import_name in;
         
     if (GetImportFunctionELF (elf,addr,&in)) {
-        strcpy (lib,in.lib_name);
-        strcpy (func,in.func_name);
+        *lib = strdup(in.lib_name);
+        *func = strdup(in.func_name);
         return (true);
     }
     return (false);
 }
 
-int Arch_Elf::IsSymbolFunction (uint64_t addr, char *func) {
+int Arch_Elf::IsSymbolFunction (uint64_t addr, char **func) {
 unsigned char info;
 
     if (GetSymbolELF(elf,addr,func,&info)) {
@@ -43,7 +43,7 @@ unsigned char info;
     return (false);
 }
 
-int Arch_Elf::IsSymbolObject (uint64_t addr, char *name) {
+int Arch_Elf::IsSymbolObject (uint64_t addr, char **name) {
 unsigned char info;
 
     if (GetSymbolELF(elf,addr,name,&info)) {

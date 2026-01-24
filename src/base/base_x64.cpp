@@ -238,7 +238,7 @@ int Base_x64::IsRet(cs_insn insn) {
     return(IsGroup(insn,X86_GRP_RET));
 }
 
-int Base_x64::IsCall(cs_insn insn, uint64_t *addr, char **name) {
+int Base_x64::IsCall(cs_insn insn, uint64_t *addr) {
     if (insn.id == X86_INS_CALL) {
         if (insn.detail->x86.op_count == 1) {
             if (insn.detail->x86.operands[0].type == X86_OP_IMM) {
@@ -294,8 +294,12 @@ int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
 #include \"x64.h\"\n\
 \n"
 
-#define C_FUNC_PROTO "\
+#define C_FUNC_ADDR "\
 void func_0x%llx(struct _cpu *cpu);\n"
+
+#define C_FUNC_NAME "\
+void %s(struct _cpu *cpu);    // 0x%llx\n"
+
 
 #define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
@@ -311,8 +315,12 @@ struct _cpu cpu;\n\
 }\n\
 \n"
 
-#define C_FUNC_HEADER "\
+#define C_FUNC_HEADER_ADDR "\
 void func_0x%llx(struct _cpu *cpu) {\n\
+"
+
+#define C_FUNC_HEADER_NAME "\
+void %s(struct _cpu *cpu) {\n\
 "
 
 #define C_FUNC_FOOTER "\
@@ -352,10 +360,12 @@ char buffer[256];
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
                     uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-                    char lib[256];
-                    char func[256];
-                    if (arch->IsImportFunction(addr,lib,func)) {
+                    char *lib;
+                    char *func;
+                    if (arch->IsImportFunction(addr,&lib,&func)) {
                         PrintLine(insn,"    jmp_from_iat(\"%s\",\"%s\");",lib,func);
+                        free(lib);
+                        free(func);
                         num++;
                     }    
                 }
@@ -594,16 +604,26 @@ char buffer[256];
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
                 addr = insn->detail->x86.operands[0].imm;
-                PrintLine(insn,"    func_0x%llx(cpu);",addr);
+                char *name;
+                name = c->GetFunctionName(addr);
+                if (name != NULL) {
+                    PrintLine(insn,"    %s(cpu);",name);
+                    free(name);
+                }
+                else {
+                    PrintLine(insn,"    func_0x%llx(cpu);",addr);
+                }
                 num++;
             } 
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-                    char lib[256];
-                    char func[256];
-                    if (arch->IsImportFunction(addr,lib,func)) {
+                    char *lib;
+                    char *func;
+                    if (arch->IsImportFunction(addr,&lib,&func)) {
                         PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
+                        free(lib);
+                        free(func);
                         num++;
                     }    
                 }
@@ -673,7 +693,14 @@ struct _subcode *sc;
 int id;
 
     id = c->subcodes[num].id;
-    printf(C_FUNC_HEADER,c->subcodes[num].first);
+    char *name = c->GetFunctionName(c->subcodes[num].first);
+    if (name != NULL) {
+        printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+        free(name);
+    }
+    else {
+        printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
+    }
     for (int m=0;m<c->subcod_count;m++) {
         sc = &c->subcodes[m];
         if ((sc->id == id) || (sc->parent == id)) {
@@ -713,7 +740,12 @@ void Base_x64::PrintCodeC(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
-            printf(C_FUNC_PROTO,c->subcodes[n].first);
+            if (c->subcodes[n].name != NULL) {
+                printf(C_FUNC_NAME,c->subcodes[n].name,c->subcodes[n].first);
+            }
+            else {
+                printf(C_FUNC_ADDR,c->subcodes[n].first);
+            }
         }
     }
     printf("\n");

@@ -58,26 +58,8 @@ class Code {
         void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
         int HasAddr (uint64_t addr,int parent);
         void Print (void);
+        char *GetFunctionName (uint64_t addr);
 };
-
-/*
-class Archive {
-    public:
-        virtual int CheckFile(char *file_name);
-        virtual int OpenFile(char *file_name);
-        virtual void CloseFile(void);
-        virtual uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
-        virtual int IsImportFunction (uint64_t addr, char *lib, char *func);
-        virtual int IsSymbolFunction (uint64_t addr, char *func);
-        virtual int IsSymbolObject (uint64_t addr, char *name);
-};
-
-
-class Language {
-    public:
-
-};
-*/
 
 class Butcher {
     public:
@@ -85,19 +67,9 @@ class Butcher {
         Archive *arch;
         Language *lang;
 
-        /*
-        virtual int CheckFile(char *file_name) = 0;
-        virtual int OpenFile(char *file_name) = 0;
-        virtual cs_err Cs_open(void) = 0;
-        virtual void CloseFile(void) = 0;
-        virtual uint8_t *GetMemory(uint64_t addr,uint64_t size,uint64_t *read) = 0;
-        virtual int IsImportFunction (uint64_t addr, char *lib, char *func)= 0;
-        virtual int IsSymbolFunction (uint64_t addr, char *func)= 0;
-        virtual int IsSymbolObject (uint64_t addr, char *name)= 0;
-        */
         virtual cs_err Cs_open(void) = 0;
         virtual int IsRet(cs_insn insn) = 0;
-        virtual int IsCall(cs_insn insn, uint64_t *addr, char **name) = 0;
+        virtual int IsCall(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsJcc(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;

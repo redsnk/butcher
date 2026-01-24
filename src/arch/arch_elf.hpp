@@ -17,9 +17,9 @@ class Arch_Elf: public Archive {
         int OpenFile(char *file_name);
         void CloseFile(void);
         uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
-        int IsImportFunction (uint64_t addr, char *lib, char *func);
-        int IsSymbolFunction (uint64_t addr, char *func);
-        int IsSymbolObject (uint64_t addr, char *name);
+        int IsImportFunction (uint64_t addr, char **lib, char **func);
+        int IsSymbolFunction (uint64_t addr, char **func);
+        int IsSymbolObject (uint64_t addr, char **name);
 };
 
 #endif // ARCH_ELF_H
