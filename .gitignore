@@ -1,6 +1,7 @@
 samples/*
 build/*
-src/test/test
+src/test/test.py
 src/test/test.c
 src/test/butcher_x64.*
 src/test/build/*
+src/test/__pycache__/*

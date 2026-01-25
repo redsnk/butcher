@@ -24,7 +24,7 @@ class Base_x64 : public Butcher {
         int PrintExtra(Code *c,struct _subcode *sc,int num);
         void PrintCode(Code *c);
         void PrintSubCode(Code *c,int num);
-        void PrintSubMem(Code *c,int num);
+        //void PrintSubMem(Code *c,int num);
 };
 
 #endif // BASE_X64_H

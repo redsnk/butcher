@@ -290,6 +290,8 @@ int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
     return (false);
 }
 
+
+/*
 #define C_HEADER "\
 #include \"butcher_x64.h\"\n\
 \n"
@@ -299,8 +301,8 @@ void func_0x%llx(struct _cpu *cpu);\n"
 
 #define C_FUNC_NAME "\
 void %s(struct _cpu *cpu);    // 0x%llx\n"
-
-
+*/
+/*
 #define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
 struct _cpu cpu;\n\
@@ -314,6 +316,7 @@ struct _cpu cpu;\n\
     return (0);\n\
 }\n\
 \n"
+*/
 
 #define C_FUNC_HEADER_ADDR "\
 void func_0x%llx(struct _cpu *cpu) {\n\
@@ -721,6 +724,7 @@ int id;
     printf(C_FUNC_FOOTER);
 }
 
+/*
 void Base_x64::PrintSubMem(Code *c,int num) {
 struct _submem *sm;
 char sub[128];
@@ -735,8 +739,10 @@ char sub[128];
     printf("    add_mem (&cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
     free(buffer);
 }
+*/
 
 void Base_x64::PrintCode(Code *c) {
+    /*
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
@@ -748,15 +754,20 @@ void Base_x64::PrintCode(Code *c) {
             }
         }
     }
+    */
+    lang->PrintHeader(c);
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             PrintSubCode(c,n);
         }
     }
-    printf(C_FOOTER_1);
+    //printf(C_FOOTER_1);
+    lang->PrintMainOpen(c);
     for (int n=0;n<c->submem_count;n++) {
-        PrintSubMem(c,n);
+        //PrintSubMem(c,n);
+        lang->PrintSubMem(c,n);
     }
-    printf(C_FOOTER_2,c->ep);
+    //printf(C_FOOTER_2,c->ep);
+    lang->PrintMainClose(c);
 }

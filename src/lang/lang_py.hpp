@@ -3,7 +3,8 @@
 #include "language.hpp"
 
 class Lang_Py : public Language {
-
+    public:
+    
 };
 
 #endif // _LANG_PY_H
