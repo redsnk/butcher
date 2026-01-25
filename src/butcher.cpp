@@ -279,7 +279,7 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             */
             Code *c = GetCode(NULL,address,NULL,SUBCODE_TOP);
             //c->Print();
-            PrintCodeC(c);
+            PrintCode(c);
             delete c;
         }
         arch->CloseFile();

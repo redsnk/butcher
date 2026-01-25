@@ -688,7 +688,7 @@ cs_insn *insn;
     return (num+1);
 }
 
-void Base_x64::PrintSubCodeC(Code *c,int num) {
+void Base_x64::PrintSubCode(Code *c,int num) {
 struct _subcode *sc;
 int id;
 
@@ -721,7 +721,7 @@ int id;
     printf(C_FUNC_FOOTER);
 }
 
-void Base_x64::PrintSubMemC(Code *c,int num) {
+void Base_x64::PrintSubMem(Code *c,int num) {
 struct _submem *sm;
 char sub[128];
 
@@ -736,7 +736,7 @@ char sub[128];
     free(buffer);
 }
 
-void Base_x64::PrintCodeC(Code *c) {
+void Base_x64::PrintCode(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
@@ -751,12 +751,12 @@ void Base_x64::PrintCodeC(Code *c) {
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
-            PrintSubCodeC(c,n);
+            PrintSubCode(c,n);
         }
     }
     printf(C_FOOTER_1);
     for (int n=0;n<c->submem_count;n++) {
-        PrintSubMemC(c,n);
+        PrintSubMem(c,n);
     }
     printf(C_FOOTER_2,c->ep);
 }

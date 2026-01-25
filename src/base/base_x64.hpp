@@ -22,9 +22,9 @@ class Base_x64 : public Butcher {
         void PrintLine(cs_insn *insn,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
-        void PrintCodeC(Code *c);
-        void PrintSubCodeC(Code *c,int num);
-        void PrintSubMemC(Code *c,int num);
+        void PrintCode(Code *c);
+        void PrintSubCode(Code *c,int num);
+        void PrintSubMem(Code *c,int num);
 };
 
 #endif // BASE_X64_H

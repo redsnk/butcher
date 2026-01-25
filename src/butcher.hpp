@@ -74,7 +74,7 @@ class Butcher {
         virtual int IsJcc(cs_insn insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn insn, uint64_t *num) = 0;
         virtual int IsEnd(cs_insn *insn, int n, int count) = 0;
-        virtual void PrintCodeC(Code *c) = 0;
+        virtual void PrintCode(Code *c) = 0;
         //
         Butcher(Archive *a,Language *l);
         ~Butcher();
