@@ -1,5 +1,5 @@
-#ifndef _X64_H
-#define _X64_H
+#ifndef _BUTCHER_X64_H
+#define _BUTCHER_X64_H
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -195,4 +195,4 @@ void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i);
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
-#endif // _X64_H
+#endif // _BUTCHER_X64_H

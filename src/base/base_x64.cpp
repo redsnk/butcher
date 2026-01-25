@@ -291,7 +291,7 @@ int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
 }
 
 #define C_HEADER "\
-#include \"x64.h\"\n\
+#include \"butcher_x64.h\"\n\
 \n"
 
 #define C_FUNC_ADDR "\

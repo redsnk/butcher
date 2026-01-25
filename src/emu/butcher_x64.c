@@ -1,4 +1,4 @@
-#include "x64.h"
+#include "butcher_x64.h"
 
 void print_cpu(struct _cpu *cpu) {
 	printf("------------------------------\n");

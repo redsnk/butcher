@@ -2,5 +2,5 @@ samples/*
 build/*
 src/test/test
 src/test/test.c
-src/test/x64.*
+src/test/butcher_x64.*
 src/test/build/*
