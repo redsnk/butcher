@@ -8,6 +8,12 @@ class Lang_C : public Language {
     void PrintMainOpen(Code *c);
     void PrintMainClose(Code *c);
     void PrintSubMem(Code *c,int num);
+    void PrintFuncHeaderName(Code *c,int num,char *name);
+    void PrintFuncHeaderAddr(Code *c,int num);
+    void PrintFuncFooter(Code *c,int num);
+    void PrintSubCodeSep(void);
+
+    Lang_C();
 };
 
 #endif // _LANG_C_H

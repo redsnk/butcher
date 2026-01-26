@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <unistd.h>
-//#include "src/arch/pe_x64.hpp"
-//#include "src/arch/elf_x64.hpp"
 #include "src/arch/arch_elf.hpp"
 #include "src/arch/arch_pe.hpp"
 #include "src/lang/lang_c.hpp"

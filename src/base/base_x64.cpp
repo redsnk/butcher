@@ -318,6 +318,7 @@ struct _cpu cpu;\n\
 \n"
 */
 
+/*
 #define C_FUNC_HEADER_ADDR "\
 void func_0x%llx(struct _cpu *cpu) {\n\
 "
@@ -329,6 +330,7 @@ void %s(struct _cpu *cpu) {\n\
 #define C_FUNC_FOOTER "\
 }\n\
 \n"
+*/
 
 // ---------------------------------------------------------------------------------------------------------
 
@@ -339,8 +341,8 @@ char buffer[256];
     va_start(argptr, format);
     vsprintf(buffer,format, argptr);
     va_end(argptr);
-    while (strlen(buffer) < 70) strcat(buffer," ");
-    printf("%s//0x%llx:\t%s\t\t%s\n", buffer, insn->address, insn->mnemonic,insn->op_str);
+    while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
+    printf("%s%s0x%llx:\t%s\t\t%s\n", buffer, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
 }
 
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
@@ -681,13 +683,10 @@ cs_insn *insn;
         params[l-1] = 0;
     }
     if (insn->detail->x86.op_count) {
-        //printf("    op_%s(cpu,\"%s\",%s);",subname,insn->mnemonic,params);
         PrintLine(insn,"    op_%s(cpu,\"%s\",%s);",subname,insn->mnemonic,params);
     } else {
-        //printf("    op(cpu,\"%s\");",insn->mnemonic);
         PrintLine(insn,"    op(cpu,\"%s\");",insn->mnemonic);
     }
-    //printf("    //0x%llx:\t%s\t\t%s\n", insn->address, insn->mnemonic,insn->op_str);
     return (num+1);
 }
 
@@ -698,17 +697,20 @@ int id;
     id = c->subcodes[num].id;
     char *name = c->GetFunctionName(c->subcodes[num].first);
     if (name != NULL) {
-        printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+        //printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+        lang->PrintFuncHeaderName(c,num,name);
         free(name);
     }
     else {
-        printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
+        //printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
+        lang->PrintFuncHeaderAddr(c,num);
     }
     for (int m=0;m<c->subcod_count;m++) {
         sc = &c->subcodes[m];
         if ((sc->id == id) || (sc->parent == id)) {
             if (sc->parent != SUBCODE_TOP) {
-                printf("    // --------------------------------------------------------------\n");
+                //printf("    // --------------------------------------------------------------\n");
+                lang->PrintSubCodeSep();
             }
             for (int n=0;n<sc->count;) {
                 if (sc->insn[n].address > sc->last) {
@@ -721,7 +723,8 @@ int id;
             }
         }
     }
-    printf(C_FUNC_FOOTER);
+    //printf(C_FUNC_FOOTER);
+    lang->PrintFuncFooter(c,num);
 }
 
 /*

@@ -1,5 +1,10 @@
 #include "lang_c.hpp"
 
+Lang_C::Lang_C() {
+    COMM = "//";
+    COMM_SEP = 70;
+}
+
 #define C_HEADER "\
 #include \"butcher_x64.h\"\n\
 \n"
@@ -60,4 +65,32 @@ char sub[128];
     }
     printf("    add_mem (&cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
     free(buffer);
+}
+
+#define C_FUNC_HEADER_NAME "\
+void %s(struct _cpu *cpu) {\n\
+"
+
+void Lang_C::PrintFuncHeaderName(Code *c,int num,char *name) {
+    printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+}
+
+#define C_FUNC_HEADER_ADDR "\
+void func_0x%llx(struct _cpu *cpu) {\n\
+"
+
+void Lang_C::PrintFuncHeaderAddr(Code *c,int num) {
+    printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
+}
+
+#define C_FUNC_FOOTER "\
+}\n\
+\n"
+
+void Lang_C::PrintFuncFooter(Code *c,int num) {
+    printf(C_FUNC_FOOTER);
+}
+
+void Lang_C::PrintSubCodeSep(void) {
+    printf("    // --------------------------------------------------------------\n");
 }
