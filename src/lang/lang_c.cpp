@@ -3,6 +3,16 @@
 Lang_C::Lang_C() {
     COMM = "//";
     COMM_SEP = 70;
+
+    OP_ALONE = "    op(cpu,\"%s\");";
+    OP_SUBNAME = "    op_%s(cpu,\"%s\",%s);";
+    OP_REG = "\"%s\",";
+    OP_IMM = "0x%llx,";
+    OP_MEM = "\"%s\",\"%s\",%i,0x%llx,";
+
+    E_CALL_FROM_IAT = "    call_from_iat(\"%s\",\"%s\");";
+    E_FUNC_NAME = "    %s(cpu);";
+    E_FUNC_ADDR = "    func_0x%llx(cpu);";
 }
 
 #define C_HEADER "\
@@ -93,4 +103,26 @@ void Lang_C::PrintFuncFooter(Code *c,int num) {
 
 void Lang_C::PrintSubCodeSep(void) {
     printf("    // --------------------------------------------------------------\n");
+}
+
+char *Lang_C::mem_str(csh handle,cs_x86_op op,char *buffer) {
+char tmp[256];
+
+    // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
+    //sprintf(buffer,"%s%+lld",reg_name(handle,op.mem.base),op.mem.disp);
+    if (op.mem.base != X86_REG_INVALID) {
+        sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+    }
+    else {
+        buffer[0] = 0;
+    }
+    if (op.mem.index != X86_REG_INVALID) {
+        sprintf(tmp,"+_%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        strcat (buffer,tmp);
+    }
+    if (op.mem.disp) {
+        sprintf(tmp,"%+lld",op.mem.disp);
+        strcat (buffer,tmp);
+    }
+    return (buffer);
 }

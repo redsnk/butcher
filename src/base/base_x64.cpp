@@ -2,13 +2,15 @@
 #include "../files/pe.hpp"
 #include <capstone/capstone.h>
 
+/*
 const char *reg_name(csh handle,int id_reg) {
     if (id_reg == X86_REG_INVALID) {
         return ("");
     }
     return(cs_reg_name(handle,id_reg));
 }
-
+*/
+/*
 char *mem_str(csh handle,cs_x86_op op,char *buffer) {
 char tmp[256];
 
@@ -30,7 +32,7 @@ char tmp[256];
     }
     return (buffer);
 }
-
+*/
 const char *get_reg64(const char *reg) {
 // rax, eax, ax, ah, al
 #define STRCMPREG(r)	!strcmp(reg,"r"#r"x") || !strcmp(reg,"e"#r"x") || !strcmp(reg,#r"x") || !strcmp(reg,#r"h") || !strcmp(reg,#r"l")
@@ -90,7 +92,7 @@ const char *get_reg64(const char *reg) {
 	return (NULL);
 }
 
-
+/*
 #define MAX_REG     (16)
 
 void reg_cpu(csh handle,int id_reg,char *buffer) {
@@ -127,6 +129,7 @@ int len;
         sprintf (buffer,"cpu->%s.r16.l",r64);
     }
 }
+*/
 
 const char *ptr(cs_insn *insn) {
     switch (insn->detail->x86.operands[0].size) {
@@ -394,13 +397,13 @@ char buffer[256];
             break;
         case X86_INS_PUSH:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                PrintLine(insn,"    _push(%s);",reg_name(handle,insn->detail->x86.operands[0].reg));
+                PrintLine(insn,"    _push(%s);",lang->reg_name(handle,insn->detail->x86.operands[0].reg));
                 num++;
             }
             break;
         case X86_INS_POP:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                PrintLine(insn,"    _pop(%s);",reg_name(handle,insn->detail->x86.operands[0].reg));
+                PrintLine(insn,"    _pop(%s);",lang->reg_name(handle,insn->detail->x86.operands[0].reg));
                 num++;
             }
             break;
@@ -409,15 +412,15 @@ char buffer[256];
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     //sub		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,"    _%s -= _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                         reg_name(handle,insn->detail->x86.operands[1].reg));
+                        PrintLine(insn,"    _%s -= _%s;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                         lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                         num++;
                     }
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //sub		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,"    _%s -= %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s -= %lld;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                             insn->detail->x86.operands[1].imm);
                         num++;
                     }
@@ -429,15 +432,15 @@ char buffer[256];
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     //add		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,"    _%s += _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                         reg_name(handle,insn->detail->x86.operands[1].reg));
+                        PrintLine(insn,"    _%s += _%s;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                         lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                         num++;
                     }
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //add		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,"    _%s += %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s += %lld;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                             insn->detail->x86.operands[1].imm);
                         num++;
                     }
@@ -450,11 +453,11 @@ char buffer[256];
                     //xor		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
                         if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                            PrintLine(insn,"    _%s = 0;",reg_name(handle,insn->detail->x86.operands[0].reg));
+                            PrintLine(insn,"    _%s = 0;",lang->reg_name(handle,insn->detail->x86.operands[0].reg));
                         }
                         else {
-                            PrintLine(insn,"    _%s ^= _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                            PrintLine(insn,"    _%s ^= _%s;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                         }
                         num++;
                     }
@@ -462,7 +465,7 @@ char buffer[256];
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //xor		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,"    _%s ^= %lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s ^= %lld;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                             insn->detail->x86.operands[1].imm);
                         num++;
                     }
@@ -481,7 +484,7 @@ char buffer[256];
                                         // test		eax, eax
                                         // jne		0x1800026ce
                                         PrintLine(insn,"");
-                                        PrintLine(next,"    if (_%s) goto label_0x%llx;",  reg_name(handle,insn->detail->x86.operands[0].reg),
+                                        PrintLine(next,"    if (_%s) goto label_0x%llx;",  lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                                             next->detail->x86.operands[0].imm);
                                         num += 2;
 
@@ -498,7 +501,7 @@ char buffer[256];
                                         // test		eax, eax
                                         // je		0x1800026ce
                                         PrintLine(insn,"");
-                                        PrintLine(next,"    if (!_%s) goto label_0x%llx;",  reg_name(handle,insn->detail->x86.operands[0].reg),
+                                        PrintLine(next,"    if (!_%s) goto label_0x%llx;",  lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                                             next->detail->x86.operands[0].imm);
                                         num += 2;
 
@@ -513,20 +516,20 @@ char buffer[256];
         case X86_INS_LEA:
             if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
                 // lea		rdx, qword ptr [rip + 0x199f7]
-                PrintLine(insn,"    _%s = 0x%llx;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                PrintLine(insn,"    _%s = 0x%llx;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                     insn->address+insn->size+insn->detail->x86.operands[1].mem.disp);
             }
             else {
                 // lea		rbp, qword ptr [rsp - 0x78]
-                PrintLine(insn,"    _%s = _%s%+lld;",reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        reg_name(handle,insn->detail->x86.operands[1].mem.base),
+                PrintLine(insn,"    _%s = _%s%+lld;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                        lang->reg_name(handle,insn->detail->x86.operands[1].mem.base),
                                                         insn->detail->x86.operands[1].mem.disp);
             }
             num++;
             break;
         case X86_INS_MOVABS:
             // movabs		rdx, 0x5f3ae6d888f298a2
-            PrintLine(insn,"    _%s = 0x%llx;",reg_name(handle,insn->detail->x86.operands[0].reg),
+            PrintLine(insn,"    _%s = 0x%llx;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                 insn->detail->x86.operands[1].imm);
             num++;
             break;
@@ -534,13 +537,13 @@ char buffer[256];
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     // mov		rsi, rcx
-                    PrintLine(insn,"    _%s = _%s;",reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                    reg_name(handle,insn->detail->x86.operands[1].reg));
+                    PrintLine(insn,"    _%s = _%s;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
+                                                    lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                     num++;
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     // mov      dl, 0x01
-                    PrintLine(insn,"    _%s = 0x%llx;",reg_name(handle,insn->detail->x86.operands[0].reg),
+                    PrintLine(insn,"    _%s = 0x%llx;",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                 insn->detail->x86.operands[1].imm);
                     num++;
                 }
@@ -554,15 +557,15 @@ char buffer[256];
                             c->AddSubMem(addr,mem,8);
                             free(mem);
                         }
-                        PrintLine(insn,"    _%s = _get_%s_ptr(0x%llx);",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s = _get_%s_ptr(0x%llx);",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                         ptr(insn),addr);
                         num++;
                     }
                     else {
                         // mov	rbx, qword ptr [r14 + 8]
-                        PrintLine(insn,"    _%s = _get_%s_ptr(%s);",reg_name(handle,insn->detail->x86.operands[0].reg),
+                        PrintLine(insn,"    _%s = _get_%s_ptr(%s);",lang->reg_name(handle,insn->detail->x86.operands[0].reg),
                                                                         ptr(insn),
-                                                                        mem_str(handle,insn->detail->x86.operands[1],buffer));
+                                                                        lang->mem_str(handle,insn->detail->x86.operands[1],buffer));
                         num++;
                     }
                 }
@@ -574,14 +577,14 @@ char buffer[256];
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
                         PrintLine(insn,"    _set_%s_ptr(0x%llx,_%s);",ptr(insn),
                                                                             addr,
-                                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                         num++;
                     }
                     else {
                         // mov		qword ptr [rsp + 0x1b0], rdi
                         PrintLine(insn,"    _set_%s_ptr(%s,_%s);",ptr(insn),
-                                                                            mem_str(handle,insn->detail->x86.operands[0],buffer),
-                                                                            reg_name(handle,insn->detail->x86.operands[1].reg));
+                                                                            lang->mem_str(handle,insn->detail->x86.operands[0],buffer),
+                                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
                         num++;
                     }
                 }
@@ -597,7 +600,7 @@ char buffer[256];
                     else {
                         // mov		dword ptr [rbp + 0x58], 0x6c6c642e
                         PrintLine(insn,"    _set_%s_ptr(%s,0x%llx);",ptr(insn),
-                                                                            mem_str(handle,insn->detail->x86.operands[0],buffer),
+                                                                            lang->mem_str(handle,insn->detail->x86.operands[0],buffer),
                                                                             insn->detail->x86.operands[1].imm);
                         num++;
                     }
@@ -612,11 +615,11 @@ char buffer[256];
                 char *name;
                 name = c->GetFunctionName(addr);
                 if (name != NULL) {
-                    PrintLine(insn,"    %s(cpu);",name);
+                    PrintLine(insn,lang->E_FUNC_NAME,name);
                     free(name);
                 }
                 else {
-                    PrintLine(insn,"    func_0x%llx(cpu);",addr);
+                    PrintLine(insn,lang->E_FUNC_ADDR,addr);
                 }
                 num++;
             } 
@@ -626,7 +629,7 @@ char buffer[256];
                     char *lib;
                     char *func;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
-                        PrintLine(insn,"    call_from_iat(\"%s\",\"%s\");",lib,func);
+                        PrintLine(insn,lang->E_CALL_FROM_IAT,lib,func);
                         free(lib);
                         free(func);
                         num++;
@@ -657,18 +660,18 @@ cs_insn *insn;
         switch (insn->detail->x86.operands[n].type) {
             case X86_OP_REG:
                 strcat(subname,"r");
-                sprintf(buffer,"\"%s\",",reg_name(handle,insn->detail->x86.operands[n].reg));
+                sprintf(buffer,lang->OP_REG,lang->reg_name(handle,insn->detail->x86.operands[n].reg));
                 strcat(params,buffer);
                 break;
             case X86_OP_IMM:
                 strcat(subname,"i");
-                sprintf(buffer,"0x%llx,",insn->detail->x86.operands[n].imm);
+                sprintf(buffer,lang->OP_IMM,insn->detail->x86.operands[n].imm);
                 strcat(params,buffer);
                 break;
             case X86_OP_MEM:
                 strcat(subname,"m");
-                sprintf(buffer,"\"%s\",\"%s\",%i,0x%llx,",reg_name(handle,insn->detail->x86.operands[n].mem.base),
-                                                reg_name(handle,insn->detail->x86.operands[n].mem.index),
+                sprintf(buffer,lang->OP_MEM,lang->reg_name(handle,insn->detail->x86.operands[n].mem.base),
+                                                lang->reg_name(handle,insn->detail->x86.operands[n].mem.index),
                                                 insn->detail->x86.operands[n].mem.scale,
                                                 insn->detail->x86.operands[n].mem.disp);
                 strcat(params,buffer);
@@ -683,9 +686,9 @@ cs_insn *insn;
         params[l-1] = 0;
     }
     if (insn->detail->x86.op_count) {
-        PrintLine(insn,"    op_%s(cpu,\"%s\",%s);",subname,insn->mnemonic,params);
+        PrintLine(insn,lang->OP_SUBNAME,subname,insn->mnemonic,params);
     } else {
-        PrintLine(insn,"    op(cpu,\"%s\");",insn->mnemonic);
+        PrintLine(insn,lang->OP_ALONE,insn->mnemonic);
     }
     return (num+1);
 }
@@ -709,7 +712,6 @@ int id;
         sc = &c->subcodes[m];
         if ((sc->id == id) || (sc->parent == id)) {
             if (sc->parent != SUBCODE_TOP) {
-                //printf("    // --------------------------------------------------------------\n");
                 lang->PrintSubCodeSep();
             }
             for (int n=0;n<sc->count;) {

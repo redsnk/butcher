@@ -159,14 +159,14 @@ int max_subcode = INIT_MEM_GETCODE;
         c = new Code(address);
     }
     if (c->HasAddr(address,parent)) {
-        printf("// *** GetCode repeated 0x%llx, exit ...\n",address);
+        printf("%s *** GetCode repeated 0x%llx, exit ...\n",lang->COMM,address);
         return (c);
     }
     c->NewSubCode(&sc);
     sc.name = name;
     sc.parent = parent;
     sc.first = address;
-    printf("// *** GetCode 0x%llx (id=%i,parent=%i)\n",sc.first,sc.id,sc.parent);
+    printf("%s *** GetCode 0x%llx (id=%i,parent=%i)\n",lang->COMM,sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
         uint8_t *m = arch->GetMemory(sc.first,max_subcode,&read);
@@ -190,23 +190,23 @@ int max_subcode = INIT_MEM_GETCODE;
                         calls[ncalls].addr = addr;
                         calls[ncalls].name = NULL;
                         if (arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
-                            printf("// *** Add call 0x%llx(%s)\n",addr,calls[ncalls].name);
+                            printf("%s *** Add call 0x%llx(%s)\n",lang->COMM,addr,calls[ncalls].name);
                         }
                         else {
-                            printf("// *** Add call 0x%llx\n",addr);
+                            printf("%s *** Add call 0x%llx\n",lang->COMM,addr);
                         }
                         ncalls++;
                     }
                     else if (IsJcc(sc.insn[n],&addr)) {
                         //printf("jcc 0x%llx\n",addr);
-                        printf("// *** Add jcc 0x%llx\n",addr);
+                        printf("%s *** Add jcc 0x%llx\n",lang->COMM,addr);
                         jmps.insert(addr);
                         c->labels.insert(addr);
                     }
                     else if (IsJmp(sc.insn[n],&addr)) {
                         //printf("jmp 0x%llx\n",addr);
                         if (addr) {
-                            printf("// *** Add jmp 0x%llx\n",addr);
+                            printf("%s *** Add jmp 0x%llx\n",lang->COMM,addr);
                             jmps.insert(addr);
                             c->labels.insert(addr);
                         }
@@ -217,7 +217,7 @@ int max_subcode = INIT_MEM_GETCODE;
                     }
                     if (lend) {
                         // End subcode
-                        printf("// *** End of subcode 0x%llx\n",sc.first);
+                        printf("%s *** End of subcode 0x%llx\n",lang->COMM,sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;
                         break;
@@ -234,7 +234,7 @@ int max_subcode = INIT_MEM_GETCODE;
                     max_subcode += STEP_MEM_GETCODE;
                 } else {
                     // Done
-                    printf("// *** Add subcode 0x%llx %li (parent=%i)\n",sc.first,sc.last-sc.first,sc.parent);
+                    printf("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM,sc.first,sc.last-sc.first,sc.parent);
                     c->AddSubcode(&sc);
                 }
             } else {
