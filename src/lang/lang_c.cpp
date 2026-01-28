@@ -4,15 +4,43 @@ Lang_C::Lang_C() {
     COMM = "//";
     COMM_SEP = 70;
 
-    OP_ALONE = "    op(cpu,\"%s\");";
-    OP_SUBNAME = "    op_%s(cpu,\"%s\",%s);";
+    OP_ALONE =              "    op(cpu,\"%s\");";
+    OP_SUBNAME =            "    op_%s(cpu,\"%s\",%s);";
     OP_REG = "\"%s\",";
     OP_IMM = "0x%llx,";
     OP_MEM = "\"%s\",\"%s\",%i,0x%llx,";
 
-    E_CALL_FROM_IAT = "    call_from_iat(\"%s\",\"%s\");";
-    E_FUNC_NAME = "    %s(cpu);";
-    E_FUNC_ADDR = "    func_0x%llx(cpu);";
+    E_CALL_FROM_IAT =       "    call_from_iat(\"%s\",\"%s\");";
+    E_FUNC_NAME =           "    %s(cpu);";
+    E_FUNC_ADDR =           "    func_0x%llx(cpu);";
+    E_RETURN =              "    return;";
+    E_GOTO =                "    goto label_0x%llx;";
+    E_JMP_FROM_IAT =        "    jmp_from_iat(\"%s\",\"%s\");";
+    E_JE =                  "    if (flag_z(cpu)) goto label_0x%llx;";
+    E_JNE =                 "    if (!flag_z(cpu)) goto label_0x%llx;";
+    E_JA =                  "    if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
+    E_JAE =                 "    if (!flag_c(cpu)) goto label_0x%llx;";
+    E_PUSH =                "    _push(%s);";
+    E_POP =                 "    _pop(%s);";
+    E_SUB_RR =              "    _%s = _%s - _%s;";
+    E_SUB_RI =              "    _%s = _%s - %lld;";
+    E_ADD_RR =              "    _%s = _%s + _%s;";
+    E_ADD_RI =              "    _%s = _%s + %lld;";
+    E_XOR_R =               "    _%s = 0;";
+    E_XOR_RR =              "    _%s = _%s ^ _%s;";
+    E_XOR_RI =              "    _%s = _%s ^ %lld;";
+    E_JNE_GOTO =            "    if (_%s != 0) goto label_0x%llx;";
+    E_JE_GOTO =             "    if (_%s == 0) goto label_0x%llx;";
+    E_SPACE =               ";";
+    E_MOV_RR =              "    _%s = _%s;";
+    E_MOV_RI =              "    _%s = 0x%llx;";
+    E_LEA_M =               "    _%s = _%s%+lld;";
+    E_MOV_RP =              "    _%s = _get_%s_ptr(0x%llx);";
+    E_MOV_RM =              "    _%s = _get_%s_ptr(%s);";
+    E_MOV_PR =              "    _set_%s_ptr(0x%llx,_%s);";
+    E_MOV_MR =              "    _set_%s_ptr(%s,_%s);";
+    E_MOV_PI =              "    _set_%s_ptr(0x%llx,0x%llx);";
+    E_MOV_MI =              "    _set_%s_ptr(%s,0x%llx);";
 }
 
 #define C_HEADER "\
@@ -109,7 +137,6 @@ char *Lang_C::mem_str(csh handle,cs_x86_op op,char *buffer) {
 char tmp[256];
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
-    //sprintf(buffer,"%s%+lld",reg_name(handle,op.mem.base),op.mem.disp);
     if (op.mem.base != X86_REG_INVALID) {
         sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
     }

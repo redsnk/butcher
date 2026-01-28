@@ -29,6 +29,22 @@ class _reg(Union):
                 ("r16",_r16),
                 ("r8",_r8)]
 
+class _cpu:
+    rax = _reg()
+	rbx = _reg()
+	rcx = _reg()
+    rdx = _reg()
+    r8 = _reg()
+    11 = _reg()
+    r12 = _reg()
+    r13 = _reg()
+    r14 = _reg()
+    r15 = _reg()
+    rdi = _reg()
+    rsi = _reg()
+    rbp = _reg()
+    rsp = _reg()
+
 '''
 @with_goto
 def test():

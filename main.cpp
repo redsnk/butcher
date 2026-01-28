@@ -3,24 +3,21 @@
 #include "src/arch/arch_elf.hpp"
 #include "src/arch/arch_pe.hpp"
 #include "src/lang/lang_c.hpp"
+#include "src/lang/lang_py.hpp"
 #include "src/base/base_x64.hpp"
 
-#define MY_VERSION  "v0.02"
+#define MY_VERSION  "v0.03"
 
 #define MAX_STR     (1024)
 
-#define HELP "\
---------------------------------------------------------------\n\
-Butcher ("MY_VERSION") programed by Alex Bassas.\n\
---------------------------------------------------------------\n\
-usage: Butcher <path> <addr>\n\
-\n"
+int opt_t = false;
+int opt_a = false;
+enum Languages opt_l = C;
 
 uint64_t string_to_num(char *num) {
 uint64_t n;
 
     if ((strlen(num) >= 2) && (num[0] == '0') && (num[1] == 'x')) {
-        // 0x1BBA
         sscanf(num+2,"%llx",&n);
         return (n);
     }
@@ -45,7 +42,16 @@ Archive *a;
         }
     }
     */
-    l = new Lang_C();
+    switch (opt_l) {
+        case PYTHON:
+            l = new Lang_Py();
+            break;
+        case C:
+        default:
+            l = new Lang_C();
+            break;
+    }
+    //l = new Lang_C();
     a = new Arch_Pe();
     if (!a->CheckFile(path)) {
         delete a;
@@ -63,13 +69,43 @@ Archive *a;
     return (1);
 }
 
+const char* HELP = "\
+--------------------------------------------------------------\n\
+Butcher ("MY_VERSION") programed by Alex Bassas.\n\
+--------------------------------------------------------------\n\
+usage: Butcher [-l<lang>][-a][-t] <path> <addr>\n\
+\n\
+-l<lang>    => Output language: [c|p]\n\
+                    - c -> C\n\
+                    - p -> Python\n\
+\n\
+-t          => Enable traces\n\
+-a          => Enable asm code\n\
+\n";
+
 int main (int argc, char **argv) {
 int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"")) != -1) {
+    while ((p = getopt(argc,argv,"tal:")) != -1) {
         switch (p) {
+                case 't':
+                    opt_t = true;
+                    break;
+                case 'a':
+                    opt_a = true;
+                    break;
+                case 'l':
+                    switch (optarg[0]) {
+                        case 'c':
+                            opt_l = C;
+                            break;
+                        case 'p':
+                            opt_l = PYTHON;
+                            break;
+                    }
+                    break;
                 case '?':
                 default:
                         printf(HELP);
