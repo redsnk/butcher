@@ -59,8 +59,7 @@ class Language {
     virtual void PrintFuncFooter(Code *c,int num) = 0;
     virtual void PrintSubCodeSep(void) = 0;
     virtual char *mem_str(csh handle,cs_x86_op op,char *buffer) = 0;
-
-    const char *reg_name(csh handle,int id_reg);
+    virtual const char *reg_name(csh handle,int id_reg) = 0;
 };
 
 #endif // _LANGUAGE_H

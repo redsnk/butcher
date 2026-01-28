@@ -1,7 +1,7 @@
 #include "lang_py.hpp"
 
 Lang_Py::Lang_Py() {
-    COMM = "//";
+    COMM = "#";
     COMM_SEP = 70;
 
     OP_ALONE =              "    op(cpu,\"%s\");";
@@ -22,23 +22,23 @@ Lang_Py::Lang_Py() {
     E_JAE =                 "    if (!flag_c(cpu)) goto label_0x%llx;";
     E_PUSH =                "    _push(%s);";
     E_POP =                 "    _pop(%s);";
-    E_SUB_RR =              "    _%s = _%s - _%s;";
-    E_SUB_RI =              "    _%s = _%s - %lld;";
-    E_ADD_RR =              "    _%s = _%s + _%s;";
-    E_ADD_RI =              "    _%s = _%s + %lld;";
-    E_XOR_R =               "    _%s = 0;";
-    E_XOR_RR =              "    _%s = _%s ^ _%s;";
-    E_XOR_RI =              "    _%s = _%s ^ %lld;";
-    E_JNE_GOTO =            "    if (_%s != 0) goto label_0x%llx;";
-    E_JE_GOTO =             "    if (_%s == 0) goto label_0x%llx;";
+    E_SUB_RR =              "    %s = %s - %s;";
+    E_SUB_RI =              "    %s = %s - %lld;";
+    E_ADD_RR =              "    %s = %s + %s;";
+    E_ADD_RI =              "    %s = %s + %lld;";
+    E_XOR_R =               "    %s = 0;";
+    E_XOR_RR =              "    %s = %s ^ %s;";
+    E_XOR_RI =              "    %s = %s ^ %lld;";
+    E_JNE_GOTO =            "    if (%s != 0) goto label_0x%llx;";
+    E_JE_GOTO =             "    if (%s == 0) goto label_0x%llx;";
     E_SPACE =               ";";
-    E_MOV_RR =              "    _%s = _%s;";
-    E_MOV_RI =              "    _%s = 0x%llx;";
-    E_LEA_M =               "    _%s = _%s%+lld;";
-    E_MOV_RP =              "    _%s = _get_%s_ptr(0x%llx);";
-    E_MOV_RM =              "    _%s = _get_%s_ptr(%s);";
-    E_MOV_PR =              "    _set_%s_ptr(0x%llx,_%s);";
-    E_MOV_MR =              "    _set_%s_ptr(%s,_%s);";
+    E_MOV_RR =              "    %s = %s;";
+    E_MOV_RI =              "    %s = 0x%llx;";
+    E_LEA_M =               "    %s = %s%+lld;";
+    E_MOV_RP =              "    %s = _get_%s_ptr(0x%llx);";
+    E_MOV_RM =              "    %s = _get_%s_ptr(%s);";
+    E_MOV_PR =              "    _set_%s_ptr(0x%llx,%s);";
+    E_MOV_MR =              "    _set_%s_ptr(%s,%s);";
     E_MOV_PI =              "    _set_%s_ptr(0x%llx,0x%llx);";
     E_MOV_MI =              "    _set_%s_ptr(%s,0x%llx);";
 }
@@ -141,18 +141,28 @@ char tmp[256];
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
     if (op.mem.base != X86_REG_INVALID) {
-        sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+        sprintf(buffer,"%s",reg_name(handle,op.mem.base));
     }
     else {
         buffer[0] = 0;
     }
     if (op.mem.index != X86_REG_INVALID) {
-        sprintf(tmp,"+_%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        sprintf(tmp,"+%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
         strcat (buffer,tmp);
     }
     if (op.mem.disp) {
         sprintf(tmp,"%+lld",op.mem.disp);
         strcat (buffer,tmp);
     }
+    return (buffer);
+}
+
+const char *Lang_Py::reg_name(csh handle,int id_reg) {
+static char buffer[16];
+
+    if (id_reg == X86_REG_INVALID) {
+        return ("");
+    }
+    sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
     return (buffer);
 }

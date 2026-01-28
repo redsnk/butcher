@@ -13,6 +13,7 @@ class Lang_Py : public Language {
     void PrintFuncFooter(Code *c,int num);
     void PrintSubCodeSep(void);
     char *mem_str(csh handle,cs_x86_op op,char *buffer);
+    const char *reg_name(csh handle,int id_reg);
 
     Lang_Py();
     

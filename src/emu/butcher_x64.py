@@ -31,11 +31,11 @@ class _reg(Union):
 
 class _cpu:
     rax = _reg()
-	rbx = _reg()
-	rcx = _reg()
+    rbx = _reg()
+    rcx = _reg()
     rdx = _reg()
     r8 = _reg()
-    11 = _reg()
+    r11 = _reg()
     r12 = _reg()
     r13 = _reg()
     r14 = _reg()
@@ -44,6 +44,14 @@ class _cpu:
     rsi = _reg()
     rbp = _reg()
     rsp = _reg()
+
+    # 64
+    @property
+    def _rax(self):
+        return self.rax.r64
+    @_rax.setter
+    def _rax(self,v):
+        self.rax.r64 = v
 
 '''
 @with_goto
@@ -66,3 +74,6 @@ print(hex(r.r8.h))
 print(hex(r.r8.l))
 test()
 '''
+cpu = _cpu()
+cpu._rax = 10
+print(cpu.rax.r64)
