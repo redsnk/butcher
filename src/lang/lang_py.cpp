@@ -4,23 +4,23 @@ Lang_Py::Lang_Py() {
     COMM = "#";
     COMM_SEP = 70;
 
-    OP_ALONE =              "    op(cpu,\"%s\")";
-    OP_SUBNAME =            "    op_%s(cpu,\"%s\",%s)";
+    OP_ALONE =              "    cpu.op(\"%s\")";
+    OP_SUBNAME =            "    cpu.op_%s(\"%s\",%s)";
     OP_REG = "\"%s\",";
     OP_IMM = "0x%llx,";
     OP_MEM = "\"%s\",\"%s\",%i,0x%llx,";
 
-    E_CALL_FROM_IAT =       "    call_from_iat(\"%s\",\"%s\")";
+    E_CALL_FROM_IAT =       "    cpu.call_from_iat(\"%s\",\"%s\")";
     E_FUNC_NAME =           "    %s(cpu)";
     E_FUNC_ADDR =           "    func_0x%llx(cpu)";
     E_RETURN =              "    ";
-    E_GOTO =                "    goto .label_0x%llx;";
-    E_LABEL =               "    label .label_0x%llx:\n";
-    E_JMP_FROM_IAT =        "    jmp_from_iat(\"%s\",\"%s\");";
-    E_JE =                  "    if cpu.flag_z():\n        goto label_0x%llx";
-    E_JNE =                 "    if not cpu.flag_z():\n        goto label_0x%llx";
-    E_JA =                  "    if not cpu.flag_c() and not cpu.flag_z():\n        goto label_0x%llx";
-    E_JAE =                 "    if not cpu.flag_c():\n        goto label_0x%llx";
+    E_GOTO =                "    goto .label_0x%llx";
+    E_LABEL =               "    label .label_0x%llx\n";
+    E_JMP_FROM_IAT =        "    cpu.jmp_from_iat(\"%s\",\"%s\");";
+    E_JE =                  "    if cpu.flag_z():\n        goto .label_0x%llx";
+    E_JNE =                 "    if not cpu.flag_z():\n        goto .label_0x%llx";
+    E_JA =                  "    if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
+    E_JAE =                 "    if not cpu.flag_c():\n        goto .label_0x%llx";
     E_PUSH =                "    cpu.push(\"%s\");";
     E_POP =                 "    cpu.pop(\"%s\");";
     E_SUB_RR =              "    cpu._%s = cpu._%s - cpu._%s;";
@@ -30,22 +30,23 @@ Lang_Py::Lang_Py() {
     E_XOR_R =               "    cpu._%s = 0;";
     E_XOR_RR =              "    cpu._%s = cpu._%s ^ cpu._%s;";
     E_XOR_RI =              "    cpu._%s = cpu._%s ^ %lld;";
-    E_JNE_GOTO =            "    if (cpu._%s != 0) goto label_0x%llx;";
-    E_JE_GOTO =             "    if (cpu._%s == 0) goto label_0x%llx;";
-    E_SPACE =               ";";
+    E_JNE_GOTO =            "    if cpu._%s != 0:\n        goto .label_0x%llx";
+    E_JE_GOTO =             "    if cpu._%s == 0:\n        goto .label_0x%llx;";
+    E_SPACE =               "";
     E_MOV_RR =              "    cpu._%s = cpu._%s;";
     E_MOV_RI =              "    cpu._%s = 0x%llx;";
     E_LEA_M =               "    cpu._%s = %s%+lld;";
-    E_MOV_RP =              "    cpu._%s = _get_%s_ptr(0x%llx);";
-    E_MOV_RM =              "    cpu._%s = _get_%s_ptr(%s);";
-    E_MOV_PR =              "    _set_%s_ptr(0x%llx,cpu._%s);";
-    E_MOV_MR =              "    _set_%s_ptr(%s,cpu._%s);";
-    E_MOV_PI =              "    _set_%s_ptr(0x%llx,0x%llx);";
-    E_MOV_MI =              "    _set_%s_ptr(%s,0x%llx);";
+    E_MOV_RP =              "    cpu._%s = cpu.get_%s_ptr(0x%llx);";
+    E_MOV_RM =              "    cpu._%s = cpu.get_%s_ptr(%s);";
+    E_MOV_PR =              "    cpu.set_%s_ptr(0x%llx,cpu._%s);";
+    E_MOV_MR =              "    cpu.set_%s_ptr(%s,cpu._%s);";
+    E_MOV_PI =              "    cpu.set_%s_ptr(0x%llx,0x%llx);";
+    E_MOV_MI =              "    cpu.set_%s_ptr(%s,0x%llx);";
 }
 
 #define PY_HEADER "\
-import butcher_x64\n\
+from butcher_x64 import _cpu\n\
+from goto import with_goto\n\
 \n"
 
 void Lang_Py::PrintHeader(Code *c) {
