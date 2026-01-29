@@ -330,11 +330,11 @@ uint64_t ret = 0;
 	return (ret);
 }
 
-void call_from_iat (char *lib,char *func) {
+void call_from_iat (struct _cpu *cpu,char *lib,char *func) {
 	panic("call_from_iat not implemented",func);
 }
 
-void jmp_from_iat (char *lib,char *func) {
+void jmp_from_iat (struct _cpu *cpu,char *lib,char *func) {
 	panic("jmp_from_iat not implemented",func);
 }
 

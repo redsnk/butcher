@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/Butcher",
             //"args": ["/home/alex/src/butcher/samples/api.node","0x180002350"],
-            "args": ["/home/alex/src/butcher/samples/bash","0x05CAE0"],
+            "args": ["-lp","/home/alex/src/butcher/samples/bash","0x05CAE0"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

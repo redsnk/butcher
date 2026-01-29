@@ -176,7 +176,7 @@ int max_subcode = INIT_MEM_GETCODE;
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
-                    printf("// 0x%llx:\t%s\t\t%s\n", sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM, sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (IsCall(sc.insn[n],&addr)) {
                         // New subcode 
                         //printf("// *** Add call 0x%llx\n",addr);

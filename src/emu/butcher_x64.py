@@ -534,6 +534,7 @@ print(hex(r.r8.h))
 print(hex(r.r8.l))
 test()
 '''
+'''
 cpu = _cpu()
 cpu._rax = 0x0123456789ABCDEF
 print(hex(cpu._rax))
@@ -541,4 +542,4 @@ print(hex(cpu._eax))
 print(hex(cpu._ax))
 print(hex(cpu._ah))
 print(hex(cpu._al))
-
+'''

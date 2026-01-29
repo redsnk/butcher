@@ -272,7 +272,7 @@ char buffer[256];
     vsprintf(buffer,format, argptr);
     va_end(argptr);
     while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
-    printf("%s%s0x%llx:\t%s\t\t%s\n", buffer, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
+    printf("%s%s 0x%llx:\t%s\t\t%s\n", buffer, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
 }
 
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
@@ -652,7 +652,7 @@ int id;
                     break;
                 }
                 if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
-                    printf("label_0x%llx:\n",sc->insn[n].address);
+                    printf(lang->E_LABEL,sc->insn[n].address);
                 }
                 n = PrintInst(c,sc,n);
             }

@@ -22,6 +22,7 @@ class Language {
     const char *E_FUNC_ADDR = "";
     const char *E_RETURN = "";
     const char *E_GOTO = "";
+    const char *E_LABEL = "";
     const char *E_JMP_FROM_IAT = "";
     const char *E_JE = "";
     const char *E_JNE = "";
