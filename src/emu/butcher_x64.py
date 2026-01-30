@@ -1,5 +1,5 @@
 # pip install goto-statement
-
+import sys
 from ctypes import *
 #from goto import with_goto
 
@@ -29,6 +29,34 @@ class _reg(Union):
                 ("r16",_r16),
                 ("r8",_r8)]
 
+class _mem:
+    def __init__(self, addr, data):
+        self.addr = addr
+        self.size = len(data)
+        self.mem = data
+
+'''
+union _eflags {
+  	struct {
+    	uint32_t CF 	: 1;
+    	uint32_t _u1 	: 1;
+		uint32_t PF		: 1;
+		uint32_t _u2 	: 1;
+		uint32_t AF		: 1;
+		uint32_t _u3 	: 1;
+		uint32_t ZF		: 1;
+		uint32_t SF		: 1;
+		uint32_t TF		: 1;
+		uint32_t IF		: 1;
+		uint32_t DF		: 1;
+		uint32_t OF		: 1;
+  	};
+  	uint32_t r32;
+};
+'''
+class _eflags(Structure):
+    _fields_ = [("r32",c_uint32)]
+
 class _cpu:
     rax = _reg()
     rbx = _reg()
@@ -46,6 +74,84 @@ class _cpu:
     rsi = _reg()
     rbp = _reg()
     rsp = _reg()
+
+    eflasg = _eflags()
+
+    mems = []
+
+    def panic(self,text):
+        print(text)
+        sys.exit(0)
+
+    def add_mem(self,addr,data):
+        self.mems.append(_mem(addr,data))
+
+    def get_mem(self,addr,size):
+        for m in self.mems:
+            if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
+                start = addr-m.addr
+                return m[start:start+size]
+        self.panic("get_mem")
+
+    def set_mem(self,addr,data):
+        size = len(data)
+        for m in self.mems:
+            if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
+                start = addr-m.addr
+                pre = m[:start]
+                post = m[start+size:]
+                m = pre+data+post
+                return
+        self.panic("set_mem")
+    
+    def call_from_iat (self,lib,func):
+        self.panic("call_from_iat")
+
+    def jmp_from_iat (self,lib,func):
+        self.panic("jmp_from_iat")
+
+    def byte_ptr(self,addr):
+        data = self.get_mem(addr,1)
+        return data[0]
+
+    def word_ptr(self,addr):
+        data = self.get_mem(addr,2)
+        return (data[1] << 8) | data[0]
+
+    def dword_ptr(self,addr):
+        data = self.get_mem(addr,4)
+        return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
+
+    def qword_ptr(self,addr):
+        data = self.get_mem(addr,8)
+        return (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
+
+    def set_byte_ptr(self,addr,value):
+        self.set_mem(addr,[value])
+
+    def set_word_ptr(self,addr,value):
+        self.set_mem(addr,[value & 0xff])
+        self.set_mem(addr+1,[(value >> 8) & 0xff])
+
+    def set_dword_ptr(self,addr,value):
+        self.set_mem(addr,[value & 0xff])
+        self.set_mem(addr+1,[(value >> 8) & 0xff])
+        self.set_mem(addr+2,[(value >> 16) & 0xff])
+        self.set_mem(addr+3,[(value >> 24) & 0xff])
+
+    def set_qword_ptr(self,addr,value):
+        self.set_mem(addr,[value & 0xff])
+        self.set_mem(addr+1,[(value >> 8) & 0xff])
+        self.set_mem(addr+2,[(value >> 16) & 0xff])
+        self.set_mem(addr+3,[(value >> 24) & 0xff])
+        self.set_mem(addr+4,[(value >> 32) & 0xff])
+        self.set_mem(addr+5,[(value >> 40) & 0xff])
+        self.set_mem(addr+6,[(value >> 48) & 0xff])
+        self.set_mem(addr+7,[(value >> 56) & 0xff])
+
+    def push(self,value):
+
+    def pop(self,value):
 
     # 64
     @property

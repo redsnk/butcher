@@ -49,6 +49,7 @@ class Language {
     const char *E_MOV_MR = "";
     const char *E_MOV_PI = "";
     const char *E_MOV_MI = "";
+    const char *E_STACK_INIT = "";
     
 
     virtual void PrintHeader(Code *c) = 0;

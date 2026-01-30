@@ -1,9 +1,10 @@
-samples/*
-build/*
+samples
+build
 src/test/c/test.c
 src/test/c/butcher_x64.*
-src/test/c/build/*
+src/test/c/build
 src/test/py/test.py
-src/test/py/__pycache__/*
+src/test/py/__pycache__
 src/test/py/butcher_x64.*
-src/test/py/build/*
+src/test/py/build
+src/test/py/.venv

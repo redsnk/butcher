@@ -54,8 +54,13 @@ void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
     } else {
         submems = (struct _submem *) realloc(submems, sizeof(struct _submem)*(submem_count+1));
     }
-    submems[submem_count].mem = (uint8_t *) malloc(size);
-    memcpy(submems[submem_count].mem,mem,size);
+    if (mem != NULL) {
+        submems[submem_count].mem = (uint8_t *) malloc(size);
+        memcpy(submems[submem_count].mem,mem,size);
+    }
+    else {
+        submems[submem_count].mem = NULL;
+    }
     submems[submem_count].size = size;
     submems[submem_count].addr = address;
     submem_count++;
@@ -122,7 +127,9 @@ int n;
     }
     if (submem_count > 0) {
         for (n=0;n<submem_count;n++) {
-            free(submems[n].mem);
+            if(submems[n].mem != NULL) {
+                free(submems[n].mem);
+            }
         }
         free(submems);
     }

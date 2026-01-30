@@ -8,6 +8,9 @@
 #include <cstring>
 #include "../butcher.hpp"
 
+#define STACK_ADDR		0xF000
+#define STACK_SIZE		(1024*10)
+
 class Base_x64 : public Butcher {
     public:
         cs_err Cs_open(void);

@@ -55,9 +55,6 @@ union _eflags {
   	uint32_t r32;
 };
 
-#define STACK_ADDR		0xF000
-#define STACK_SIZE		(1024*10)
-
 struct _mem {
 	uint64_t addr;
 	uint64_t size;
@@ -162,6 +159,7 @@ void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
+void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);

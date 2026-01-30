@@ -26,9 +26,9 @@ void print_cpu(struct _cpu *cpu) {
 void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
-	add_mem(cpu,STACK_ADDR,NULL,STACK_SIZE);
-	cpu->rsp.r64 = (uint64_t) (STACK_ADDR+(STACK_SIZE/2));
-	cpu->rbp = cpu->rsp;
+	//add_mem(cpu,STACK_ADDR,NULL,STACK_SIZE);
+	//cpu->rsp.r64 = (uint64_t) (STACK_ADDR+(STACK_SIZE/2));
+	//cpu->rbp = cpu->rsp;
 }
 
 void end(struct _cpu *cpu) {

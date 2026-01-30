@@ -2,6 +2,13 @@
 #include "../files/pe.hpp"
 #include <capstone/capstone.h>
 
+const char *reg_name(csh handle,int id_reg) {
+    if (id_reg == X86_REG_INVALID) {
+        return ("");
+    }
+    return (cs_reg_name(handle,id_reg));
+}
+
 const char *get_reg64(const char *reg) {
 // rax, eax, ax, ah, al
 #define STRCMPREG(r)	!strcmp(reg,"r"#r"x") || !strcmp(reg,"e"#r"x") || !strcmp(reg,#r"x") || !strcmp(reg,#r"h") || !strcmp(reg,#r"l")
@@ -265,13 +272,20 @@ int Base_x64::IsJcc(cs_insn insn, uint64_t *addr) {
 // ---------------------------------------------------------------------------------------------------------
 
 void Base_x64::PrintLine(cs_insn *insn,const char *format,...) {
-char buffer[256];
+char buffer[1024];
 
     va_list argptr;
     va_start(argptr, format);
     vsprintf(buffer,format, argptr);
     va_end(argptr);
-    while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
+    char *p = buffer;
+    for (int n=0;n<strlen(buffer);n++) {
+        if (buffer[n] == '\n') {
+            p = buffer+n+1;
+        }
+    }
+    //while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
+    while (strlen(p) < lang->COMM_SEP) strcat(p," ");
     printf("%s%s 0x%llx:\t%s\t\t%s\n", buffer, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
 }
 
@@ -693,6 +707,7 @@ void Base_x64::PrintCode(Code *c) {
         }
     }
     */
+    c->AddSubMem(STACK_ADDR,NULL,STACK_SIZE);
     lang->PrintHeader(c);
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
@@ -706,6 +721,9 @@ void Base_x64::PrintCode(Code *c) {
         //PrintSubMem(c,n);
         lang->PrintSubMem(c,n);
     }
+    printf(lang->E_STACK_INIT,lang->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
+                                lang->reg_name(handle,X86_REG_RBP),
+                                lang->reg_name(handle,X86_REG_RSP));
     //printf(C_FOOTER_2,c->ep);
     lang->PrintMainClose(c);
 }

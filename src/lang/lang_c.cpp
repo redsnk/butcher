@@ -23,25 +23,26 @@ Lang_C::Lang_C() {
     E_JAE =                 "    if (!flag_c(cpu)) goto label_0x%llx;";
     E_PUSH =                "    _push(%s);";
     E_POP =                 "    _pop(%s);";
-    E_SUB_RR =              "    _%s = _%s - _%s;";
-    E_SUB_RI =              "    _%s = _%s - %lld;";
-    E_ADD_RR =              "    _%s = _%s + _%s;";
-    E_ADD_RI =              "    _%s = _%s + %lld;";
-    E_XOR_R =               "    _%s = 0;";
-    E_XOR_RR =              "    _%s = _%s ^ %s;";
-    E_XOR_RI =              "    _%s = _%s ^ %lld;";
-    E_JNE_GOTO =            "    if (_%s != 0) goto label_0x%llx;";
-    E_JE_GOTO =             "    if (_%s == 0) goto label_0x%llx;";
+    E_SUB_RR =              "    %s = %s - %s;";
+    E_SUB_RI =              "    %s = %s - %lld;";
+    E_ADD_RR =              "    %s = %s + %s;";
+    E_ADD_RI =              "    %s = %s + %lld;";
+    E_XOR_R =               "    %s = 0;";
+    E_XOR_RR =              "    %s = %s ^ %s;";
+    E_XOR_RI =              "    %s = %s ^ %lld;";
+    E_JNE_GOTO =            "    if (%s != 0) goto label_0x%llx;";
+    E_JE_GOTO =             "    if (%s == 0) goto label_0x%llx;";
     E_SPACE =               ";";
-    E_MOV_RR =              "    _%s = _%s;";
-    E_MOV_RI =              "    _%s = 0x%llx;";
-    E_LEA_M =               "    _%s = _%s%+lld;";
-    E_MOV_RP =              "    _%s = _get_%s_ptr(0x%llx);";
-    E_MOV_RM =              "    _%s = _get_%s_ptr(%s);";
-    E_MOV_PR =              "    _set_%s_ptr(0x%llx,_%s);";
-    E_MOV_MR =              "    _set_%s_ptr(%s,_%s);";
+    E_MOV_RR =              "    %s = %s;";
+    E_MOV_RI =              "    %s = 0x%llx;";
+    E_LEA_M =               "    %s = %s%+lld;";
+    E_MOV_RP =              "    %s = _get_%s_ptr(0x%llx);";
+    E_MOV_RM =              "    %s = _get_%s_ptr(%s);";
+    E_MOV_PR =              "    _set_%s_ptr(0x%llx,%s);";
+    E_MOV_MR =              "    _set_%s_ptr(%s,%s);";
     E_MOV_PI =              "    _set_%s_ptr(0x%llx,0x%llx);";
     E_MOV_MI =              "    _set_%s_ptr(%s,0x%llx);";
+    E_STACK_INIT =          "    %s = 0x%llx;\n    %s = %s;\n";
 }
 
 #define C_HEADER "\
@@ -71,9 +72,10 @@ void Lang_C::PrintHeader(Code *c) {
 
 #define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
-struct _cpu cpu;\n\
+struct _cpu c,*cpu;\n\
 \n\
-    init(&cpu);\n\
+    cpu = &c;\n\
+    init(cpu);\n\
 "
 
 void Lang_C::PrintMainOpen(Code *c) {
@@ -81,8 +83,8 @@ void Lang_C::PrintMainOpen(Code *c) {
 }
 
 #define C_FOOTER_2 "\
-    func_0x%llx(&cpu);\n\
-    end(&cpu);\n\
+    func_0x%llx(cpu);\n\
+    end(cpu);\n\
     return (0);\n\
 }\n\
 \n"
@@ -96,14 +98,19 @@ struct _submem *sm;
 char sub[128];
 
     sm = &c->submems[num];
-    char *buffer = (char *) malloc((sm->size*4)+128);
-    buffer[0] = 0;
-    for (int n=0;n<sm->size;n++) {
-        sprintf(sub,"\\x%02x",sm->mem[n]);
-        strcat(buffer,sub);
+    if (sm->mem != NULL) {
+        char *buffer = (char *) malloc((sm->size*4)+128);
+        buffer[0] = 0;
+        for (int n=0;n<sm->size;n++) {
+            sprintf(sub,"\\x%02x",sm->mem[n]);
+            strcat(buffer,sub);
+        }
+        printf("    add_mem (cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
+        free(buffer);
     }
-    printf("    add_mem (&cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
-    free(buffer);
+    else {
+        printf("    add_mem (cpu,0x%llx,NULL,%i);\n",sm->addr,sm->size);
+    }
 }
 
 #define C_FUNC_HEADER_NAME "\
@@ -139,13 +146,13 @@ char tmp[256];
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
     if (op.mem.base != X86_REG_INVALID) {
-        sprintf(buffer,"_%s",reg_name(handle,op.mem.base));
+        sprintf(buffer,"%s",reg_name(handle,op.mem.base));
     }
     else {
         buffer[0] = 0;
     }
     if (op.mem.index != X86_REG_INVALID) {
-        sprintf(tmp,"+_%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        sprintf(tmp,"+%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
         strcat (buffer,tmp);
     }
     if (op.mem.disp) {
@@ -156,14 +163,11 @@ char tmp[256];
 }
 
 const char *Lang_C::reg_name(csh handle,int id_reg) {
-//static char buffer[16];
+static char buffer[16];
 
     if (id_reg == X86_REG_INVALID) {
         return ("");
     }
-    /*
     sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
     return (buffer);
-    */
-    return (cs_reg_name(handle,id_reg));
 }
