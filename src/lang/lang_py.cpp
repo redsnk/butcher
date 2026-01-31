@@ -21,8 +21,8 @@ Lang_Py::Lang_Py() {
     E_JNE =                 "    if not cpu.flag_z():\n        goto .label_0x%llx";
     E_JA =                  "    if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JAE =                 "    if not cpu.flag_c():\n        goto .label_0x%llx";
-    E_PUSH =                "    cpu.push(\"%s\");";
-    E_POP =                 "    cpu.pop(\"%s\");";
+    E_PUSH =                "    cpu.push_%s(%s);";
+    E_POP =                 "    %s = cpu.pop_%s();";
     E_SUB_RR =              "    %s = %s - %s;";
     E_SUB_RI =              "    %s = %s - %lld;";
     E_ADD_RR =              "    %s = %s + %s;";
@@ -123,10 +123,12 @@ void Lang_Py::PrintSubCodeSep(void) {
     printf("    # --------------------------------------------------------------\n");
 }
 
-char *Lang_Py::mem_str(csh handle,cs_x86_op op,char *buffer) {
+char *Lang_Py::mem_str(csh handle,cs_x86_op op) {
 char tmp[256];
+char *buffer;
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
+    buffer = (char *) malloc(256);
     if (op.mem.base != X86_REG_INVALID) {
         sprintf(buffer,"%s",reg_name(handle,op.mem.base));
     }
@@ -144,12 +146,15 @@ char tmp[256];
     return (buffer);
 }
 
-const char *Lang_Py::reg_name(csh handle,int id_reg) {
-static char buffer[16];
+char *Lang_Py::reg_name(csh handle,int id_reg) {
+char *buffer;
 
+    buffer = (char *) malloc(256);
     if (id_reg == X86_REG_INVALID) {
-        return ("");
+        strcpy(buffer,"");
     }
-    sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
+    else {
+        sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
+    }
     return (buffer);
 }

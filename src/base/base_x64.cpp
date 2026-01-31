@@ -292,7 +292,7 @@ char buffer[1024];
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
 uint64_t read;
-char buffer[256];
+char *reg0,*reg1,*mstr;
 
     insn = &sc->insn[num];
     switch (insn->id) {
@@ -338,85 +338,89 @@ char buffer[256];
             break;
         case X86_INS_PUSH:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                PrintLine(insn,lang->E_PUSH,lang->reg_name(handle,insn->detail->x86.operands[0].reg));
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                PrintLine(insn,lang->E_PUSH,ptr(insn),reg0);
+                free(reg0);
                 num++;
             }
             break;
         case X86_INS_POP:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                PrintLine(insn,lang->E_POP,lang->reg_name(handle,insn->detail->x86.operands[0].reg));
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                PrintLine(insn,lang->E_POP,reg0,ptr(insn));
+                free(reg0);
                 num++;
             }
             break;
         case X86_INS_SUB:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
                     //sub		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,lang->E_SUB_RR,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                        PrintLine(insn,lang->E_SUB_RR,reg0,reg0,reg1);
                         num++;
                     }
+                    free(reg1);
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //sub		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,lang->E_SUB_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            insn->detail->x86.operands[1].imm);
+                        PrintLine(insn,lang->E_SUB_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
                         num++;
                     }
                 }
+                free(reg0);
             }
             break;
         case X86_INS_ADD:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
                     //add		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,lang->E_ADD_RR,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                        PrintLine(insn,lang->E_ADD_RR,reg0,reg0,reg1);
                         num++;
                     }
+                    free(reg1);
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //add		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,lang->E_ADD_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            insn->detail->x86.operands[1].imm);
+                        PrintLine(insn,lang->E_ADD_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
                         num++;
                     }
                 }
+                free(reg0);
             }
             break;
         case X86_INS_XOR:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
                     //xor		rsp, rax
                     if (FlagsNotUsed(sc,num)) {
                         if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                            PrintLine(insn,lang->E_XOR_R,lang->reg_name(handle,insn->detail->x86.operands[0].reg));
+                            PrintLine(insn,lang->E_XOR_R,reg0);
                         }
                         else {
-                            PrintLine(insn,lang->E_XOR_RR,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                            PrintLine(insn,lang->E_XOR_RR,reg0,reg0,reg1);
                         }
                         num++;
                     }
+                    free(reg1);
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     //xor		rsp, 0x178
                     if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,lang->E_XOR_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                            insn->detail->x86.operands[1].imm);
+                        PrintLine(insn,lang->E_XOR_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
                         num++;
                     }
                 }
+                free(reg0);
             }
             break;
         case X86_INS_TEST:
@@ -426,34 +430,36 @@ char buffer[256];
                     case X86_INS_JNE:
                         if (FlagsNotUsed(sc,num+1)) {
                             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                                     if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
                                         // test		eax, eax
                                         // jne		0x1800026ce
                                         PrintLine(insn,lang->E_SPACE);
-                                        PrintLine(next,lang->E_JNE_GOTO,  lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                                            next->detail->x86.operands[0].imm);
+                                        PrintLine(next,lang->E_JNE_GOTO,reg0,next->detail->x86.operands[0].imm);
                                         num += 2;
 
                                     }
                                 }
+                                free(reg0);
                             }
                         }
                         break;
                     case X86_INS_JE:
                         if (FlagsNotUsed(sc,num+1)) {
                             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                                     if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
                                         // test		eax, eax
                                         // je		0x1800026ce
                                         PrintLine(insn,lang->E_SPACE);
-                                        PrintLine(next,lang->E_JE_GOTO,  lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                                            next->detail->x86.operands[0].imm);
+                                        PrintLine(next,lang->E_JE_GOTO,reg0,next->detail->x86.operands[0].imm);
                                         num += 2;
 
                                     }
                                 }
+                                free(reg0);
                             }
                         }
                         break;
@@ -461,37 +467,40 @@ char buffer[256];
             }
             break;
         case X86_INS_LEA:
+            reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
             if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
                 // lea		rdx, qword ptr [rip + 0x199f7]
-                PrintLine(insn,lang->E_MOV_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                    insn->address+insn->size+insn->detail->x86.operands[1].mem.disp);
+                PrintLine(insn,lang->E_MOV_RI,reg0,insn->address+insn->size+insn->detail->x86.operands[1].mem.disp);
             }
             else {
                 // lea		rbp, qword ptr [rsp - 0x78]
-                PrintLine(insn,lang->E_LEA_M,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                        lang->reg_name(handle,insn->detail->x86.operands[1].mem.base),
-                                                        insn->detail->x86.operands[1].mem.disp);
+                reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].mem.base);
+                PrintLine(insn,lang->E_LEA_M,reg0,reg1,insn->detail->x86.operands[1].mem.disp);
+                free(reg1);
             }
+            free(reg0);
             num++;
             break;
         case X86_INS_MOVABS:
             // movabs		rdx, 0x5f3ae6d888f298a2
-            PrintLine(insn,lang->E_MOV_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                insn->detail->x86.operands[1].imm);
+            reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+            PrintLine(insn,lang->E_MOV_RI,reg0,insn->detail->x86.operands[1].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_MOV:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
                     // mov		rsi, rcx
-                    PrintLine(insn,lang->E_MOV_RR,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                    lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                    PrintLine(insn,lang->E_MOV_RR,reg0,reg1);
+                    free(reg1);
                     num++;
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     // mov      dl, 0x01
-                    PrintLine(insn,lang->E_MOV_RI,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                insn->detail->x86.operands[1].imm);
+                    PrintLine(insn,lang->E_MOV_RI,reg0,insn->detail->x86.operands[1].imm);
                     num++;
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
@@ -504,36 +513,36 @@ char buffer[256];
                             c->AddSubMem(addr,mem,8);
                             free(mem);
                         }
-                        PrintLine(insn,lang->E_MOV_RP,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                        ptr(insn),addr);
+                        PrintLine(insn,lang->E_MOV_RP,reg0,ptr(insn),addr);
                         num++;
                     }
                     else {
                         // mov	rbx, qword ptr [r14 + 8]
-                        PrintLine(insn,lang->E_MOV_RM,lang->reg_name(handle,insn->detail->x86.operands[0].reg),
-                                                                        ptr(insn),
-                                                                        lang->mem_str(handle,insn->detail->x86.operands[1],buffer));
+                        mstr = lang->mem_str(handle,insn->detail->x86.operands[1]);
+                        PrintLine(insn,lang->E_MOV_RM,reg0,ptr(insn),mstr);
+                        free(mstr);
                         num++;
                     }
                 }
+                free(reg0);
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
                     if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
                         // mov		qword ptr [rip + 0x1d8f1], rax
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
-                        PrintLine(insn,lang->E_MOV_PR,ptr(insn),
-                                                                            addr,
-                                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                        PrintLine(insn,lang->E_MOV_PR,ptr(insn),addr,reg1);
                         num++;
                     }
                     else {
                         // mov		qword ptr [rsp + 0x1b0], rdi
-                        PrintLine(insn,lang->E_MOV_MR,ptr(insn),
-                                                                            lang->mem_str(handle,insn->detail->x86.operands[0],buffer),
-                                                                            lang->reg_name(handle,insn->detail->x86.operands[1].reg));
+                        mstr = lang->mem_str(handle,insn->detail->x86.operands[0]);
+                        PrintLine(insn,lang->E_MOV_MR,ptr(insn),mstr,reg1);
+                        free(mstr);
                         num++;
                     }
+                    free(reg1);
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
                     if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
@@ -546,9 +555,9 @@ char buffer[256];
                     }
                     else {
                         // mov		dword ptr [rbp + 0x58], 0x6c6c642e
-                        PrintLine(insn,lang->E_MOV_MI,ptr(insn),
-                                                                            lang->mem_str(handle,insn->detail->x86.operands[0],buffer),
-                                                                            insn->detail->x86.operands[1].imm);
+                        mstr = lang->mem_str(handle,insn->detail->x86.operands[0]);
+                        PrintLine(insn,lang->E_MOV_MI,ptr(insn),mstr,insn->detail->x86.operands[1].imm);
+                        free(mstr);
                         num++;
                     }
                 }
@@ -607,7 +616,7 @@ cs_insn *insn;
         switch (insn->detail->x86.operands[n].type) {
             case X86_OP_REG:
                 strcat(subname,"r");
-                sprintf(buffer,lang->OP_REG,lang->reg_name(handle,insn->detail->x86.operands[n].reg));
+                sprintf(buffer,lang->OP_REG,reg_name(handle,insn->detail->x86.operands[n].reg));
                 strcat(params,buffer);
                 break;
             case X86_OP_IMM:
@@ -617,8 +626,8 @@ cs_insn *insn;
                 break;
             case X86_OP_MEM:
                 strcat(subname,"m");
-                sprintf(buffer,lang->OP_MEM,lang->reg_name(handle,insn->detail->x86.operands[n].mem.base),
-                                                lang->reg_name(handle,insn->detail->x86.operands[n].mem.index),
+                sprintf(buffer,lang->OP_MEM,reg_name(handle,insn->detail->x86.operands[n].mem.base),
+                                                reg_name(handle,insn->detail->x86.operands[n].mem.index),
                                                 insn->detail->x86.operands[n].mem.scale,
                                                 insn->detail->x86.operands[n].mem.disp);
                 strcat(params,buffer);

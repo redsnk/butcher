@@ -257,6 +257,10 @@ int flag_c(struct _cpu *cpu) {
 
 void push(struct _cpu *cpu,int bits,uint64_t n) {
 	switch (bits) {
+		case 8:
+			cpu->rsp.r64 -= 1;
+			set_mem(cpu,cpu->rsp.r64,1,(uint8_t *)&n);
+			break;
 		case 16:
 			cpu->rsp.r64 -= 2;
 			set_mem(cpu,cpu->rsp.r64,2,(uint8_t *)&n);
@@ -278,6 +282,10 @@ uint64_t pop(struct _cpu *cpu,int bits) {
 uint64_t ret=0;
 
 	switch (bits) {
+		case 8:
+			get_mem(cpu,cpu->rsp.r64,1,(uint8_t*) &ret);
+			cpu->rsp.r64 += 1;
+			break;
 		case 16:
 			get_mem(cpu,cpu->rsp.r64,2,(uint8_t*) &ret);
 			cpu->rsp.r64 += 2;

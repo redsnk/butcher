@@ -21,8 +21,8 @@ Lang_C::Lang_C() {
     E_JNE =                 "    if (!flag_z(cpu)) goto label_0x%llx;";
     E_JA =                  "    if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
     E_JAE =                 "    if (!flag_c(cpu)) goto label_0x%llx;";
-    E_PUSH =                "    _push(%s);";
-    E_POP =                 "    _pop(%s);";
+    E_PUSH =                "    _push_%s(%s);";
+    E_POP =                 "    %s = _pop_%s();";
     E_SUB_RR =              "    %s = %s - %s;";
     E_SUB_RI =              "    %s = %s - %lld;";
     E_ADD_RR =              "    %s = %s + %s;";
@@ -32,7 +32,7 @@ Lang_C::Lang_C() {
     E_XOR_RI =              "    %s = %s ^ %lld;";
     E_JNE_GOTO =            "    if (%s != 0) goto label_0x%llx;";
     E_JE_GOTO =             "    if (%s == 0) goto label_0x%llx;";
-    E_SPACE =               ";";
+    E_SPACE =               "";
     E_MOV_RR =              "    %s = %s;";
     E_MOV_RI =              "    %s = 0x%llx;";
     E_LEA_M =               "    %s = %s%+lld;";
@@ -141,10 +141,12 @@ void Lang_C::PrintSubCodeSep(void) {
     printf("    // --------------------------------------------------------------\n");
 }
 
-char *Lang_C::mem_str(csh handle,cs_x86_op op,char *buffer) {
+char *Lang_C::mem_str(csh handle,cs_x86_op op) {
 char tmp[256];
+char *buffer;
 
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
+    buffer = (char *) malloc(256);
     if (op.mem.base != X86_REG_INVALID) {
         sprintf(buffer,"%s",reg_name(handle,op.mem.base));
     }
@@ -162,12 +164,15 @@ char tmp[256];
     return (buffer);
 }
 
-const char *Lang_C::reg_name(csh handle,int id_reg) {
-static char buffer[16];
+char *Lang_C::reg_name(csh handle,int id_reg) {
+char *buffer;
 
+    buffer = (char *) malloc(256);
     if (id_reg == X86_REG_INVALID) {
-        return ("");
+        strcpy(buffer,"");
     }
-    sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
+    else {
+        sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
+    }
     return (buffer);
 }

@@ -142,8 +142,10 @@ struct _cpu {
 #define _bpl	(cpu->rbp.r8.l)
 #define _spl	(cpu->rsp.r8.l)
 
+/*
 #define _push(x)	op_r(cpu,"push",#x)
 #define _pop(x)		op_r(cpu,"pop",#x)
+*/
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)
@@ -154,6 +156,17 @@ struct _cpu {
 #define _set_word_ptr(m,v)	set_word_ptr(cpu,m,v)
 #define _set_dword_ptr(m,v)	set_dword_ptr(cpu,m,v)
 #define _set_qword_ptr(m,v)	set_qword_ptr(cpu,m,v)
+
+#define _push_byte(v)		push(cpu,1,v)
+#define _push_word(v)		push(cpu,2,v)
+#define _push_dword(v)		push(cpu,4,v)
+#define _push_qword(v)		push(cpu,8,v)
+
+#define _pop_byte()			pop(cpu,1)
+#define _pop_word()			pop(cpu,2)
+#define _pop_dword()		pop(cpu,4)
+#define _pop_qword()		pop(cpu,8)
+
 
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
@@ -179,6 +192,8 @@ uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
 uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
+void push(struct _cpu *cpu,int bits,uint64_t n);
+uint64_t pop(struct _cpu *cpu,int bits);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);
