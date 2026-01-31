@@ -1,5 +1,6 @@
 # pip install goto-statement
 import sys
+import traceback
 from ctypes import *
 #from goto import with_goto
 
@@ -79,30 +80,39 @@ class _cpu:
 
     mems = []
 
+    def print(self):
+        print(">> rax = "+hex(self.rax.r64)+", rbx = "+hex(self.rbx.r64)+", rcx = "+hex(self.rcx.r64)+", rdx = "+hex(self.rdx.r64))
+        print(">> rbp = "+hex(self.rbp.r64)+", rsp = "+hex(self.rsp.r64)+"\n")
+
     def panic(self,text):
-        print(text)
+        for line in traceback.format_stack():
+            print(line.strip())
+        print("panic: "+text)
         sys.exit(0)
 
     def add_mem(self,addr,data):
         self.mems.append(_mem(addr,data))
 
+    def add_zero_mem(self,addr,size):
+        self.add_mem(addr,[0] * size)
+
     def get_mem(self,addr,size):
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
-                return m[start:start+size]
-        self.panic("get_mem")
+                return m.mem[start:start+size]
+        self.panic("get_mem - "+hex(addr))
 
     def set_mem(self,addr,data):
         size = len(data)
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
-                pre = m[:start]
-                post = m[start+size:]
-                m = pre+data+post
+                pre = m.mem[:start]
+                post = m.mem[start+size:]
+                m.mem = pre+data+post
                 return
-        self.panic("set_mem")
+        self.panic("set_mem - "+hex(addr))
     
     def call_from_iat (self,lib,func):
         self.panic("call_from_iat")
@@ -110,19 +120,19 @@ class _cpu:
     def jmp_from_iat (self,lib,func):
         self.panic("jmp_from_iat")
 
-    def byte_ptr(self,addr):
+    def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)
         return data[0]
 
-    def word_ptr(self,addr):
+    def get_word_ptr(self,addr):
         data = self.get_mem(addr,2)
         return (data[1] << 8) | data[0]
 
-    def dword_ptr(self,addr):
+    def get_dword_ptr(self,addr):
         data = self.get_mem(addr,4)
         return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
 
-    def qword_ptr(self,addr):
+    def get_qword_ptr(self,addr):
         data = self.get_mem(addr,8)
         return (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
 
@@ -149,10 +159,42 @@ class _cpu:
         self.set_mem(addr+6,[(value >> 48) & 0xff])
         self.set_mem(addr+7,[(value >> 56) & 0xff])
 
-    def push(self,value):
+    def push_byte(self,value):
+        self.rsp.r64 = self.rsp.r64 - 1
+        self.set_byte_ptr(self.rsp.r64,value)
 
-    def pop(self,value):
+    def push_word(self,value):
+        self.rsp.r64 = self.rsp.r64 - 2
+        self.set_word_ptr(self.rsp.r64,value)
 
+    def push_dword(self,value):
+        self.rsp.r64 = self.rsp.r64 - 4
+        self.set_dword_ptr(self.rsp.r64,value)
+
+    def push_qword(self,value):
+        self.rsp.r64 = self.rsp.r64 - 8
+        self.set_qword_ptr(self.rsp.r64,value)
+
+    def pop_byte(self,b):
+        v = self.get_byte_ptr(self.rsp.r64)
+        self.rsp.r64 = self.rsp.r64 + 1
+        return v
+
+    def pop_word(self,b):
+        v = self.get_word_ptr(self.rsp.r64)
+        self.rsp.r64 = self.rsp.r64 + 2
+        return v
+
+    def pop_dword(self,b):
+        v = self.get_dword_ptr(self.rsp.r64)
+        self.rsp.r64 = self.rsp.r64 + 4
+        return v
+
+    def pop_qword(self,b):
+        v = self.get_qword_ptr(self.rsp.r64)
+        self.rsp.r64 = self.rsp.r64 + 8
+        return v
+    
     # 64
     @property
     def _rax(self):
@@ -257,7 +299,7 @@ class _cpu:
         return self.rbp.r64
     @_rbp.setter
     def _rbp(self,v):
-        self.rsi.r64 = v
+        self.rbp.r64 = v
 
     @property
     def _rsp(self):

@@ -21,27 +21,28 @@ Lang_Py::Lang_Py() {
     E_JNE =                 "    if not cpu.flag_z():\n        goto .label_0x%llx";
     E_JA =                  "    if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JAE =                 "    if not cpu.flag_c():\n        goto .label_0x%llx";
-    E_PUSH =                "    cpu.push_%s(%s);";
-    E_POP =                 "    %s = cpu.pop_%s();";
-    E_SUB_RR =              "    %s = %s - %s;";
-    E_SUB_RI =              "    %s = %s - %lld;";
-    E_ADD_RR =              "    %s = %s + %s;";
-    E_ADD_RI =              "    %s = %s + %lld;";
-    E_XOR_R =               "    %s = 0;";
-    E_XOR_RR =              "    %s = %s ^ c%s;";
-    E_XOR_RI =              "    %s = %s ^ %lld;";
+    E_PUSH =                "    cpu.push_%s(%s)";
+    E_POP =                 "    %s = cpu.pop_%s()";
+    E_SUB_RR =              "    %s = %s - %s";
+    E_SUB_RI =              "    %s = %s - %lld";
+    E_ADD_RR =              "    %s = %s + %s";
+    E_ADD_RI =              "    %s = %s + %lld";
+    E_XOR_R =               "    %s = 0";
+    E_XOR_RR =              "    %s = %s ^ %s";
+    E_XOR_RI =              "    %s = %s ^ %lld";
     E_JNE_GOTO =            "    if %s != 0:\n        goto .label_0x%llx";
-    E_JE_GOTO =             "    if %s == 0:\n        goto .label_0x%llx;";
+    E_JE_GOTO =             "    if %s == 0:\n        goto .label_0x%llx";
     E_SPACE =               "";
-    E_MOV_RR =              "    %s = %s;";
-    E_MOV_RI =              "    %s = 0x%llx;";
-    E_LEA_M =               "    %s = %s%+lld;";
-    E_MOV_RP =              "    %s = cpu.get_%s_ptr(0x%llx);";
-    E_MOV_RM =              "    %s = cpu.get_%s_ptr(%s);";
-    E_MOV_PR =              "    cpu.set_%s_ptr(0x%llx,%s);";
-    E_MOV_MR =              "    cpu.set_%s_ptr(%s,%s);";
-    E_MOV_PI =              "    cpu.set_%s_ptr(0x%llx,0x%llx);";
-    E_MOV_MI =              "    cpu.set_%s_ptr(%s,0x%llx);";
+    E_MOV_RR =              "    %s = %s";
+    E_MOV_RI =              "    %s = 0x%llx";
+    E_LEA_M =               "    %s = %s%+lld";
+    E_MOV_RP =              "    %s = cpu.get_%s_ptr(0x%llx)";
+    E_MOV_RM =              "    %s = cpu.get_%s_ptr(%s)";
+    E_MOV_PR =              "    cpu.set_%s_ptr(0x%llx,%s)";
+    E_MOV_MR =              "    cpu.set_%s_ptr(%s,%s)";
+    E_MOV_PI =              "    cpu.set_%s_ptr(0x%llx,0x%llx)";
+    E_MOV_MI =              "    cpu.set_%s_ptr(%s,0x%llx)";
+    E_STACK_INIT =          "    %s = 0x%llx\n    %s = %s\n";
 }
 
 #define PY_HEADER "\
