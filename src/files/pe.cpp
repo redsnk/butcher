@@ -110,53 +110,6 @@ uint64_t GetImageBase (struct _PE *pe) {
 	return (pe->Optional_Header_Windows_Specific_Fields.pe32plus.ImageBase);
 }
 
-/*
-uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read) {
-int n;
-uint64_t base, start, end, offset;
-uint8_t *m;
-long l;
-
-	for (n=0;n<pe->COFF_File_Header.NumberOfSections;n++) {
-		base = GetImageBase(pe);
-		start = base+pe->Sections[n].VirtualAddress;
-		end = start+pe->Sections[n].SizeOfRawData;
-		// TODO: SizeOfRawData instead of VirtualSize
-		if ((addr >= start) && (addr < end)) {
-			// addr inside the section
-			if ((end-addr) < size) {
-				// not enought size
-				size = end-addr-1;
-				if (!size) {
-					// size == 0
-					return (NULL);
-				}
-			}
-			m = (uint8_t *) malloc(size);
-			if (m != NULL) {
-				// TODO: check SizeOfRawData overflow
-				offset = pe->Sections[n].PointerToRawData+(addr-start);
-				l = fseek(pe->f,offset,SEEK_SET);
-				if (l != -1) {
-					l = fread(m,1,size,pe->f);
-					if (l == size) {
-						*read = size;
-						return (m);
-					} else {
-						printf("GetMemoryPE error: fread\n");
-					}
-				} else {
-					printf("GetMemoryPE error: fseek\n");
-				}
-				free(m);		
-			}	
-			break;
-		}
-	}
-	return (NULL);
-}
-*/
-
 uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read) {
 int n;
 uint8_t *m;

@@ -19,6 +19,10 @@ void Arch_Elf::CloseFile(void) {
     FreeELF(elf);
 }
 
+int Arch_Elf::Is32(void) {
+    return(false);
+}
+
 uint8_t *Arch_Elf::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryELF(elf,addr,size,read));
 }

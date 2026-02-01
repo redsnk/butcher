@@ -19,6 +19,10 @@ void Arch_Pe::CloseFile(void) {
     FreePE(pe);
 }
 
+int Arch_Pe::Is32(void) {
+    return (pe->pe32);
+}
+
 uint8_t *Arch_Pe::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryPE(pe,addr,size,read));
 }

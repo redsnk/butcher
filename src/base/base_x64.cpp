@@ -207,10 +207,14 @@ cs_insn *insn;
     return (true);
 }
 
+int IsRIP(int id) {
+    return((id == X86_REG_EIP)||(id == X86_REG_RIP));
+}
+
 // ---------------------------------------------------------------------------------------------------------
 
 cs_err Base_x64::Cs_open(void) {
-    return(cs_open(CS_ARCH_X86, CS_MODE_64, &handle));
+    return(cs_open(CS_ARCH_X86, arch->Is32()?CS_MODE_32:CS_MODE_64, &handle));
 }
 
 int Base_x64::IsRet(cs_insn insn) {
@@ -307,7 +311,7 @@ char *reg0,*reg1,*mstr;
                 num++;
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-                if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     uint64_t addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     char *lib;
                     char *func;
@@ -468,7 +472,7 @@ char *reg0,*reg1,*mstr;
             break;
         case X86_INS_LEA:
             reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
-            if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
+            if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                 // lea		rdx, qword ptr [rip + 0x199f7]
                 PrintLine(insn,lang->E_MOV_RI,reg0,insn->address+insn->size+insn->detail->x86.operands[1].mem.disp);
             }
@@ -504,7 +508,7 @@ char *reg0,*reg1,*mstr;
                     num++;
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
-                    if (insn->detail->x86.operands[1].mem.base == X86_REG_RIP) {
+                    if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                         // mov rax, qword ptr [**rip** + 0x1dc97]
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
                         //uint8_t *mem = GetMemoryPE(pe,addr,8,&read);
@@ -529,7 +533,7 @@ char *reg0,*reg1,*mstr;
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                     reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                    if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                         // mov		qword ptr [rip + 0x1d8f1], rax
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
                         PrintLine(insn,lang->E_MOV_PR,ptr(insn),addr,reg1);
@@ -545,7 +549,7 @@ char *reg0,*reg1,*mstr;
                     free(reg1);
                 }
                 else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                    if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                         //  mov		dword ptr [rip + 0x1d725], 0xc0000409
                         uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
                         PrintLine(insn,lang->E_MOV_PI,ptr(insn),
@@ -580,7 +584,7 @@ char *reg0,*reg1,*mstr;
                 num++;
             } 
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-                if (insn->detail->x86.operands[0].mem.base == X86_REG_RIP) {
+                if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     char *lib;
                     char *func;

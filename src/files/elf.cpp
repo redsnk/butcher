@@ -173,54 +173,6 @@ void FreeELF (struct _ELF *elf) {
 	}
 }
 
-/*
-uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read) {
-int n;
-uint64_t start, end, offset;
-uint8_t *m;
-long l;
-
-    for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
-        start = elf->Phdr[n].p_vaddr;
-        // TODO: memory size instead of file size
-        end = elf->Phdr[n].p_vaddr + elf->Phdr[n].p_filesz; 
-        if ((addr >= start) && (addr < end)) {
-			// addr inside the section
-			if ((end-addr) < size) {
-				// not enought size
-				size = end-addr-1;
-				if (!size) {
-					// size == 0
-					return (NULL);
-				}
-			}
-			m = (uint8_t *) malloc(size);
-			if (m != NULL) {
-				offset = elf->Phdr[n].p_offset+(addr-start);
-				l = fseek(elf->f,offset,SEEK_SET);
-				if (l != -1) {
-					l = fread(m,1,size,elf->f);
-					if (l == size) {
-						*read = size;
-						return (m);
-					} else {
-						printf("GetMemoryELF error: fread\n");
-					}
-				} else {
-					printf("GetMemoryELF error: fseek\n");
-				}
-				free(m);		
-			}
-            else {
-                printf("GetMemoryELF error: malloc\n");
-            }
-			break;
-		}
-    }
-    return (NULL);
-}
-*/
-
 uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read) {
 int n;
 uint8_t *m;
