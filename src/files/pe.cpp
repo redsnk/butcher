@@ -126,9 +126,10 @@ uint64_t base;
 	return (NULL);
 }
 
-int GetImportFunctionPE (struct _PE *pe,uint64_t addr,struct _import_name *in) {
-uint64_t read;
+int GetImportFunctionPE (struct _PE *pe,uint64_t addr,char **lib, char **func) {
+uint64_t read, *value;
 int b,m,n;
+uint8_t *name,*name2;
 
 	uint64_t base = GetImageBase(pe);
 	struct _import_directory_table *table = (struct _import_directory_table *) GetMemoryPE (pe,base+pe->Directories[IMPORT_TABLE].VirtualAddress,pe->Directories[IMPORT_TABLE].Size,&read);
@@ -136,7 +137,7 @@ int b,m,n;
 		if (read == pe->Directories[IMPORT_TABLE].Size) {
 			n = 0;
 			while (table->entry[n].import_lookup_table) {
-				uint8_t *name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME-1,&read);
+				name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME-1,&read);
 				if (name != NULL) {
 					//printf("%s\n",name);
 					m = 0;
@@ -144,7 +145,7 @@ int b,m,n;
 					uint64_t iat = base+table->entry[n].import_address_table;
 					while (true) {
 						uint64_t entry = iat+(m*b);
-						uint64_t *value = (uint64_t *) GetMemoryPE (pe,entry,b,&read);
+						value = (uint64_t *) GetMemoryPE (pe,entry,b,&read);
 						if (value == NULL) {
 							break;
 						}
@@ -154,18 +155,22 @@ int b,m,n;
 						}
 						if (entry == addr) {
 							// found
-							strcpy (in->lib_name,(const char *) name);
+							//strcpy (in->lib_name,(const char *) name);
+							*lib = strdup((char *)name);
 							uint64_t vad = (*value) & 0xffffffff;
-							uint8_t *func = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME-1,&read);
-							if (func != NULL) {
-								//printf("%s\n",func+2);
-								strcpy (in->func_name,(const char *)(func+2));
-								free (func);
-								free(value);
+							name2 = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME-1,&read);
+							if (name2 != NULL) {
+								//printf("%s\n",name2+2);
+								//strcpy (in->func_name,(const char *)(func+2));
+								*func = strdup((char *) name2+2);
 								free(name);
+								free(name2);
+								free(value);
+								//free(name);
 								free(table);
 								return (true);
 							}
+							free(*lib);
 						}
 						free(value);
 						m++;

@@ -39,12 +39,12 @@ int Arch_Elf::ValidMemory(uint64_t addr) {
     return (false);
 }
 
-int Arch_Elf::IsImportFunction (uint64_t addr, char **lib, char **func) {
-struct _elf_import_name in;
-        
-    if (GetImportFunctionELF (elf,addr,&in)) {
+int Arch_Elf::IsImportFunction (uint64_t addr, char **lib, char **func) {       
+    if (GetImportFunctionELF (elf,addr,lib,func)) {
+        /*
         *lib = strdup(in.lib_name);
         *func = strdup(in.func_name);
+        */
         return (true);
     }
     return (false);

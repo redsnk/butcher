@@ -482,15 +482,10 @@ struct _ELF {
 
 #define MAX_IMPORT_NAME	(256)
 
-struct _elf_import_name {
-	char lib_name[MAX_IMPORT_NAME];
-	char func_name[MAX_IMPORT_NAME];
-};
-
 struct _ELF *GetELF (char *name);
 void FreeELF (struct _ELF *elf);
 uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t *read);
-int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in);
+int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, char **lib, char **func);
 int GetSymbolELF (struct _ELF *elf,uint64_t addr,char **name,unsigned char *info);
 
 #endif	// _ELF_H

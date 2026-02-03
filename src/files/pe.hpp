@@ -193,11 +193,6 @@ struct _PE {
 
 #define MAX_IMPORT_NAME	(256)
 
-struct _import_name {
-	char lib_name[MAX_IMPORT_NAME];
-	char func_name[MAX_IMPORT_NAME];
-};
-
 struct _import_directory_entry {
 	uint32_t import_lookup_table;
 	uint32_t time_data_stamp;
@@ -213,6 +208,6 @@ struct _import_directory_table {
 struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
 uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read);
-int GetImportFunctionPE (struct _PE *pe, uint64_t addr, struct _import_name *in);
+int GetImportFunctionPE (struct _PE *pe, uint64_t addr, char **lib, char **func);
 
 #endif	// _PE_H

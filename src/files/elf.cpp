@@ -186,7 +186,7 @@ uint8_t *m;
     return (NULL);
 }
 
-int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, struct _elf_import_name *in) {
+int GetImportFunctionELF (struct _ELF *elf, uint64_t addr, char **lib, char **func) {
 uint64_t start,end,index;
 
     start = elf->Shdr[elf->GotPltTableIndex].sh_addr;
@@ -194,8 +194,10 @@ uint64_t start,end,index;
     if ((addr >= start) && (addr <= end)) {
         // TODO; Elf32
         index = ((addr-start) / 8)+1;
-        strcpy (in->lib_name,"<none>");
-        strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
+        //strcpy (in->lib_name,"<none>");
+        *lib = strdup("<none>");
+        //strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
+        *func = strdup(elf->DynStrTable+elf->DynSymTable[index].st_name);
         return (true);
     }
     return (false);

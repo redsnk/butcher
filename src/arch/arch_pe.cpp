@@ -41,11 +41,11 @@ int Arch_Pe::ValidMemory(uint64_t addr) {
 
 
 int Arch_Pe::IsImportFunction (uint64_t addr, char **lib, char **func) {
-struct _import_name in;
-        
-    if (GetImportFunctionPE (pe,addr,&in)) {
+    if (GetImportFunctionPE (pe,addr,lib,func)) {
+        /*
         *lib = strdup(in.lib_name);
         *func = strdup(in.func_name);
+        */
         return (true);
     }
     return (false);
