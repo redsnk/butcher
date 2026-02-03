@@ -27,6 +27,19 @@ uint8_t *Arch_Pe::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryPE(pe,addr,size,read));
 }
 
+int Arch_Pe::ValidMemory(uint64_t addr) {
+ uint8_t *mem;
+ uint64_t read;
+
+    mem = GetMemory(addr,1,&read);
+    if (mem != NULL) {
+        free(mem);
+        return (true);
+    }
+    return (false);
+}
+
+
 int Arch_Pe::IsImportFunction (uint64_t addr, char **lib, char **func) {
 struct _import_name in;
         

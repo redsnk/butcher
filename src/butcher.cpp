@@ -137,10 +137,10 @@ int n;
 
 // ----------------------
 
-int Butcher::IsGroup (cs_insn insn, int group) {
-    if (insn.detail->groups_count > 0) {
-        for (int i=0;i <  insn.detail->groups_count;i++) {
-            if (insn.detail->groups[i] == group) {
+int Butcher::IsGroup (cs_insn *insn, int group) {
+    if (insn->detail->groups_count > 0) {
+        for (int i=0;i <  insn->detail->groups_count;i++) {
+            if (insn->detail->groups[i] == group) {
                 return (true);
             }
         }
@@ -151,12 +151,12 @@ int Butcher::IsGroup (cs_insn insn, int group) {
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
-int n;
+int n,nn,count;
 //std::set<uint64_t> calls;
 struct _call *calls;
 int ncalls = 0;
 std::set<uint64_t> jmps;
-uint64_t addr,read;
+uint64_t addr,read,*addr_list;
 int max_subcode = INIT_MEM_GETCODE;
 
     if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
@@ -184,7 +184,7 @@ int max_subcode = INIT_MEM_GETCODE;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM, sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    if (IsCall(sc.insn[n],&addr)) {
+                    if (IsCall(&sc.insn[n],&addr)) {
                         // New subcode 
                         //printf("// *** Add call 0x%llx\n",addr);
                         //calls.insert(addr);
@@ -204,13 +204,22 @@ int max_subcode = INIT_MEM_GETCODE;
                         }
                         ncalls++;
                     }
-                    else if (IsJcc(sc.insn[n],&addr)) {
+                    else if (IsJcc(&sc.insn[n],&addr)) {
                         //printf("jcc 0x%llx\n",addr);
                         printf("%s *** Add jcc 0x%llx\n",lang->COMM,addr);
                         jmps.insert(addr);
                         c->labels.insert(addr);
                     }
-                    else if (IsJmp(sc.insn[n],&addr)) {
+                    else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
+                        for (nn=0;nn<count;nn++) {
+                            jmps.insert(addr_list[nn]);
+                            c->labels.insert(addr_list[nn]);
+                        }
+                        free (addr_list);
+                        lend = true;
+                    }
+                    /*
+                    else if (IsJmp(&sc.insn[n],&addr)) {
                         //printf("jmp 0x%llx\n",addr);
                         if (addr) {
                             printf("%s *** Add jmp 0x%llx\n",lang->COMM,addr);
@@ -219,7 +228,8 @@ int max_subcode = INIT_MEM_GETCODE;
                         }
                         lend = true;
                     }
-                    else if (IsRet(sc.insn[n]) || IsInt(sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
+                    */
+                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
                         lend = true;
                     }
                     if (lend) {

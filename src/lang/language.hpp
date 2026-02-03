@@ -12,6 +12,7 @@ class Language {
     public:
     const char *COMM = "";
     int COMM_SEP = 0;
+    const char *INDENT = "";
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
     const char *OP_REG = "";

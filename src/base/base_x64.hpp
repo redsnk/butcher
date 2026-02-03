@@ -14,20 +14,19 @@
 class Base_x64 : public Butcher {
     public:
         cs_err Cs_open(void);
-        int IsRet(cs_insn insn);
-        int IsCall(cs_insn insn, uint64_t *addr);
-        int IsJmp(cs_insn insn, uint64_t *addr);
-        int IsJcc(cs_insn insn, uint64_t *addr);
-        int IsInt(cs_insn insn, uint64_t *num);
+        int IsRet(cs_insn *insn);
+        int IsCall(cs_insn *insn, uint64_t *addr);
+        int IsJmp(cs_insn *insn, uint64_t *addr[],int *count);
+        int IsJcc(cs_insn *insn, uint64_t *addr);
+        int IsInt(cs_insn *insn, uint64_t *num);
         int IsEnd(cs_insn *insn, int n, int count);
 
         using Butcher::Butcher;
-        void PrintLine(cs_insn *insn,const char *format,...);
+        void PrintLine(cs_insn *insn,int indent,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
         void PrintCode(Code *c);
         void PrintSubCode(Code *c,int num);
-        //void PrintSubMem(Code *c,int num);
 };
 
 #endif // BASE_X64_H

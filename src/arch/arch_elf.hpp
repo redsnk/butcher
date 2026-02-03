@@ -18,6 +18,7 @@ class Arch_Elf: public Archive {
         void CloseFile(void);
         int Is32(void);
         uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
+        int ValidMemory(uint64_t addr);
         int IsImportFunction (uint64_t addr, char **lib, char **func);
         int IsSymbolFunction (uint64_t addr, char **func);
         int IsSymbolObject (uint64_t addr, char **name);

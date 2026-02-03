@@ -27,6 +27,18 @@ uint8_t *Arch_Elf::GetMemory(uint64_t addr,uint64_t size, uint64_t *read) {
     return(GetMemoryELF(elf,addr,size,read));
 }
 
+int Arch_Elf::ValidMemory(uint64_t addr) {
+ uint8_t *mem;
+ uint64_t read;
+
+    mem = GetMemory(addr,1,&read);
+    if (mem != NULL) {
+        free(mem);
+        return (true);
+    }
+    return (false);
+}
+
 int Arch_Elf::IsImportFunction (uint64_t addr, char **lib, char **func) {
 struct _elf_import_name in;
         
