@@ -128,44 +128,52 @@ uint64_t base;
 
 int GetImportFunctionPE (struct _PE *pe,uint64_t addr,struct _import_name *in) {
 uint64_t read;
+int b,m,n;
 
 	uint64_t base = GetImageBase(pe);
 	struct _import_directory_table *table = (struct _import_directory_table *) GetMemoryPE (pe,base+pe->Directories[IMPORT_TABLE].VirtualAddress,pe->Directories[IMPORT_TABLE].Size,&read);
-	if ((table != NULL) && (read == pe->Directories[IMPORT_TABLE].Size)) {
-		int n = 0;
-		while (table->entry[n].import_lookup_table) {
-			uint8_t *name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME,&read);
-			if (name != NULL) {
-				//printf("%s\n",name);
-				int m = 0;
-				// TODO: PE32 addresses
-				uint64_t iat = base+table->entry[n].import_address_table;
-				while (true) {
-					uint64_t entry = iat+(m*8);
-					uint64_t *value = (uint64_t *) GetMemoryPE (pe,entry,8,&read);
-					if ((value == NULL) || (read != 8) || (*value == 0)) {
-						break;
-					}
-					if (entry == addr) {
-						// found
-						strcpy (in->lib_name,(const char *) name);
-						uint64_t vad = (*value) & 0xffffffff;
-						uint8_t *func = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME,&read);
-						if (func != NULL) {
-							strcpy (in->func_name,(const char *)(func+2));
-							free (func);
-							free(value);
-							free(name);
-							free(table);
-							return (true);
+	if (table != NULL) {
+		if (read == pe->Directories[IMPORT_TABLE].Size) {
+			n = 0;
+			while (table->entry[n].import_lookup_table) {
+				uint8_t *name = GetMemoryPE (pe,base+table->entry[n].name,MAX_IMPORT_NAME-1,&read);
+				if (name != NULL) {
+					//printf("%s\n",name);
+					m = 0;
+					b = pe->pe32?4:8;
+					uint64_t iat = base+table->entry[n].import_address_table;
+					while (true) {
+						uint64_t entry = iat+(m*b);
+						uint64_t *value = (uint64_t *) GetMemoryPE (pe,entry,b,&read);
+						if (value == NULL) {
+							break;
 						}
+						if ((read != b) || (*value == 0)) {
+							free(value);
+							break;
+						}
+						if (entry == addr) {
+							// found
+							strcpy (in->lib_name,(const char *) name);
+							uint64_t vad = (*value) & 0xffffffff;
+							uint8_t *func = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME-1,&read);
+							if (func != NULL) {
+								//printf("%s\n",func+2);
+								strcpy (in->func_name,(const char *)(func+2));
+								free (func);
+								free(value);
+								free(name);
+								free(table);
+								return (true);
+							}
+						}
+						free(value);
+						m++;
 					}
-					free(value);
-					m++;
+					free(name);	
 				}
-				free(name);	
+				n++;
 			}
-			n++;
 		}
 		free(table);
 	}

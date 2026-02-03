@@ -390,6 +390,17 @@ int n,b;
                     }    
                 }
                 else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                        (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
+                        (insn->detail->x86.operands[0].mem.disp)) {
+                    addr = insn->detail->x86.operands[0].mem.disp;
+                    if (arch->IsImportFunction(addr,&lib,&func)) {
+                        PrintLine(insn,1,lang->E_JMP_FROM_IAT,lib,func);
+                        free(lib);
+                        free(func);
+                        num++;
+                    }
+                }
+                else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
                     // jmp             dword ptr [eax*4 + 0x44fcb89]
