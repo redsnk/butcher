@@ -19,6 +19,8 @@ class Butcher {
         csh handle;
         Archive *arch;
         Language *lang;
+        int ltraces;
+        int lasm;
 
         virtual cs_err Cs_open(void) = 0;
         virtual int IsRet(cs_insn *insn) = 0;

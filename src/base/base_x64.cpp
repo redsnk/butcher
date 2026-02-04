@@ -354,8 +354,13 @@ char out[1024];
     }
     */
     //while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
-    while (strlen(p) < lang->COMM_SEP) strcat(p," ");
-    printf("%s%s 0x%llx:\t%s\t\t%s\n", out, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
+    if (!lasm) {
+        printf("%s\n", out);
+    }
+    else {
+        while (strlen(p) < lang->COMM_SEP) strcat(p," ");
+        printf("%s%s 0x%llx:\t%s\t\t%s\n", out, lang->COMM, insn->address, insn->mnemonic,insn->op_str);
+    }
 }
 
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {

@@ -64,6 +64,8 @@ Archive *a;
         }
     }
     b = new Base_x64(a,l);
+    b->ltraces = opt_t;
+    b->lasm = opt_a;
     b->Cut(path,addr);
     delete b;
     return (1);
