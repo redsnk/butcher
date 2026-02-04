@@ -127,7 +127,7 @@ uint64_t base;
 }
 
 int GetImportFunctionPE (struct _PE *pe,uint64_t addr,char **lib, char **func) {
-uint64_t read, *value;
+uint64_t read, *value, entry, iat, vad;
 int b,m,n;
 uint8_t *name,*name2;
 
@@ -142,9 +142,9 @@ uint8_t *name,*name2;
 					//printf("%s\n",name);
 					m = 0;
 					b = pe->pe32?4:8;
-					uint64_t iat = base+table->entry[n].import_address_table;
+					iat = base+table->entry[n].import_address_table;
 					while (true) {
-						uint64_t entry = iat+(m*b);
+						entry = iat+(m*b);
 						value = (uint64_t *) GetMemoryPE (pe,entry,b,&read);
 						if (value == NULL) {
 							break;
@@ -156,12 +156,12 @@ uint8_t *name,*name2;
 						if (entry == addr) {
 							// found
 							//strcpy (in->lib_name,(const char *) name);
-							*lib = strdup((char *)name);
-							uint64_t vad = (*value) & 0xffffffff;
+							vad = (*value) & 0xffffffff;
 							name2 = GetMemoryPE (pe,base+vad,MAX_IMPORT_NAME-1,&read);
 							if (name2 != NULL) {
 								//printf("%s\n",name2+2);
 								//strcpy (in->func_name,(const char *)(func+2));
+								*lib = strdup((char *)name);
 								*func = strdup((char *) name2+2);
 								free(name);
 								free(name2);

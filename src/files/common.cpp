@@ -16,7 +16,7 @@ long l,c;
         *read = last - addr + 1;
         m = (uint8_t *) malloc(*read);
         if (m != NULL) {
-            memset(m,0,size);
+            memset(m,0,*read);
             if ((addr - v_addr  + 1) <= d_size) {
                 // addr inside the file section
                 if ((last - v_addr + 1) <= d_size) {
