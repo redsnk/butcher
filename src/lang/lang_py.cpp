@@ -33,7 +33,8 @@ Lang_Py::Lang_Py() {
     E_XOR_RI =              "%s = %s ^ %lld";
     E_JNE_R_GOTO =          "if %s != 0:\n        goto .label_0x%llx";
     E_JE_R_GOTO =           "if %s == 0:\n        goto .label_0x%llx";
-    E_JA_RI_GOTO =          "if %s > 0x%llx:\n        goto .label_0x%llx";
+    E_JA_RR_GOTO =          "if %s > %s:\n        goto .label_0x%llx";
+    E_JGE_RR_GOTO=          "if %s >= %s:\n        goto .label_0x%llx";
     E_SPACE =               "";
     E_MOV_RR =              "%s = %s";
     E_MOV_RI =              "%s = 0x%llx";
@@ -48,6 +49,8 @@ Lang_Py::Lang_Py() {
     E_IF_R_EQ_I =           "if %s == 0x%llx:";
     E_ELIF_R_EQ_I =         "elif %s == 0x%llx:";
     E_ENDIF =               "";
+    E_GET_MEM =             "cpu.get_%s_ptr(%s)";
+    E_S_GET_MEM =           "cpu.s_get_%s_ptr(%s)";
 }
 
 #define PY_HEADER "\
@@ -161,6 +164,19 @@ char *buffer;
     }
     else {
         sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
+    }
+    return (buffer);
+}
+
+char *Lang_Py::s_reg_name(csh handle,int id_reg) {
+char *buffer;
+
+    buffer = (char *) malloc(256);
+    if (id_reg == X86_REG_INVALID) {
+        strcpy(buffer,"");
+    }
+    else {
+        sprintf(buffer,"cpu.s_%s",cs_reg_name(handle,id_reg));
     }
     return (buffer);
 }

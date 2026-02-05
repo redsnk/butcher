@@ -26,6 +26,7 @@ class _r32(Structure):
 
 class _reg(Union):
     _fields_ = [("r64",c_uint64),
+                ("s64",c_int64),
                 ("r32",_r32),
                 ("r16",_r16),
                 ("r8",_r8)]
@@ -204,6 +205,13 @@ class _cpu:
         self.rax.r64 = v
 
     @property
+    def s_rax(self):
+        return self.rax.s64
+    @s_rax.setter
+    def s_rax(self,v):
+        self.rax.s64 = v
+
+    @property
     def _rbx(self):
         return self.rbx.r64
     @_rbx.setter
@@ -229,14 +237,14 @@ class _cpu:
         return self.r8.r64
     @_r8.setter
     def _r8(self,v):
-        self.rax.r8 = v
+        self.r8.r64 = v
 
     @property
     def _r9(self):
         return self.r9.r64
     @_r9.setter
     def _r9(self,v):
-        self.rax.r9 = v
+        self.r9.r64 = v
 
     @property
     def _r10(self):
@@ -673,16 +681,18 @@ def test():
     print("4")
 
 r = _reg()
-r.r64 = 0x0102030405060708;
+r.r64 = 0x0102030405060708
+r.r64 = r.r64 + 1
+s64 = c_int64(r.r64)
+print(s64 + 1)
 print(hex(r.r64))
 print(hex(r.r32.h))
 print(hex(r.r32.l))
 print(hex(r.r16.h))
 print(hex(r.r8.h))
 print(hex(r.r8.l))
-test()
-'''
-'''
+#test()
+
 cpu = _cpu()
 cpu._rax = 0x0123456789ABCDEF
 print(hex(cpu._rax))

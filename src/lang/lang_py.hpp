@@ -14,6 +14,7 @@ class Lang_Py : public Language {
     void PrintSubCodeSep(void);
     char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);
+    char *s_reg_name(csh handle,int id_reg);
 
     Lang_Py();
     

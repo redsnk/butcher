@@ -32,6 +32,7 @@ struct _r32 {
 
 union _reg {
 	uint64_t r64;
+	int64_t s64;
 	struct _r32 r32;
 	struct _r16 r16;
 	struct _r8 r8;
@@ -141,11 +142,6 @@ struct _cpu {
 #define _r15b	(cpu->r15.r8.l)
 #define _bpl	(cpu->rbp.r8.l)
 #define _spl	(cpu->rsp.r8.l)
-
-/*
-#define _push(x)	op_r(cpu,"push",#x)
-#define _pop(x)		op_r(cpu,"pop",#x)
-*/
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)

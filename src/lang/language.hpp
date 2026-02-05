@@ -40,7 +40,8 @@ class Language {
     const char *E_XOR_RI = "";
     const char *E_JNE_R_GOTO = "";
     const char *E_JE_R_GOTO = "";
-    const char *E_JA_RI_GOTO = "";
+    const char *E_JA_RR_GOTO = "";
+    const char *E_JGE_RR_GOTO = "";
     const char *E_SPACE = "";
     const char *E_MOV_RR = "";
     const char *E_MOV_RI = "";
@@ -55,7 +56,8 @@ class Language {
     const char *E_IF_R_EQ_I = "";
     const char *E_ELIF_R_EQ_I = "";
     const char *E_ENDIF = "";
-    
+    const char *E_GET_MEM = "";
+    const char *E_S_GET_MEM = "";
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
@@ -67,6 +69,9 @@ class Language {
     virtual void PrintSubCodeSep(void) = 0;
     virtual char *mem_str(csh handle,cs_x86_op op) = 0;
     virtual char *reg_name(csh handle,int id_reg) = 0;
+    virtual char *s_reg_name(csh handle,int id_reg) = 0;
+    const char *ptr(cs_x86_op op);
+    char *get_op_str(csh handle,cs_x86_op op,int sign);
 };
 
 #endif // _LANGUAGE_H
