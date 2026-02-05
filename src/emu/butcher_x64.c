@@ -255,7 +255,8 @@ int flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF);
 }
 
-void push(struct _cpu *cpu,int bits,uint64_t n) {
+void push(struct _cpu *cpu,int b,uint64_t n) {
+	/*
 	switch (bits) {
 		case 8:
 			cpu->rsp.r64 -= 1;
@@ -276,11 +277,15 @@ void push(struct _cpu *cpu,int bits,uint64_t n) {
 		default:
 			panic("push bits","");
 	}
+	*/
+	cpu->rsp.r64 -= b;
+	set_mem(cpu,cpu->rsp.r64,b,(uint8_t *)&n);
 }
 
-uint64_t pop(struct _cpu *cpu,int bits) {
+uint64_t pop(struct _cpu *cpu,int b) {
 uint64_t ret=0;
 
+	/*
 	switch (bits) {
 		case 8:
 			get_mem(cpu,cpu->rsp.r64,1,(uint8_t*) &ret);
@@ -301,6 +306,9 @@ uint64_t ret=0;
 		default:
 			panic("pop bits","");
 	}
+	*/
+	get_mem(cpu,cpu->rsp.r64,b,(uint8_t*) &ret);
+	cpu->rsp.r64 += b;
 	return (ret);
 }
 

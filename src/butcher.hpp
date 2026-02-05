@@ -23,6 +23,7 @@ class Butcher {
         int lasm;
 
         virtual cs_err Cs_open(void) = 0;
+        virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
         virtual int IsRet(cs_insn *insn) = 0;
         virtual int IsCall(cs_insn *insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn *insn, uint64_t *addr[],int *count) = 0;

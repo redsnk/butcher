@@ -31,8 +31,9 @@ Lang_C::Lang_C() {
     E_XOR_R =               "%s = 0;";
     E_XOR_RR =              "%s = %s ^ %s;";
     E_XOR_RI =              "%s = %s ^ %lld;";
-    E_JNE_GOTO =            "if (%s != 0) goto label_0x%llx;";
-    E_JE_GOTO =             "if (%s == 0) goto label_0x%llx;";
+    E_JNE_R_GOTO =          "if (%s != 0) goto label_0x%llx;";
+    E_JE_R_GOTO =           "if (%s == 0) goto label_0x%llx;";
+    E_JA_RI_GOTO =          "if (%s > 0x%llx) goto label_0x%llx;";
     E_SPACE =               "";
     E_MOV_RR =              "%s = %s;";
     E_MOV_RI =              "%s = 0x%llx;";
@@ -44,6 +45,9 @@ Lang_C::Lang_C() {
     E_MOV_PI =              "_set_%s_ptr(0x%llx,0x%llx);";
     E_MOV_MI =              "_set_%s_ptr(%s,0x%llx);";
     E_STACK_INIT =          "    %s = 0x%llx;\n    %s = %s;\n";
+    E_IF_R_EQ_I =           "if (%s == 0x%llx) {";
+    E_ELIF_R_EQ_I =         "else if (%s == 0x%llx) {";
+    E_ENDIF =               "}";
 }
 
 #define C_HEADER "\
@@ -84,7 +88,9 @@ void Lang_C::PrintMainOpen(Code *c) {
 }
 
 #define C_FOOTER_2 "\
+    /* Insert code here ... */\n\
     func_0x%llx(cpu);\n\
+    /* Insert code here ... */\n\
     end(cpu);\n\
     return (0);\n\
 }\n\

@@ -38,8 +38,9 @@ class Language {
     const char *E_XOR_R = "";
     const char *E_XOR_RR = "";
     const char *E_XOR_RI = "";
-    const char *E_JNE_GOTO = "";
-    const char *E_JE_GOTO = "";
+    const char *E_JNE_R_GOTO = "";
+    const char *E_JE_R_GOTO = "";
+    const char *E_JA_RI_GOTO = "";
     const char *E_SPACE = "";
     const char *E_MOV_RR = "";
     const char *E_MOV_RI = "";
@@ -51,6 +52,9 @@ class Language {
     const char *E_MOV_PI = "";
     const char *E_MOV_MI = "";
     const char *E_STACK_INIT = "";
+    const char *E_IF_R_EQ_I = "";
+    const char *E_ELIF_R_EQ_I = "";
+    const char *E_ENDIF = "";
     
 
     virtual void PrintHeader(Code *c) = 0;

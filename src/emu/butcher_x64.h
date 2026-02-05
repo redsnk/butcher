@@ -192,8 +192,8 @@ uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
 uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
-void push(struct _cpu *cpu,int bits,uint64_t n);
-uint64_t pop(struct _cpu *cpu,int bits);
+void push(struct _cpu *cpu,int b,uint64_t n);
+uint64_t pop(struct _cpu *cpu,int b);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);

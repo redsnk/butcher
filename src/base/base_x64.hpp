@@ -14,6 +14,7 @@
 class Base_x64 : public Butcher {
     public:
         cs_err Cs_open(void);
+        int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count);
         int IsRet(cs_insn *insn);
         int IsCall(cs_insn *insn, uint64_t *addr);
         int IsJmp(cs_insn *insn, uint64_t *addr[],int *count);

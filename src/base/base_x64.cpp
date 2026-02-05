@@ -212,6 +212,30 @@ int IsRIP(int id) {
     return((id == X86_REG_EIP)||(id == X86_REG_RIP));
 }
 
+int MemUtil(uint8_t *mem,int read) {
+int n,c;
+
+    if (read >= 8) {
+        // Unicode
+        n = 0;
+        do {
+            if ((mem[n] != 0) && (mem[n+1] == 0)) {
+                n += 2;
+            } 
+            else {
+                break;
+            }  
+        }
+        while (n < (read-1));
+        c = (n/2);
+        if ((c >= 4) && (mem[n] == 0) && (mem[n+1] == 0)) {
+            // 4+ chars
+            return ((c+1)*2);
+        }
+    }
+    return (0);
+}
+
 // ---------------------------------------------------------------------------------------------------------
 
 cs_err Base_x64::Cs_open(void) {
@@ -330,6 +354,45 @@ int Base_x64::IsJcc(cs_insn *insn, uint64_t *addr) {
     return (false);
 }
 
+#define MAX_SUBMEM  (1024*5)
+
+int Base_x64::IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) {
+uint64_t read;
+int n;
+
+    if (insn->id == X86_INS_MOV) {
+        if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+            if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                *addr = insn->detail->x86.operands[1].imm;
+                *mem = arch->GetMemory(*addr,MAX_SUBMEM,&read);
+                if (*mem != NULL) {
+                    *count = MemUtil(*mem,read);
+                    if (*count) {
+                        return (true);
+                    }
+                    free(*mem);
+                }
+            }
+            else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
+                if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
+                    // mov rax, qword ptr [**rip** + 0x1dc97]
+                    *addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
+                    n = insn->detail->x86.addr_size;
+                    *mem = arch->GetMemory(*addr,n,&read);
+                    if (*mem != NULL) {
+                        if (read == n) {
+                            *count = read;
+                            return (true);
+                        }
+                        free(mem);
+                    }
+                }
+            }
+        }
+    }
+    return (false);
+}
+
 // ---------------------------------------------------------------------------------------------------------
 
 void Base_x64::PrintLine(cs_insn *insn,int indent,const char *format,...) {
@@ -409,7 +472,8 @@ int n,b;
                         (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
                     // jmp             dword ptr [eax*4 + 0x44fcb89]
-                    PrintLine(insn,1,"switch(%s) {",lang->reg_name(handle,insn->detail->x86.operands[0].mem.index));
+                    //PrintLine(insn,1,"switch(%s) {",lang->reg_name(handle,insn->detail->x86.operands[0].mem.index));
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].mem.index);
                     for (n=0;n<MAX_JMPS;n++) {
                         addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                         b = insn->detail->x86.addr_size;
@@ -424,8 +488,10 @@ int n,b;
                             free(mem);
                             if (arch->ValidMemory(addr)) {
                                 // Valid
-                                PrintLine(insn,2,"case %i:",n);
-                                PrintLine(insn,3,lang->E_GOTO,addr);
+                                PrintLine(insn,1,(n==0)?lang->E_IF_R_EQ_I:lang->E_ELIF_R_EQ_I,reg0,n);
+                                //PrintLine(insn,2,"case %i:",n);
+                                PrintLine(insn,2,lang->E_GOTO,addr);
+                                PrintLine(insn,1,lang->E_ENDIF);
                             }
                             else {
                                 break;
@@ -435,7 +501,8 @@ int n,b;
                             break;
                         }
                     }
-                    PrintLine(insn,1,"}",lang->reg_name(handle,insn->detail->x86.operands[0].mem.base));
+                    free(reg0);
+                    //PrintLine(insn,1,lang->E_ENDIF);
                     num++;
                 }
             }
@@ -556,7 +623,7 @@ int n,b;
                                         // test		eax, eax
                                         // jne		0x1800026ce
                                         PrintLine(insn,0,lang->E_SPACE);
-                                        PrintLine(next,1,lang->E_JNE_GOTO,reg0,next->detail->x86.operands[0].imm);
+                                        PrintLine(next,1,lang->E_JNE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
                                         num += 2;
 
                                     }
@@ -574,10 +641,35 @@ int n,b;
                                         // test		eax, eax
                                         // je		0x1800026ce
                                         PrintLine(insn,0,lang->E_SPACE);
-                                        PrintLine(next,1,lang->E_JE_GOTO,reg0,next->detail->x86.operands[0].imm);
+                                        PrintLine(next,1,lang->E_JE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
                                         num += 2;
 
                                     }
+                                }
+                                free(reg0);
+                            }
+                        }
+                        break;
+                }
+            }
+            break;
+        case X86_INS_CMP:
+            if ((num+1) < sc->count) {
+                cs_insn *next = &sc->insn[num+1];
+                switch (next->id) {
+                    case X86_INS_JA:
+                        if (FlagsNotUsed(sc,num+1)) {
+                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                                    // TODO
+                                }
+                                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                                    // cmp		eax, 0x2ab
+                                    // ja		0x4500588
+                                    PrintLine(insn,0,lang->E_SPACE);
+                                    PrintLine(next,1,lang->E_JA_RI_GOTO,reg0,insn->detail->x86.operands[1].imm,next->detail->x86.operands[0].imm);
+                                    num += 2;
                                 }
                                 free(reg0);
                             }
@@ -627,12 +719,14 @@ int n,b;
                     if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                         // mov rax, qword ptr [**rip** + 0x1dc97]
                         addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
+                        /*
                         n = insn->detail->x86.addr_size;
                         mem = arch->GetMemory(addr,n,&read);
                         if ((mem != NULL) && (read == n)) {
                             c->AddSubMem(addr,mem,n);
                             free(mem);
                         }
+                        */
                         PrintLine(insn,1,lang->E_MOV_RP,reg0,ptr(insn),addr);
                         num++;
                     }

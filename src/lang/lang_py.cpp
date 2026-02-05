@@ -16,7 +16,7 @@ Lang_Py::Lang_Py() {
     E_FUNC_ADDR =           "func_0x%llx(cpu)";
     E_RETURN =              "";
     E_GOTO =                "goto .label_0x%llx";
-    E_LABEL =               "label .label_0x%llx\n";
+    E_LABEL =               "    label .label_0x%llx\n";
     E_JMP_FROM_IAT =        "cpu.jmp_from_iat(\"%s\",\"%s\");";
     E_JE =                  "if cpu.flag_z():\n        goto .label_0x%llx";
     E_JNE =                 "if not cpu.flag_z():\n        goto .label_0x%llx";
@@ -31,8 +31,9 @@ Lang_Py::Lang_Py() {
     E_XOR_R =               "%s = 0";
     E_XOR_RR =              "%s = %s ^ %s";
     E_XOR_RI =              "%s = %s ^ %lld";
-    E_JNE_GOTO =            "if %s != 0:\n        goto .label_0x%llx";
-    E_JE_GOTO =             "if %s == 0:\n        goto .label_0x%llx";
+    E_JNE_R_GOTO =          "if %s != 0:\n        goto .label_0x%llx";
+    E_JE_R_GOTO =           "if %s == 0:\n        goto .label_0x%llx";
+    E_JA_RI_GOTO =          "if %s > 0x%llx:\n        goto .label_0x%llx";
     E_SPACE =               "";
     E_MOV_RR =              "%s = %s";
     E_MOV_RI =              "%s = 0x%llx";
@@ -44,6 +45,9 @@ Lang_Py::Lang_Py() {
     E_MOV_PI =              "cpu.set_%s_ptr(0x%llx,0x%llx)";
     E_MOV_MI =              "cpu.set_%s_ptr(%s,0x%llx)";
     E_STACK_INIT =          "    %s = 0x%llx\n    %s = %s\n";
+    E_IF_R_EQ_I =           "if %s == 0x%llx:";
+    E_ELIF_R_EQ_I =         "elif %s == 0x%llx:";
+    E_ENDIF =               "";
 }
 
 #define PY_HEADER "\

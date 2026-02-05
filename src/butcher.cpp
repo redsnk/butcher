@@ -158,6 +158,7 @@ int ncalls = 0;
 std::set<uint64_t> jmps;
 uint64_t addr,read,*addr_list;
 int max_subcode = INIT_MEM_GETCODE;
+uint8_t *mem;
 
     if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
         //printf("// test\n");
@@ -184,6 +185,12 @@ int max_subcode = INIT_MEM_GETCODE;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     if (ltraces) printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM, sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    if (IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
+                        // New submem
+                        if (ltraces) printf("%s *** Add submem 0x%llx(%li)\n",lang->COMM,addr,count);
+                        c->AddSubMem(addr,mem,count);
+                        free(mem);
+                    }
                     if (IsCall(&sc.insn[n],&addr)) {
                         // New subcode 
                         //printf("// *** Add call 0x%llx\n",addr);
