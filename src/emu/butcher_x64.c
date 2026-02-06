@@ -58,15 +58,33 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
 FILE *f;
 char *mem;
+uint64_t l;
 
 	mem = calloc(1,v_Size);
-	if (d_Size) {
-		f = fopen(name,"r");
-		if (f != NULL) {
-			fseek(f,d_Offset,SEEK_SET);
-			fread(mem,1,d_Size,f);
-			fclose(f);
+	if (mem != NULL) {
+		if (d_Size) {
+			f = fopen(name,"r");
+			if (f != NULL) {
+				if (!fseek(f,d_Offset,SEEK_SET)) {
+					l = fread(mem,1,d_Size,f);
+					if (l != d_Size) {
+						panic("load_mem","fread");
+					}
+				}
+				else {
+					panic("load_mem","fseek");
+				}	
+				fclose(f);
+			}
+			else {
+				panic("load_mem","fopen");
+			}
 		}
+		add_mem (cpu,v_Address,mem,v_Size);
+		free(mem);
+	}
+	else {
+		panic("load_mem","calloc");
 	}
 }
 

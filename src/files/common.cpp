@@ -14,9 +14,8 @@ long l,c;
         }
         // last inside the virtual section
         *read = last - addr + 1;
-        m = (uint8_t *) malloc(*read);
+        m = (uint8_t *) calloc(1,*read);
         if (m != NULL) {
-            memset(m,0,*read);
             if ((addr - v_addr  + 1) <= d_size) {
                 // addr inside the file section
                 if ((last - v_addr + 1) <= d_size) {
@@ -25,7 +24,7 @@ long l,c;
                 }
                 else {
                     // last outside the file section
-                    c = v_addr + v_size - addr;
+                    c = d_size - (addr - v_addr);
                 }
             }
             else {

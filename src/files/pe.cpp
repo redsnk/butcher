@@ -6,7 +6,8 @@ struct _PE *GetPE (char *name) {
 FILE *f;
 struct _PE *pe;
 long l,lsections,lmax;
-int b;
+int b,n;
+uint32_t align;
 
 	f = fopen(name,"r");
 	if (f!= NULL) {
@@ -60,6 +61,11 @@ int b;
 											l = fread(&pe->Sections,1,lmax,f);
 											if (l == lmax) {
 												pe->name = strdup(name);
+												// Fix virtual size to SectionAlignment 
+												align = (pe->pe32)?pe->Optional_Header_Windows_Specific_Fields.pe32.SectionAlignament:pe->Optional_Header_Windows_Specific_Fields.pe32plus.SectionAlignament;
+												for (n=0;n<pe->num_sections;n++) {
+													pe->Sections[n].VirtualSize = (((pe->Sections[n].VirtualSize)/align)*align)+align;
+												}
 												return (pe);
 											} else {
 												printf("GetPE error: fread Sections\n");
