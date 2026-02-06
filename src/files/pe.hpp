@@ -116,6 +116,7 @@ struct _Section_Header {
 
 struct _PE {
 	FILE *f;
+	char *name;
 	struct _ms_dos_stub ms_dos_stub;
 	int32_t signature;
 	struct _COFF_File_Header COFF_File_Header;
@@ -209,5 +210,6 @@ struct _PE *GetPE (char *name);
 void FreePE (struct _PE *pe);
 uint8_t *GetMemoryPE (struct _PE *pe, uint64_t addr, uint64_t size, uint64_t *read);
 int GetImportFunctionPE (struct _PE *pe, uint64_t addr, char **lib, char **func);
+uint64_t GetImageBase (struct _PE *pe);
 
 #endif	// _PE_H

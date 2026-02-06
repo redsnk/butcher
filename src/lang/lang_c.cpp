@@ -51,6 +51,7 @@ Lang_C::Lang_C() {
     E_ENDIF =               "}";
     E_GET_MEM =             "_get_%s_ptr(%s)";
     E_S_GET_MEM =           "s_get_%s_ptr(%s)";
+    E_LOAD_MEM =            "load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);";
 }
 
 #define C_HEADER "\
@@ -115,11 +116,11 @@ char sub[128];
             sprintf(sub,"\\x%02x",sm->mem[n]);
             strcat(buffer,sub);
         }
-        printf("    add_mem (cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
+        printf("    add_mem(cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
         free(buffer);
     }
     else {
-        printf("    add_mem (cpu,0x%llx,NULL,%i);\n",sm->addr,sm->size);
+        printf("    add_mem(cpu,0x%llx,NULL,%i);\n",sm->addr,sm->size);
     }
 }
 

@@ -59,6 +59,7 @@ int b;
 											lmax = pe->num_sections*sizeof(struct _Section_Header);
 											l = fread(&pe->Sections,1,lmax,f);
 											if (l == lmax) {
+												pe->name = strdup(name);
 												return (pe);
 											} else {
 												printf("GetPE error: fread Sections\n");
@@ -98,6 +99,7 @@ int b;
 
 void FreePE (struct _PE *pe) {
 	if (pe != NULL) {
+		free(pe->name);
 		fclose(pe->f);
 		free(pe);
 	}

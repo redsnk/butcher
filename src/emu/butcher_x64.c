@@ -55,6 +55,21 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 	cpu->mem_count++;
 }
 
+void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
+FILE *f;
+char *mem;
+
+	mem = calloc(1,v_Size);
+	if (d_Size) {
+		f = fopen(name,"r");
+		if (f != NULL) {
+			fseek(f,d_Offset,SEEK_SET);
+			fread(mem,1,d_Size,f);
+			fclose(f);
+		}
+	}
+}
+
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	for (int n=0;n<cpu->mem_count;n++) {
 		if ((addr >= cpu->mems[n].addr) && ((addr+size) <= (cpu->mems[n].addr+cpu->mems[n].size))) {
@@ -86,8 +101,22 @@ uint8_t value;
 	return (value);
 }
 
+int8_t s_byte_ptr(struct _cpu *cpu,uint64_t addr) {
+int8_t value;
+
+	get_mem (cpu,addr,1,(uint8_t *)&value);
+	return (value);
+}
+
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr) {
 uint16_t value;
+
+	get_mem (cpu,addr,2,(uint8_t *)&value);
+	return (value);
+}
+
+int16_t s_word_ptr(struct _cpu *cpu,uint64_t addr) {
+int16_t value;
 
 	get_mem (cpu,addr,2,(uint8_t *)&value);
 	return (value);
@@ -100,8 +129,22 @@ uint32_t value;
 	return (value);
 }
 
+int32_t s_dword_ptr(struct _cpu *cpu,uint64_t addr) {
+int32_t value;
+
+	get_mem (cpu,addr,4,(uint8_t *)&value);
+	return (value);
+}
+
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr) {
 uint64_t value;
+
+	get_mem (cpu,addr,8,(uint8_t *)&value);
+	return (value);
+}
+
+int64_t s_qword_ptr(struct _cpu *cpu,uint64_t addr) {
+int64_t value;
 
 	get_mem (cpu,addr,8,(uint8_t *)&value);
 	return (value);

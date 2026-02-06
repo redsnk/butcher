@@ -148,6 +148,11 @@ struct _cpu {
 #define _get_dword_ptr(m)	dword_ptr(cpu,m)
 #define _get_qword_ptr(m)	qword_ptr(cpu,m)
 
+#define s_get_byte_ptr(m)	s_byte_ptr(cpu,m)
+#define s_get_word_ptr(m)	s_word_ptr(cpu,m)
+#define s_get_dword_ptr(m)	s_dword_ptr(cpu,m)
+#define s_get_qword_ptr(m)	s_qword_ptr(cpu,m)
+
 #define _set_byte_ptr(m,v)	set_byte_ptr(cpu,m,v)
 #define _set_word_ptr(m,v)	set_word_ptr(cpu,m,v)
 #define _set_dword_ptr(m,v)	set_dword_ptr(cpu,m,v)
@@ -170,6 +175,7 @@ void panic(char *str1,char *str2);
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
 void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func);
@@ -177,6 +183,10 @@ uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
 uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+int8_t s_byte_ptr(struct _cpu *cpu,uint64_t addr);
+int16_t s_word_ptr(struct _cpu *cpu,uint64_t addr);
+int32_t s_dword_ptr(struct _cpu *cpu,uint64_t addr);
+int64_t s_qword_ptr(struct _cpu *cpu,uint64_t addr);
 void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
 void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
 void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);

@@ -258,6 +258,35 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
     return (false);
 }
 
+int Base_x64::IsJmpIAT(cs_insn *insn) {
+uint64_t addr;
+char *lib,*func;
+
+    if (insn->id == X86_INS_JMP) {
+        if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+            if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,&lib,&func)) {
+                    free(lib);
+                    free(func);
+                    return (true);
+                }    
+            }
+            else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.disp)) {
+                addr = insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,&lib,&func)) {
+                    free(lib);
+                    free(func);
+                    return (true);
+                }
+            }
+        }
+    }
+    return (false);
+}
+
 /*
 int Base_x64::IsJmp(cs_insn *insn, uint64_t *addr) {
     *addr = 0;
@@ -403,7 +432,7 @@ char out[1024];
     }
     */
     //while (strlen(buffer) < lang->COMM_SEP) strcat(buffer," ");
-    if (!lasm) {
+    if ((insn == NULL) || !lasm) {
         printf("%s\n", out);
     }
     else {
@@ -910,6 +939,9 @@ char sub[128];
 */
 
 void Base_x64::PrintCode(Code *c) {
+struct _Section *sections;
+int count,n;
+
     /*
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
@@ -936,6 +968,15 @@ void Base_x64::PrintCode(Code *c) {
     for (int n=0;n<c->submem_count;n++) {
         //PrintSubMem(c,n);
         lang->PrintSubMem(c,n);
+    }
+    if (loadm) {
+        sections = arch->GetSections(&count);
+        if (sections != NULL) {
+            for (n=0;n<count;n++) {
+                PrintLine(NULL,1,lang->E_LOAD_MEM,arch->GetFileName(),sections[n].d_Offset,sections[n].d_Size,sections[n].v_Address,sections[n].v_Size);
+            }
+            free(sections);
+        }
     }
     printf(lang->E_STACK_INIT,lang->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
                                 lang->reg_name(handle,X86_REG_RBP),

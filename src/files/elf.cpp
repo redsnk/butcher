@@ -105,6 +105,7 @@ long l,s;
                                                             // Got.Plt Table
                                                             elf->GotPltTableIndex = GetSectionIndexByName(elf,".got.plt");
                                                             if (elf->GotPltTableIndex != -1) {
+                                                                elf->name = strdup(name);
                                                                 return (elf);
                                                             }
                                                             else {
@@ -163,6 +164,7 @@ long l,s;
 
 void FreeELF (struct _ELF *elf) {
     if (elf != NULL) {
+        free(elf->name);
         free(elf->DynStrTable);
         free(elf->DynSymTable);
         free(elf->ShStrTable);

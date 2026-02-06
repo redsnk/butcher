@@ -467,6 +467,7 @@ union _Elf_Ehdr {
 
 struct _ELF {
 	FILE *f;
+  char *name;
 	_Elf_Ehdr Ehdr;
   Elf64_Phdr *Phdr;
   Elf64_Shdr *Shdr;

@@ -58,6 +58,7 @@ class Language {
     const char *E_ENDIF = "";
     const char *E_GET_MEM = "";
     const char *E_S_GET_MEM = "";
+    const char *E_LOAD_MEM = "";
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

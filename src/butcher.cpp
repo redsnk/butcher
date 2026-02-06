@@ -185,7 +185,7 @@ uint8_t *mem;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     if (ltraces) printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM, sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    if (IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
+                    if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
                         // New submem
                         if (ltraces) printf("%s *** Add submem 0x%llx(%li)\n",lang->COMM,addr,count);
                         c->AddSubMem(addr,mem,count);
@@ -236,7 +236,7 @@ uint8_t *mem;
                         lend = true;
                     }
                     */
-                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
+                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count) ||IsJmpIAT(&sc.insn[n]) ) {
                         lend = true;
                     }
                     if (lend) {
@@ -315,6 +315,7 @@ Butcher::Butcher(Archive *a,Language *l) {
     arch = a;
     ltraces = false;
     lasm = false;
+    loadm = false;
 }
 
 Butcher::~Butcher() {

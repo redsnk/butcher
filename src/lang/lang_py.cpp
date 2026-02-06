@@ -51,6 +51,7 @@ Lang_Py::Lang_Py() {
     E_ENDIF =               "";
     E_GET_MEM =             "cpu.get_%s_ptr(%s)";
     E_S_GET_MEM =           "cpu.s_get_%s_ptr(%s)";
+    E_LOAD_MEM =            "cpu.load_mem(\"%s\",0x%llx,0x%llx,0x%llx,0x%llx)";
 }
 
 #define PY_HEADER "\

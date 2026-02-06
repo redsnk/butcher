@@ -15,6 +15,10 @@ int Arch_Pe::OpenFile(char *file_name) {
     return(pe != NULL);
 }
 
+char *Arch_Pe::GetFileName(void) {
+    return (pe->name);
+}
+
 void Arch_Pe::CloseFile(void) {
     FreePE(pe);
 }
@@ -39,7 +43,6 @@ int Arch_Pe::ValidMemory(uint64_t addr) {
     return (false);
 }
 
-
 int Arch_Pe::IsImportFunction (uint64_t addr, char **lib, char **func) {
     if (GetImportFunctionPE (pe,addr,lib,func)) {
         /*
@@ -57,4 +60,21 @@ int Arch_Pe::IsSymbolFunction (uint64_t addr, char **func) {
 
 int Arch_Pe::IsSymbolObject (uint64_t addr, char **name) {
     return (false);
+}
+
+struct _Section *Arch_Pe::GetSections(int *count) {
+int n;
+uint64_t base;
+struct _Section *sections;
+
+    base = GetImageBase(pe);
+    sections = (struct _Section *) malloc(sizeof(struct _Section)*pe->COFF_File_Header.NumberOfSections);
+    *count = pe->COFF_File_Header.NumberOfSections;
+	for (n=0;n<pe->COFF_File_Header.NumberOfSections;n++) {
+        sections[n].d_Offset = pe->Sections[n].PointerToRawData;
+        sections[n].d_Size = pe->Sections[n].SizeOfRawData;
+        sections[n].v_Address = base+pe->Sections[n].VirtualAddress;
+        sections[n].v_Size = pe->Sections[n].VirtualSize;
+	}
+    return (sections);
 }

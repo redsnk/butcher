@@ -12,16 +12,18 @@
 class Arch_Pe : public Archive {
     public:
         struct _PE *pe;
-
+        
         int CheckFile(char *file_name);
         int OpenFile(char *file_name);
         void CloseFile(void);
+        char *GetFileName(void);
         int Is32(void);
         uint8_t *GetMemory(uint64_t addr,uint64_t size, uint64_t *read);
         int ValidMemory(uint64_t addr);
         int IsImportFunction (uint64_t addr, char **lib, char **func);
         int IsSymbolFunction (uint64_t addr, char **func);
         int IsSymbolObject (uint64_t addr, char **name);
+        struct _Section *GetSections(int *count);
 };
 
 #endif // ARCH_PE_H

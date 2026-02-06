@@ -12,6 +12,7 @@
 
 int opt_t = false;
 int opt_a = false;
+int opt_m = false;
 enum Languages opt_l = C;
 
 uint64_t string_to_num(char *num) {
@@ -66,6 +67,7 @@ Archive *a;
     b = new Base_x64(a,l);
     b->ltraces = opt_t;
     b->lasm = opt_a;
+    b->loadm = opt_m;
     b->Cut(path,addr);
     delete b;
     return (1);
@@ -81,6 +83,7 @@ usage: Butcher [-l<lang>][-a][-t] <path> <addr>\n\
                     - c -> C\n\
                     - p -> Python\n\
 \n\
+-m          => Load memory from file\n\
 -t          => Enable traces\n\
 -a          => Enable asm code\n\
 \n";
@@ -90,13 +93,16 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"tal:")) != -1) {
+    while ((p = getopt(argc,argv,"mtal:")) != -1) {
         switch (p) {
                 case 't':
                     opt_t = true;
                     break;
                 case 'a':
                     opt_a = true;
+                    break;
+                case 'm':
+                    opt_m = true;
                     break;
                 case 'l':
                     switch (optarg[0]) {

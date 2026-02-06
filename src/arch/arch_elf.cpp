@@ -19,6 +19,10 @@ void Arch_Elf::CloseFile(void) {
     FreeELF(elf);
 }
 
+char *Arch_Elf::GetFileName(void) {
+    return (elf->name);
+}
+
 int Arch_Elf::Is32(void) {
     return(false);
 }
@@ -66,4 +70,20 @@ unsigned char info;
         return  (ELF64_ST_TYPE(info) == STT_OBJECT);
     }
     return (false);
+}
+
+struct _Section *Arch_Elf::GetSections(int *count) {
+ int n;
+uint8_t *m;
+struct _Section *sections;
+
+    sections = (struct _Section *) malloc(sizeof(struct _Section)*elf->Ehdr.Ehdr64.e_phnum);
+    *count = elf->Ehdr.Ehdr64.e_phnum;
+    for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
+        sections[n].d_Offset = elf->Phdr[n].p_offset;
+        sections[n].d_Size = elf->Phdr[n].p_filesz;
+        sections[n].v_Address = elf->Phdr[n].p_vaddr;
+        sections[n].v_Size = elf->Phdr[n].p_memsz;
+    }
+    return (sections);
 }
