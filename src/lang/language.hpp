@@ -32,14 +32,15 @@ class Language {
     const char *E_PUSH = "";
     const char *E_POP = "";
     const char *E_SUB_RR = "";
-    const char *E_SUB_RI = "";
+    //const char *E_SUB_RI = "";
     const char *E_ADD_RR = "";
     const char *E_ADD_RI = "";
     const char *E_XOR_R = "";
     const char *E_XOR_RR = "";
-    const char *E_XOR_RI = "";
+    //const char *E_XOR_RI = "";
     const char *E_JNE_R_GOTO = "";
     const char *E_JE_R_GOTO = "";
+    const char *E_JLE_R_GOTO = "";
     const char *E_JA_RR_GOTO = "";
     const char *E_JGE_RR_GOTO = "";
     const char *E_SPACE = "";

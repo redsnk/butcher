@@ -25,14 +25,15 @@ Lang_Py::Lang_Py() {
     E_PUSH =                "cpu.push_%s(%s)";
     E_POP =                 "%s = cpu.pop_%s()";
     E_SUB_RR =              "%s = %s - %s";
-    E_SUB_RI =              "%s = %s - %lld";
+    //E_SUB_RI =              "%s = %s - %lld";
     E_ADD_RR =              "%s = %s + %s";
     E_ADD_RI =              "%s = %s + %lld";
     E_XOR_R =               "%s = 0";
     E_XOR_RR =              "%s = %s ^ %s";
-    E_XOR_RI =              "%s = %s ^ %lld";
+    //E_XOR_RI =              "%s = %s ^ %lld";
     E_JNE_R_GOTO =          "if %s != 0:\n        goto .label_0x%llx";
     E_JE_R_GOTO =           "if %s == 0:\n        goto .label_0x%llx";
+    E_JLE_R_GOTO =          "if %s <= 0:\n        goto .label_0x%llx";
     E_JA_RR_GOTO =          "if %s > %s:\n        goto .label_0x%llx";
     E_JGE_RR_GOTO=          "if %s >= %s:\n        goto .label_0x%llx";
     E_SPACE =               "";

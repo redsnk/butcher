@@ -165,6 +165,8 @@ int ClearFlagInst(cs_insn *insn) {
         case X86_INS_SBB:
         case X86_INS_CMP:
         case X86_INS_TEST:
+        case X86_INS_INC:
+        case X86_INS_DEC:
             return (true);
     }
     return (false);
@@ -556,73 +558,43 @@ int n,b;
             break;
         case X86_INS_SUB:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
-                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    //sub		rsp, rax
-                    if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,1,lang->E_SUB_RR,reg0,reg0,reg1);
-                        num++;
-                    }
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    reg1 = lang->get_op_str(handle,insn->detail->x86.operands[1],false);
+                    PrintLine(insn,1,lang->E_SUB_RR,reg0,reg0,reg1);
+                    num++;
                     free(reg1);
+                    free(reg0);
                 }
-                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    //sub		rsp, 0x178
-                    if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,1,lang->E_SUB_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
-                        num++;
-                    }
-                }
-                free(reg0);
             }
             break;
         case X86_INS_ADD:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
-                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    //add		rsp, rax
-                    if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,1,lang->E_ADD_RR,reg0,reg0,reg1);
-                        num++;
-                    }
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    reg1 = lang->get_op_str(handle,insn->detail->x86.operands[1],false);
+                    PrintLine(insn,1,lang->E_ADD_RR,reg0,reg0,reg1);
+                    num++;
                     free(reg1);
+                    free(reg0);
                 }
-                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    //add		rsp, 0x178
-                    if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,1,lang->E_ADD_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
-                        num++;
-                    }
-                }
-                free(reg0);
             }
             break;
         case X86_INS_XOR:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
-                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    reg1 = lang->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    //xor		rsp, rax
-                    if (FlagsNotUsed(sc,num)) {
-                        if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                            PrintLine(insn,1,lang->E_XOR_R,reg0);
-                        }
-                        else {
-                            PrintLine(insn,1,lang->E_XOR_RR,reg0,reg0,reg1);
-                        }
-                        num++;
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    if ((insn->detail->x86.operands[1].type == X86_OP_REG) && (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg)) {
+                        PrintLine(insn,1,lang->E_XOR_R,reg0);   
                     }
-                    free(reg1);
-                }
-                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    //xor		rsp, 0x178
-                    if (FlagsNotUsed(sc,num)) {
-                        PrintLine(insn,1,lang->E_XOR_RI,reg0,reg0,insn->detail->x86.operands[1].imm);
-                        num++;
+                    else {
+                        reg1 = lang->get_op_str(handle,insn->detail->x86.operands[1],false);
+                        PrintLine(insn,1,lang->E_XOR_RR,reg0,reg0,reg1);
+                        free(reg1);
                     }
+                    num++;
+                    free(reg0);
                 }
-                free(reg0);
             }
             break;
         case X86_INS_TEST:
@@ -659,6 +631,25 @@ int n,b;
                                         // je		0x1800026ce
                                         PrintLine(insn,0,lang->E_SPACE);
                                         PrintLine(next,1,lang->E_JE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
+                                        num += 2;
+
+                                    }
+                                }
+                                free(reg0);
+                            }
+                        }
+                        break;
+                    case X86_INS_JLE:
+                        // (ZF=1 or SF!=OF).
+                        if (FlagsNotUsed(sc,num+1)) {
+                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                                reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
+                                        // test		eax, eax
+                                        // jle		0x1800026ce
+                                        PrintLine(insn,0,lang->E_SPACE);
+                                        PrintLine(next,1,lang->E_JLE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
                                         num += 2;
 
                                     }
