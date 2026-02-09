@@ -22,6 +22,7 @@ Lang_C::Lang_C() {
     E_JNE =                 "if (!flag_z(cpu)) goto label_0x%llx;";
     E_JA =                  "if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
     E_JAE =                 "if (!flag_c(cpu)) goto label_0x%llx;";
+    E_JL =                  "if (flag_o(cpu) != flag_s()) goto label_0x%llx;";
     E_PUSH =                "_push_%s(%s);";
     E_POP =                 "%s = _pop_%s();";
     E_SUB_RR =              "%s = %s - %s;";

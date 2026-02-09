@@ -14,7 +14,7 @@ Lang_Py::Lang_Py() {
     E_CALL_FROM_IAT =       "cpu.call_from_iat(\"%s\",\"%s\")";
     E_FUNC_NAME =           "%s(cpu)";
     E_FUNC_ADDR =           "func_0x%llx(cpu)";
-    E_RETURN =              "";
+    E_RETURN =              "return";
     E_GOTO =                "goto .label_0x%llx";
     E_LABEL =               "    label .label_0x%llx\n";
     E_JMP_FROM_IAT =        "cpu.jmp_from_iat(\"%s\",\"%s\");";
@@ -22,6 +22,7 @@ Lang_Py::Lang_Py() {
     E_JNE =                 "if not cpu.flag_z():\n        goto .label_0x%llx";
     E_JA =                  "if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JAE =                 "if not cpu.flag_c():\n        goto .label_0x%llx";
+    E_JL =                  "if cpu.flag_o() != cpu.flag_s():\n        goto .label_0x%llx";
     E_PUSH =                "cpu.push_%s(%s)";
     E_POP =                 "%s = cpu.pop_%s()";
     E_SUB_RR =              "%s = %s - %s";

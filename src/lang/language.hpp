@@ -29,6 +29,7 @@ class Language {
     const char *E_JNE = "";
     const char *E_JA = "";
     const char *E_JAE = "";
+    const char *E_JL = "";
     const char *E_PUSH = "";
     const char *E_POP = "";
     const char *E_SUB_RR = "";

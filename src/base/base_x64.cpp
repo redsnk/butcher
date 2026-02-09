@@ -540,6 +540,10 @@ int n,b;
             PrintLine(insn,1,lang->E_JAE,insn->detail->x86.operands[0].imm);
             num++;
             break;
+        case X86_INS_JL:
+            PrintLine(insn,1,lang->E_JL,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
         case X86_INS_PUSH:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -576,6 +580,26 @@ int n,b;
                     PrintLine(insn,1,lang->E_ADD_RR,reg0,reg0,reg1);
                     num++;
                     free(reg1);
+                    free(reg0);
+                }
+            }
+            break;
+        case X86_INS_INC:
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    PrintLine(insn,1,lang->E_ADD_RR,reg0,reg0,"1");
+                    num++;
+                    free(reg0);
+                }
+            }
+            break;
+        case X86_INS_DEC:
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    PrintLine(insn,1,lang->E_SUB_RR,reg0,reg0,"1");
+                    num++;
                     free(reg0);
                 }
             }
