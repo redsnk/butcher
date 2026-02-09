@@ -2,8 +2,8 @@
 #include <unistd.h>
 #include "src/arch/arch_elf.hpp"
 #include "src/arch/arch_pe.hpp"
-#include "src/lang/lang_c.hpp"
-#include "src/lang/lang_py.hpp"
+#include "src/lang/lang_c_x64.hpp"
+#include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
 
 #define MY_VERSION  "v0.03"
@@ -45,11 +45,11 @@ Archive *a;
     */
     switch (opt_l) {
         case PYTHON:
-            l = new Lang_Py();
+            l = (Language *) new Lang_Py_x64();
             break;
         case C:
         default:
-            l = new Lang_C();
+            l = (Language *) new Lang_C_x64();
             break;
     }
     //l = new Lang_C();

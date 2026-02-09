@@ -7,12 +7,15 @@
 #include <stdint.h>
 #include <cstring>
 #include "../butcher.hpp"
+#include "../lang/lang_x64.hpp"
 
 #define STACK_ADDR		0xF000
 #define STACK_SIZE		(1024*10)
 
 class Base_x64 : public Butcher {
     public:
+        Lang_x64 *lang_x64;
+        
         cs_err Cs_open(void);
         int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count);
         int IsRet(cs_insn *insn);
@@ -23,12 +26,14 @@ class Base_x64 : public Butcher {
         int IsEnd(cs_insn *insn, int n, int count);
         int IsJmpIAT(cs_insn *insn);
 
-        using Butcher::Butcher;
+        //using Butcher::Butcher;
         void PrintLine(cs_insn *insn,int indent,const char *format,...);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
         void PrintCode(Code *c);
         void PrintSubCode(Code *c,int num);
+
+        Base_x64(Archive *a,Language *l);
 };
 
 #endif // BASE_X64_H

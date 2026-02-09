@@ -1,6 +1,6 @@
-#include "lang_c.hpp"
+#include "lang_c_x64.hpp"
 
-Lang_C::Lang_C() {
+Lang_C_x64::Lang_C_x64() {
     COMM = "//";
     COMM_SEP = 70;
     INDENT = "    ";
@@ -67,7 +67,7 @@ void func_0x%llx(struct _cpu *cpu);\n"
 void %s(struct _cpu *cpu);    // 0x%llx\n"
 
 
-void Lang_C::PrintHeader(Code *c) {
+void Lang_C_x64::PrintHeader(Code *c) {
     printf(C_HEADER);
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
@@ -89,7 +89,7 @@ struct _cpu c,*cpu;\n\
     init(cpu);\n\
 "
 
-void Lang_C::PrintMainOpen(Code *c) {
+void Lang_C_x64::PrintMainOpen(Code *c) {
     printf(C_FOOTER_1);
 }
 
@@ -102,11 +102,11 @@ void Lang_C::PrintMainOpen(Code *c) {
 }\n\
 \n"
 
-void Lang_C::PrintMainClose(Code *c) {
+void Lang_C_x64::PrintMainClose(Code *c) {
     printf(C_FOOTER_2,c->ep);
 }
 
-void Lang_C::PrintSubMem(Code *c,int num) {
+void Lang_C_x64::PrintSubMem(Code *c,int num) {
 struct _submem *sm;
 char sub[128];
 
@@ -130,7 +130,7 @@ char sub[128];
 void %s(struct _cpu *cpu) {\n\
 "
 
-void Lang_C::PrintFuncHeaderName(Code *c,int num,char *name) {
+void Lang_C_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
     printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
 }
 
@@ -138,7 +138,7 @@ void Lang_C::PrintFuncHeaderName(Code *c,int num,char *name) {
 void func_0x%llx(struct _cpu *cpu) {\n\
 "
 
-void Lang_C::PrintFuncHeaderAddr(Code *c,int num) {
+void Lang_C_x64::PrintFuncHeaderAddr(Code *c,int num) {
     printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
@@ -146,15 +146,15 @@ void Lang_C::PrintFuncHeaderAddr(Code *c,int num) {
 }\n\
 \n"
 
-void Lang_C::PrintFuncFooter(Code *c,int num) {
+void Lang_C_x64::PrintFuncFooter(Code *c,int num) {
     printf(C_FUNC_FOOTER);
 }
 
-void Lang_C::PrintSubCodeSep(void) {
+void Lang_C_x64::PrintSubCodeSep(void) {
     printf("    // --------------------------------------------------------------\n");
 }
 
-char *Lang_C::mem_str(csh handle,cs_x86_op op) {
+char *Lang_C_x64::mem_str(csh handle,cs_x86_op op) {
 char tmp[256];
 char *buffer;
 
@@ -177,7 +177,7 @@ char *buffer;
     return (buffer);
 }
 
-char *Lang_C::reg_name(csh handle,int id_reg) {
+char *Lang_C_x64::reg_name(csh handle,int id_reg) {
 char *buffer;
 
     buffer = (char *) malloc(256);
@@ -190,7 +190,7 @@ char *buffer;
     return (buffer);
 }
 
-char *Lang_C::s_reg_name(csh handle,int id_reg) {
+char *Lang_C_x64::s_reg_name(csh handle,int id_reg) {
 char *buffer;
 
     buffer = (char *) malloc(256);

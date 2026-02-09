@@ -1,6 +1,6 @@
-#include "lang_py.hpp"
+#include "lang_py_x64.hpp"
 
-Lang_Py::Lang_Py() {
+Lang_Py_x64::Lang_Py_x64() {
     COMM = "#";
     COMM_SEP = 70;
     INDENT = "    ";
@@ -61,7 +61,7 @@ from butcher_x64 import _cpu\n\
 from goto import with_goto\n\
 \n"
 
-void Lang_Py::PrintHeader(Code *c) {
+void Lang_Py_x64::PrintHeader(Code *c) {
     printf(PY_HEADER);
 }
 
@@ -70,7 +70,7 @@ def main():\n\
     cpu = _cpu()\n\
 "
 
-void Lang_Py::PrintMainOpen(Code *c) {
+void Lang_Py_x64::PrintMainOpen(Code *c) {
     printf(PY_FOOTER_1);
 }
 
@@ -81,11 +81,11 @@ if __name__==\"__main__\":\n\
     main()\n\
 \n"
 
-void Lang_Py::PrintMainClose(Code *c) {
+void Lang_Py_x64::PrintMainClose(Code *c) {
     printf(PY_FOOTER_2,c->ep);
 }
 
-void Lang_Py::PrintSubMem(Code *c,int num) {
+void Lang_Py_x64::PrintSubMem(Code *c,int num) {
 struct _submem *sm;
 char sub[128];
 
@@ -111,7 +111,7 @@ char sub[128];
 def %s(cpu):\n\
 "
 
-void Lang_Py::PrintFuncHeaderName(Code *c,int num,char *name) {
+void Lang_Py_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
     printf(PY_FUNC_HEADER_NAME,name,c->subcodes[num].first);
 }
 
@@ -120,22 +120,22 @@ void Lang_Py::PrintFuncHeaderName(Code *c,int num,char *name) {
 def func_0x%llx(cpu):\n\
 "
 
-void Lang_Py::PrintFuncHeaderAddr(Code *c,int num) {
+void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
     printf(PY_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
 #define PY_FUNC_FOOTER "\
 \n"
 
-void Lang_Py::PrintFuncFooter(Code *c,int num) {
+void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
     printf(PY_FUNC_FOOTER);
 }
 
-void Lang_Py::PrintSubCodeSep(void) {
+void Lang_Py_x64::PrintSubCodeSep(void) {
     printf("    # --------------------------------------------------------------\n");
 }
 
-char *Lang_Py::mem_str(csh handle,cs_x86_op op) {
+char *Lang_Py_x64::mem_str(csh handle,cs_x86_op op) {
 char tmp[256];
 char *buffer;
 
@@ -158,7 +158,7 @@ char *buffer;
     return (buffer);
 }
 
-char *Lang_Py::reg_name(csh handle,int id_reg) {
+char *Lang_Py_x64::reg_name(csh handle,int id_reg) {
 char *buffer;
 
     buffer = (char *) malloc(256);
@@ -171,7 +171,7 @@ char *buffer;
     return (buffer);
 }
 
-char *Lang_Py::s_reg_name(csh handle,int id_reg) {
+char *Lang_Py_x64::s_reg_name(csh handle,int id_reg) {
 char *buffer;
 
     buffer = (char *) malloc(256);
