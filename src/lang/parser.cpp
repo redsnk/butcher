@@ -704,60 +704,66 @@ namespace lang {
             {
   case 3:
 #line 73 "grammar.y" // lalr1.cc:919
-    { emit->_emit("FUNCTION = '%s'\n",yystack_[3].value.as < std::string > ().c_str());}
+    { emit->emit_func(yystack_[3].value.as < std::string > ().c_str());}
 #line 709 "parser.cpp" // lalr1.cc:919
     break;
 
   case 4:
 #line 74 "grammar.y" // lalr1.cc:919
-    { emit->_emit("ADD\n"); }
+    { emit->emit_add(); }
 #line 715 "parser.cpp" // lalr1.cc:919
     break;
 
   case 5:
 #line 75 "grammar.y" // lalr1.cc:919
-    { emit->_emit("SUB\n"); }
+    { emit->emit_sub(); }
 #line 721 "parser.cpp" // lalr1.cc:919
     break;
 
   case 6:
 #line 76 "grammar.y" // lalr1.cc:919
-    { emit->_emit("MULT\n"); }
+    { emit->emit_mult(); }
 #line 727 "parser.cpp" // lalr1.cc:919
     break;
 
   case 7:
 #line 77 "grammar.y" // lalr1.cc:919
-    { emit->_emit("ASSIGN = '%s'\n",yystack_[2].value.as < std::string > ().c_str());}
+    { emit->emit_assign(yystack_[2].value.as < std::string > ().c_str());}
 #line 733 "parser.cpp" // lalr1.cc:919
     break;
 
   case 8:
 #line 78 "grammar.y" // lalr1.cc:919
-    { emit->_emit("EQUAL\n");}
+    { emit->emit_equal();}
 #line 739 "parser.cpp" // lalr1.cc:919
     break;
 
   case 9:
 #line 79 "grammar.y" // lalr1.cc:919
-    { emit->_emit("NAME = '%s'\n", yystack_[0].value.as < std::string > ().c_str()); }
+    { emit->emit_name(yystack_[0].value.as < std::string > ().c_str()); }
 #line 745 "parser.cpp" // lalr1.cc:919
     break;
 
   case 10:
 #line 80 "grammar.y" // lalr1.cc:919
-    { emit->_emit("NUMBER = %d\n", yystack_[0].value.as < long long > ()); }
+    { emit->emit_number(yystack_[0].value.as < long long > ()); }
 #line 751 "parser.cpp" // lalr1.cc:919
     break;
 
   case 11:
 #line 81 "grammar.y" // lalr1.cc:919
-    { emit->_emit("END\n");}
+    { emit->emit_end();}
 #line 757 "parser.cpp" // lalr1.cc:919
     break;
 
+  case 12:
+#line 82 "grammar.y" // lalr1.cc:919
+    { emit->emit_indent();}
+#line 763 "parser.cpp" // lalr1.cc:919
+    break;
 
-#line 761 "parser.cpp" // lalr1.cc:919
+
+#line 767 "parser.cpp" // lalr1.cc:919
             default:
               break;
             }
@@ -933,74 +939,76 @@ namespace lang {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -11;
+  const signed char Parser::yypact_ninf_ = -7;
 
   const signed char Parser::yytable_ninf_ = -1;
 
   const signed char
   Parser::yypact_[] =
   {
-       3,    -5,   -11,   -11,    12,     5,     3,     3,     3,     3,
-       3,     3,   -11,    12,    12,   -10,    12,    -1,    -1,   -11,
-     -11
+      -2,    -4,    -7,    -7,    -7,    18,     0,    -2,    -2,    -2,
+      -2,    -2,    -2,    -7,    18,    18,    -1,    18,    -6,    -6,
+      -7,    -7
   };
 
   const unsigned char
   Parser::yydefact_[] =
   {
-       2,     9,    10,    11,    12,     2,     2,     2,     2,     2,
-       2,     2,     1,    13,     7,     0,     8,     4,     5,     6,
-       3
+       2,     9,    10,    11,    12,    13,     2,     2,     2,     2,
+       2,     2,     2,     1,    14,     7,     0,     8,     4,     5,
+       6,     3
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-     -11,    10,   -11
+      -7,    15,    -7
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-      -1,     4,     5
+      -1,     5,     6
   };
 
   const unsigned char
   Parser::yytable_[] =
   {
-       8,     9,    10,    11,     6,    12,     1,     2,     1,     2,
-      20,     3,    11,     3,     7,    13,    14,    15,    16,    17,
-      18,    19,     8,     9,    10,    11
+      13,     1,     2,     1,     2,     7,     3,    12,     3,     9,
+      10,    11,    12,     0,     0,     0,     8,     4,     0,     4,
+      21,    14,    15,    16,    17,    18,    19,    20,     9,    10,
+      11,    12
   };
 
-  const unsigned char
+  const signed char
   Parser::yycheck_[] =
   {
-      10,    11,    12,    13,     9,     0,     3,     4,     3,     4,
-      20,     8,    13,     8,    19,     5,     6,     7,     8,     9,
-      10,    11,    10,    11,    12,    13
+       0,     3,     4,     3,     4,     9,     8,    13,     8,    10,
+      11,    12,    13,    -1,    -1,    -1,    20,    19,    -1,    19,
+      21,     6,     7,     8,     9,    10,    11,    12,    10,    11,
+      12,    13
   };
 
   const unsigned char
   Parser::yystos_[] =
   {
-       0,     3,     4,     8,    22,    23,     9,    19,    10,    11,
-      12,    13,     0,    22,    22,    22,    22,    22,    22,    22,
-      20
+       0,     3,     4,     8,    19,    23,    24,     9,    20,    10,
+      11,    12,    13,     0,    23,    23,    23,    23,    23,    23,
+      23,    21
   };
 
   const unsigned char
   Parser::yyr1_[] =
   {
-       0,    21,    22,    22,    22,    22,    22,    22,    22,    22,
-      22,    22,    23,    23
+       0,    22,    23,    23,    23,    23,    23,    23,    23,    23,
+      23,    23,    23,    24,    24
   };
 
   const unsigned char
   Parser::yyr2_[] =
   {
        0,     2,     0,     4,     3,     3,     3,     3,     3,     1,
-       1,     1,     1,     2
+       1,     1,     1,     1,     2
   };
 
 
@@ -1012,8 +1020,8 @@ namespace lang {
   {
   "$end", "error", "$undefined", "NAME", "INT", "FLT", "INTVAR", "FLTVAR",
   "END", "'='", "EQUAL", "'+'", "'-'", "MULTIPLY", "DIVIDE", "MODULO",
-  "UMINUS", "FACTORIAL", "EXPONENT", "'('", "')'", "$accept", "expr",
-  "stmt_list", YY_NULLPTR
+  "UMINUS", "FACTORIAL", "EXPONENT", "INDENT", "'('", "')'", "$accept",
+  "expr", "stmt_list", YY_NULLPTR
   };
 
 
@@ -1021,7 +1029,7 @@ namespace lang {
   Parser::yyrline_[] =
   {
        0,    72,    72,    73,    74,    75,    76,    77,    78,    79,
-      80,    81,    84,    85
+      80,    81,    82,    85,    86
   };
 
   // Print the state stack on the debug stream.
@@ -1066,7 +1074,7 @@ namespace lang {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      19,    20,     2,    11,     2,    12,     2,     2,     2,     2,
+      20,    21,     2,    11,     2,    12,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     9,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1089,9 +1097,9 @@ namespace lang {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,    10,    13,    14,    15,    16,    17,
-      18
+      18,    19
     };
-    const unsigned user_token_number_max_ = 270;
+    const unsigned user_token_number_max_ = 271;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int> (t) <= yyeof_)
@@ -1104,8 +1112,8 @@ namespace lang {
 
 #line 15 "grammar.y" // lalr1.cc:1242
 } // lang
-#line 1108 "parser.cpp" // lalr1.cc:1242
-#line 88 "grammar.y" // lalr1.cc:1243
+#line 1116 "parser.cpp" // lalr1.cc:1242
+#line 89 "grammar.y" // lalr1.cc:1243
 
 
 void lang::Parser::error(const std::string& msg) {

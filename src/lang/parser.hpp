@@ -407,7 +407,8 @@ namespace lang {
         MODULO = 267,
         UMINUS = 268,
         FACTORIAL = 269,
-        EXPONENT = 270
+        EXPONENT = 270,
+        INDENT = 271
       };
     };
 
@@ -618,13 +619,13 @@ switch (yytype)
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::END || tok == 61 || tok == token::EQUAL || tok == 43 || tok == 45 || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::END || tok == 61 || tok == token::EQUAL || tok == 43 || tok == 45 || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
       }
 #else
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::END || tok == 61 || tok == token::EQUAL || tok == 43 || tok == 45 || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::END || tok == 61 || tok == token::EQUAL || tok == 43 || tok == 45 || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -910,6 +911,21 @@ switch (yytype)
         return symbol_type (token::EXPONENT);
       }
 #endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_INDENT ()
+      {
+        return symbol_type (token::INDENT);
+      }
+#else
+      static
+      symbol_type
+      make_INDENT ()
+      {
+        return symbol_type (token::INDENT);
+      }
+#endif
 
 
   private:
@@ -966,7 +982,7 @@ switch (yytype)
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -1213,12 +1229,12 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 25,     ///< Last index in yytable_.
+      yylast_ = 31,     ///< Last index in yytable_.
       yynnts_ = 3,  ///< Number of nonterminal symbols.
-      yyfinal_ = 12, ///< Termination state number.
+      yyfinal_ = 13, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 21  ///< Number of tokens.
+      yyntokens_ = 22  ///< Number of tokens.
     };
 
 
@@ -1230,7 +1246,7 @@ switch (yytype)
 
 #line 15 "grammar.y" // lalr1.cc:401
 } // lang
-#line 1234 "parser.hpp" // lalr1.cc:401
+#line 1250 "parser.hpp" // lalr1.cc:401
 
 
 // //                    "%code provides" blocks.
@@ -1244,7 +1260,7 @@ switch (yytype)
 		void _emit(char *s, ...);
 	}
 
-#line 1248 "parser.hpp" // lalr1.cc:401
+#line 1264 "parser.hpp" // lalr1.cc:401
 
 
 #endif // !YY_YY_PARSER_HPP_INCLUDED

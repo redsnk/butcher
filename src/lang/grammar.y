@@ -50,7 +50,7 @@
 %precedence         UMINUS
 %precedence         FACTORIAL
 %right              EXPONENT
-
+%precedence			INDENT
 
 %start stmt_list
 
@@ -70,15 +70,16 @@
 %%
 
 expr: 
-| NAME '(' expr ')'		{ emit->_emit("FUNCTION = '%s'\n",$1.c_str());}
-| expr '+' expr			{ emit->_emit("ADD\n"); }
-| expr '-' expr			{ emit->_emit("SUB\n"); }
-| expr MULTIPLY expr	{ emit->_emit("MULT\n"); }
-| NAME '=' expr			{ emit->_emit("ASSIGN = '%s'\n",$1.c_str());}
-| expr EQUAL expr		{ emit->_emit("EQUAL\n");}
-| NAME					{ emit->_emit("NAME = '%s'\n", $1.c_str()); }
-| INT					{ emit->_emit("NUMBER = %d\n", $1); }
-| END					{ emit->_emit("END\n");}
+| NAME '(' expr ')'		{ emit->emit_func($1.c_str());}
+| expr '+' expr			{ emit->emit_add(); }
+| expr '-' expr			{ emit->emit_sub(); }
+| expr MULTIPLY expr	{ emit->emit_mult(); }
+| NAME '=' expr			{ emit->emit_assign($1.c_str());}
+| expr EQUAL expr		{ emit->emit_equal();}
+| NAME					{ emit->emit_name($1.c_str()); }
+| INT					{ emit->emit_number($1); }
+| END					{ emit->emit_end();}
+| INDENT                { emit->emit_indent();}
 ;
 
 stmt_list: expr

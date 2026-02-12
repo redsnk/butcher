@@ -339,8 +339,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 13
-#define YY_END_OF_BUFFER 14
+#define YY_NUM_RULES 14
+#define YY_END_OF_BUFFER 15
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -350,8 +350,8 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[29] =
     {   0,
-        0,    0,   14,   12,   13,    7,    6,   11,    4,   12,
-        5,    2,   10,   11,    1,    8,    3,    3,    2,    0,
+        0,    0,   15,   13,   14,    7,    6,   12,    4,   11,
+        5,    2,   10,   12,    1,    8,    3,    3,    2,    0,
         9,    1,    0,    0,    3,    0,    3,    0
     } ;
 
@@ -813,19 +813,24 @@ return Parser::token::END;
 case 11:
 YY_RULE_SETUP
 #line 30 "lexer.l"
-return yytext[0];
+return Parser::token::INDENT;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 31 "lexer.l"
-/* no action on unmatched input */
+return yytext[0];
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 33 "lexer.l"
+#line 32 "lexer.l"
+/* no action on unmatched input */
+	YY_BREAK
+case 14:
+YY_RULE_SETUP
+#line 34 "lexer.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 829 "scanner.cpp"
+#line 834 "scanner.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1994,7 +1999,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 33 "lexer.l"
+#line 34 "lexer.l"
 
  
 

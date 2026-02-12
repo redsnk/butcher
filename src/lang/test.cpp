@@ -17,6 +17,7 @@ Emit *e;
 	    yyscan_t scanner;
 		yylex_init(&scanner);
 		e = new Emit();
+		e->debug = true;
     	lang::Parser parser{ scanner,e };
 
 		for (n=2;n<=argc;n++) {

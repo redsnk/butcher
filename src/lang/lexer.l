@@ -27,6 +27,7 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "^"         return Parser::token::EXPONENT;
 "=="        return Parser::token::EQUAL;
 ";"         return Parser::token::END;
+"."         return Parser::token::INDENT;
 [-+()=]     return yytext[0];
 .           /* no action on unmatched input */
  

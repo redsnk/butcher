@@ -2,6 +2,9 @@
 #define _LANGUAGE_H
 
 #include "../code.hpp"
+#include "emit.hpp"
+#include "scanner.hpp"
+#include "parser.hpp"
 
 enum Languages {
   C,
@@ -22,6 +25,10 @@ class Language {
     virtual void PrintFuncHeaderAddr(Code *c,int num) = 0;
     virtual void PrintFuncFooter(Code *c,int num) = 0;
     virtual void PrintSubCodeSep(void) = 0;
+
+    virtual char *Translate (csh handle,char *s, cs_insn *insn) = 0;
+
+    Emit *Parse(char *str);
 };
 
 #endif // _LANGUAGE_H

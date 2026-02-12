@@ -573,6 +573,7 @@ int n,b;
             }
             break;
         case X86_INS_ADD:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -582,6 +583,12 @@ int n,b;
                     free(reg1);
                     free(reg0);
                 }
+            }
+            */
+            reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                free(reg0);
             }
             break;
         case X86_INS_INC:
