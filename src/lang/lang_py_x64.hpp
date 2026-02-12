@@ -1,5 +1,6 @@
 #ifndef _LANG_PY_X64_H
 #define _LANG_PY_X64_H
+
 #include "lang_x64.hpp"
 
 class Lang_Py_x64 : public Lang_x64 {
@@ -12,7 +13,7 @@ class Lang_Py_x64 : public Lang_x64 {
     void PrintFuncHeaderAddr(Code *c,int num);
     void PrintFuncFooter(Code *c,int num);
     void PrintSubCodeSep(void);
-    
+
     char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);
     char *s_reg_name(csh handle,int id_reg);

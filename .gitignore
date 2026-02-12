@@ -8,3 +8,4 @@ src/test/py/__pycache__
 src/test/py/butcher_x64.*
 src/test/py/build
 src/test/py/.venv
+src/lang/test
