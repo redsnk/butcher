@@ -67,6 +67,7 @@ class Lang_x64 : public Language {
     virtual char *reg_name(csh handle,int id_reg) = 0;
     virtual char *s_reg_name(csh handle,int id_reg) = 0;
 
+    char *Translate_var (csh handle,cs_insn *insn,char *name);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i);
     char *Translate (csh handle,char *s, cs_insn *insn);
     

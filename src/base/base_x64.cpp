@@ -588,6 +588,7 @@ int n,b;
             reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
+                num++;
                 free(reg0);
             }
             break;
@@ -746,6 +747,13 @@ int n,b;
             num++;
             break;
         case X86_INS_MOV:
+            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
@@ -764,14 +772,6 @@ int n,b;
                     if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                         // mov rax, qword ptr [**rip** + 0x1dc97]
                         addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
-                        /*
-                        n = insn->detail->x86.addr_size;
-                        mem = arch->GetMemory(addr,n,&read);
-                        if ((mem != NULL) && (read == n)) {
-                            c->AddSubMem(addr,mem,n);
-                            free(mem);
-                        }
-                        */
                         PrintLine(insn,1,lang_x64->E_MOV_RP,reg0,lang_x64->ptr(insn->detail->x86.operands[0]),addr);
                         num++;
                     }
@@ -819,6 +819,7 @@ int n,b;
                     }
                 }
             }
+            */
             break;
         case X86_INS_CALL:
             //uint64_t addr = 0;
@@ -848,7 +849,6 @@ int n,b;
             }
             break;
         default:
-            // Reset history
             break;
     }
     return (num);
