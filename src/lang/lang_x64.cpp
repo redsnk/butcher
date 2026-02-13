@@ -16,7 +16,7 @@ const char *Lang_x64::ptr(cs_x86_op op) {
     return ("ptr_error");
 }
 
-char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int sign) {
+char *Lang_x64::op_str(csh handle,cs_x86_op op,int sign, int lset) {
 char buffer[MAX_STR_OP];
 char *str;
 
@@ -30,7 +30,12 @@ char *str;
             }
         case X86_OP_MEM:
             str = mem_str(handle,op);
-            sprintf(buffer,(sign)?E_S_GET_MEM:E_GET_MEM,ptr(op),str);
+            if (lset) {
+                strcpy(buffer,str);
+            }
+            else {
+                sprintf(buffer,(sign)?E_S_GET_MEM:E_GET_MEM,ptr(op),str);
+            }
             free(str);
             return (strdup(buffer));
         case X86_OP_IMM:
@@ -40,17 +45,23 @@ char *str;
     return(NULL);
 }
 
-#define MAX_TRANS_BUFFER    (1024)
+char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int sign) {
+    return(op_str(handle,op,sign,false));
+}
+
+char *Lang_x64::set_op_str(csh handle,cs_x86_op op) {
+    return(op_str(handle,op,false,true));
+}
 
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name) {
     if (!strcmp(name,"op0")) {
-        return (get_op_str(handle,insn->detail->x86.operands[0],false));
+        return (set_op_str(handle,insn->detail->x86.operands[0]));
     }
     else if (!strcmp(name,"op1")) {
         return (get_op_str(handle,insn->detail->x86.operands[1],false));
     }
     else if (!strcmp(name,"sop0")) {
-        return (get_op_str(handle,insn->detail->x86.operands[0],true));
+        return (set_op_str(handle,insn->detail->x86.operands[0]));
     }
     else if (!strcmp(name,"sop1")) {
         return (get_op_str(handle,insn->detail->x86.operands[1],true));
@@ -65,7 +76,7 @@ char *buffer;
         case _id_item::NAME:
             return (Translate_var(handle,insn,i->item.name));
         case _id_item::NUMBER:
-            buffer = (char *) malloc(MAX_TRANS_BUFFER);
+            buffer = (char *) malloc(MAX_STR_OP);
             sprintf(buffer,"%lld",i->item.num);
             return (buffer);
         default:
@@ -77,13 +88,14 @@ char *buffer;
 char *Lang_x64::Translate (csh handle,char *s, cs_insn *insn) {
 Emit *e;
 char *buffer,*it1,*it2;
-char tmp[MAX_TRANS_BUFFER];
+int lmem;
+char tmp[MAX_STR_OP];
 int n;
 std::vector<std::string> list;
 std::string str;
 
-    buffer = (char *) malloc(MAX_TRANS_BUFFER);
-    buffer[0];
+    buffer = (char *) malloc(MAX_STR_OP);
+    buffer[0] = 0;
     e = Parse(s);
     n = 0;
     while (n < e->count) {
@@ -101,15 +113,26 @@ std::string str;
                 break;
             case _id_item::ASSIGN:
                 it1 = Translate_var(handle,insn,e->items[n].item.name);
+                lmem = (insn->detail->x86.operands[0].type ==X86_OP_MEM);
                 if (list.size()>0) {
                     str = list.back();
                     list.pop_back();
-                    sprintf(tmp,"%s = %s",it1,str.c_str());
+                    if (lmem) {
+                        sprintf(tmp,E_SET_MEM,ptr(insn->detail->x86.operands[0]),it1,str.c_str());
+                    }
+                    else {
+                        sprintf(tmp,"%s = %s",it1,str.c_str());
+                    }
                     strcat (buffer,tmp);
                 }
                 else {
                     it2 = Translate_item(handle,insn,&e->items[n-1]);
-                    sprintf(tmp,"%s = %s",it1,it2);
+                    if (lmem) {
+                        sprintf(tmp,E_SET_MEM,ptr(insn->detail->x86.operands[0]),it1,it2);
+                    }
+                    else {
+                        sprintf(tmp,"%s = %s",it1,it2);
+                    }
                     strcat (buffer,tmp);
                     free(it2);
                 }
@@ -121,6 +144,7 @@ std::string str;
                     list.pop_back();
                     strcat (buffer,str.c_str());
                 }
+                strcat(buffer,ENDS);
                 break;
             default:
                 break;

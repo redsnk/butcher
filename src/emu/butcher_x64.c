@@ -316,6 +316,14 @@ int flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF);
 }
 
+int flag_o(struct _cpu *cpu) {
+	return(cpu->eflags.OF);
+}
+
+int flag_s(struct _cpu *cpu) {
+	return(cpu->eflags.SF);
+}
+
 void push(struct _cpu *cpu,int b,uint64_t n) {
 	/*
 	switch (bits) {

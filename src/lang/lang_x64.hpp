@@ -54,6 +54,7 @@ class Lang_x64 : public Language {
     const char *E_GET_MEM = "";
     const char *E_S_GET_MEM = "";
     const char *E_LOAD_MEM = "";
+    const char *E_SET_MEM = "";
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
@@ -67,13 +68,14 @@ class Lang_x64 : public Language {
     virtual char *reg_name(csh handle,int id_reg) = 0;
     virtual char *s_reg_name(csh handle,int id_reg) = 0;
 
+    const char *ptr(cs_x86_op op);
+    char *op_str(csh handle,cs_x86_op op,int sign,int lset);
+    char *get_op_str(csh handle,cs_x86_op op,int sign);
+    char *set_op_str(csh handle,cs_x86_op op);
+
     char *Translate_var (csh handle,cs_insn *insn,char *name);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i);
     char *Translate (csh handle,char *s, cs_insn *insn);
-    
-
-    const char *ptr(cs_x86_op op);
-    char *get_op_str(csh handle,cs_x86_op op,int sign);
 };
 
 #endif // _LANG_X64_H

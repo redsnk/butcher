@@ -16,6 +16,8 @@ class Language {
     const char *COMM = "";
     int COMM_SEP = 0;
     const char *INDENT = "";
+    const char *ENDS = "";
+    const char *SEPS = "";
     
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

@@ -4,6 +4,8 @@ Lang_C_x64::Lang_C_x64() {
     COMM = "//";
     COMM_SEP = 70;
     INDENT = "    ";
+    ENDS = ";";
+    SEPS = ";";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";
@@ -22,7 +24,7 @@ Lang_C_x64::Lang_C_x64() {
     E_JNE =                 "if (!flag_z(cpu)) goto label_0x%llx;";
     E_JA =                  "if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
     E_JAE =                 "if (!flag_c(cpu)) goto label_0x%llx;";
-    E_JL =                  "if (flag_o(cpu) != flag_s()) goto label_0x%llx;";
+    E_JL =                  "if (flag_o(cpu) != flag_s(cpu)) goto label_0x%llx;";
     E_PUSH =                "_push_%s(%s);";
     E_POP =                 "%s = _pop_%s();";
     E_SUB_RR =              "%s = %s - %s;";
@@ -54,6 +56,7 @@ Lang_C_x64::Lang_C_x64() {
     E_GET_MEM =             "_get_%s_ptr(%s)";
     E_S_GET_MEM =           "s_get_%s_ptr(%s)";
     E_LOAD_MEM =            "load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);";
+    E_SET_MEM =             "_set_%s_ptr(%s,%s);";
 }
 
 #define C_HEADER "\

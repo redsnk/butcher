@@ -198,6 +198,8 @@ uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
 uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
+int flag_o(struct _cpu *cpu);
+int flag_s(struct _cpu *cpu);
 void push(struct _cpu *cpu,int b,uint64_t n);
 uint64_t pop(struct _cpu *cpu,int b);
 

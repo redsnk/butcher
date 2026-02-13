@@ -4,6 +4,8 @@ Lang_Py_x64::Lang_Py_x64() {
     COMM = "#";
     COMM_SEP = 70;
     INDENT = "    ";
+    ENDS = "";
+    SEPS = ";";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";
@@ -54,6 +56,7 @@ Lang_Py_x64::Lang_Py_x64() {
     E_GET_MEM =             "cpu.get_%s_ptr(%s)";
     E_S_GET_MEM =           "cpu.s_get_%s_ptr(%s)";
     E_LOAD_MEM =            "cpu.load_mem(\"%s\",0x%llx,0x%llx,0x%llx,0x%llx)";
+    E_SET_MEM =             "cpu.set_%s_ptr(%s,%s)";
 }
 
 #define PY_HEADER "\

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../../../build/Butcher "/home/alex/src/butcher/samples/api.node" 0x180002350 > test.c
+../../../build/Butcher -lc -a -m "/home/alex/src/butcher/samples/api.node" 0x180002350 > test.c

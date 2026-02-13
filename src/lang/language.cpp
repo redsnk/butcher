@@ -8,7 +8,7 @@ Emit *e;
     yyscan_t scanner;
     yylex_init(&scanner);
     e = new Emit();
-    e->debug = true;                        // ******
+    //e->debug = true;                        // ******
     lang::Parser parser{ scanner,e };
     b = yy_scan_string (str,scanner );
     parser.parse();
