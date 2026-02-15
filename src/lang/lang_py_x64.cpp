@@ -16,7 +16,7 @@ Lang_Py_x64::Lang_Py_x64() {
     E_CALL_FROM_IAT =       "cpu.call_from_iat(\"%s\",\"%s\")";
     E_FUNC_NAME =           "%s(cpu)";
     E_FUNC_ADDR =           "func_0x%llx(cpu)";
-    E_RETURN =              "return";
+    E_RETURN =              "goto .label_return";
     E_GOTO =                "goto .label_0x%llx";
     E_LABEL =               "    label .label_0x%llx\n";
     E_JMP_FROM_IAT =        "cpu.jmp_from_iat(\"%s\",\"%s\");";
@@ -128,6 +128,8 @@ void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
 }
 
 #define PY_FUNC_FOOTER "\
+    label .label_return\n\
+    return\n\
 \n"
 
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
