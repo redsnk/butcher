@@ -6,6 +6,16 @@ Lang_C_x64::Lang_C_x64() {
     INDENT = "    ";
     ENDS = ";";
     SEPS = ";";
+    EQUAL = "==";
+    NEQUAL = "!=";
+    GT = ">";
+    LT = "<";
+    GTE = ">=";
+    LTE = "<=";
+    F_ZF = "flag_z";
+    F_SF = "flag_s";
+    F_ADD_OF = "add_flag_o";
+    F_ADD_CF = "add_flag_c";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

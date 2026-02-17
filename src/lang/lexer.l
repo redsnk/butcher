@@ -17,6 +17,8 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
  
 %%
 
+"true"      return Parser::token::TRUE;
+"false"     return Parser::token::FALSE;
 {name}      yylval->emplace<std::string>(yytext); return Parser::token::NAME; 
 {integer}   yylval->emplace<long long>(strtoll(yytext, nullptr, 10)); return Parser::token::INT;
 {float}     yylval->emplace<double>(strtod(yytext, nullptr)); return Parser::token::FLT;
@@ -26,8 +28,15 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "!"         return Parser::token::FACTORIAL;
 "^"         return Parser::token::EXPONENT;
 "=="        return Parser::token::EQUAL;
+"!="        return Parser::token::NEQUAL;
+"<"         return Parser::token::LT;
+">"         return Parser::token::GT;
+"<="        return Parser::token::LTE;
+">="        return Parser::token::GTE;
 ";"         return Parser::token::END;
 "."         return Parser::token::INDENT;
+","			return Parser::token::LIST;
+"|"         return Parser::token::LF;
 [-+()=]     return yytext[0];
 .           /* no action on unmatched input */
  

@@ -66,7 +66,24 @@ char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name) {
     else if (!strcmp(name,"sop1")) {
         return (get_op_str(handle,insn->detail->x86.operands[1],true));
     }
-    return (strdup("<error>"));
+    else if (!strcmp(name,"zf")) {
+        return (strdup(F_ZF));
+    }
+    else if (!strcmp(name,"sf")) {
+        return (strdup(F_SF));
+    }
+    else if (!strcmp(name,"add_of")) {
+        return (strdup(F_ADD_OF));
+    }
+    else if (!strcmp(name,"add_cf")) {
+        return (strdup(F_ADD_CF));
+    }
+    else if (!strcmp(name,"bits")) {
+        char *buffer = (char *) malloc(1024);
+        sprintf(buffer,"%i",insn->detail->x86.addr_size*8);
+        return (buffer);
+    }
+    return (strdup("<Translate_var error>"));
 }
 
 char *Lang_x64::Translate_item (csh handle,cs_insn *insn,_s_item *i) {
@@ -82,7 +99,7 @@ char *buffer;
         default:
             break;
     }
-    return (strdup("<error>"));
+    return (strdup("<Translate_item  error>"));
 }
 
 char *Lang_x64::Translate (csh handle,char *s, cs_insn *insn) {
@@ -103,6 +120,9 @@ std::string str;
             case _id_item::INDENT:
                 strcat (buffer,INDENT);
                 break;
+            case _id_item::LF:
+                strcat (buffer,"\n");
+                break;
             case _id_item::ADD:
                 it1 = Translate_item(handle,insn,&e->items[n-2]);
                 it2 = Translate_item(handle,insn,&e->items[n-1]);
@@ -110,6 +130,31 @@ std::string str;
                 free(it1);
                 free(it2);
                 list.push_back(tmp);
+                break;
+            case _id_item::LIST:
+                if (list.size()>0) {
+                    it1 = Translate_item(handle,insn,&e->items[n-1]);
+                    str = list.back();
+                    list.pop_back();
+                    sprintf(tmp,"%s,%s",it1,str.c_str());
+                    list.push_back(tmp);
+                    free(it1);
+                    e->del_item(n-1);
+                    e->del_item(n-1);
+                    n -= 2;
+                }
+                else {
+                    it1 = Translate_item(handle,insn,&e->items[n-2]);
+                    it2 = Translate_item(handle,insn,&e->items[n-1]);
+                    sprintf(tmp,"%s,%s",it1,it2);
+                    list.push_back(tmp);
+                    free(it2);
+                    free(it1);
+                    e->del_item(n-2);
+                    e->del_item(n-2);
+                    e->del_item(n-2);
+                    n -= 3;
+                }
                 break;
             case _id_item::ASSIGN:
                 it1 = Translate_var(handle,insn,e->items[n].item.name);
@@ -145,6 +190,70 @@ std::string str;
                     strcat (buffer,str.c_str());
                 }
                 strcat(buffer,ENDS);
+                break;
+            case _id_item::EQUAL:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,EQUAL,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::NEQUAL:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,NEQUAL,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::GT:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,GT,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::LT:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,LT,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::GTE:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,GTE,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::LTE:
+                it1 = Translate_item(handle,insn,&e->items[n-2]);
+                it2 = Translate_item(handle,insn,&e->items[n-1]);
+                sprintf(tmp,"%s %s %s",it1,LTE,it2);
+                free(it1);
+                free(it2);
+                list.push_back(tmp);
+                break;
+            case _id_item::FUNCTION:
+                it1 = Translate_var(handle,insn,e->items[n].item.name);
+                if (list.size()>0) {
+                    str = list.back();
+                    list.pop_back();
+                    sprintf(tmp,"%s(%s)",it1,str.c_str());
+                    strcat (buffer,tmp);
+                }
+                else {
+                    it2 = Translate_item(handle,insn,&e->items[n-1]);
+                    sprintf(tmp,"%s(%s)",it1,it2);
+                    strcat (buffer,tmp);
+                    free(it2);
+                }
+                free(it1);
                 break;
             default:
                 break;

@@ -42,9 +42,13 @@
 %nterm <long long>  iexp
 %nterm <double>     fexp
 
+%precedence			TRUE
+%precedence         FALSE
+%precedence			LF
 %precedence         END
 %precedence         '='
-%precedence         EQUAL
+%right				LIST
+%precedence         EQUAL NEQUAL LT GT LTE GTE
 %left               '+' '-' 
 %left               MULTIPLY DIVIDE MODULO
 %precedence         UMINUS
@@ -70,16 +74,25 @@
 %%
 
 expr: 
-| NAME '(' expr ')'		{ emit->emit_func($1.c_str());}
-| expr '+' expr			{ emit->emit_add(); }
-| expr '-' expr			{ emit->emit_sub(); }
-| expr MULTIPLY expr	{ emit->emit_mult(); }
-| NAME '=' expr			{ emit->emit_assign($1.c_str());}
-| expr EQUAL expr		{ emit->emit_equal();}
-| NAME					{ emit->emit_name($1.c_str()); }
-| INT					{ emit->emit_number($1); }
-| END					{ emit->emit_end();}
-| INDENT                { emit->emit_indent();}
+| NAME '(' expr ')'     { emit->emit_item_name(FUNCTION,"FUNCTION",$1.c_str()); }
+| expr LIST expr        { emit->emit_item(LIST,"LIST"); }
+| expr '+' expr			{ emit->emit_item(ADD,"ADD"); }
+| expr '-' expr			{ emit->emit_item(SUB,"SUB"); }
+| expr MULTIPLY expr	{ emit->emit_item(MULT,"MULT"); }
+| NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
+| expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
+| expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }
+| expr LT expr          { emit->emit_item(LT,"LT"); }
+| expr GT expr          { emit->emit_item(GT,"GT"); }
+| expr LTE expr         { emit->emit_item(LTE,"LTE"); }
+| expr GTE expr         { emit->emit_item(GTE,"GTE"); }
+| NAME					{ emit->emit_item_name(NAME,"NAME",$1.c_str()); }
+| INT					{ emit->emit_item_number(NUMBER,"NUMBER",$1); }
+| END					{ emit->emit_item(END,"END"); }
+| TRUE					{ emit->emit_item(ID_TRUE,"TRUE"); }
+| FALSE                 { emit->emit_item(ID_FALSE,"FALSE"); }
+| INDENT                { emit->emit_item(INDENT,"INDENT"); }
+| LF                    { emit->emit_item(LF,"LF"); }
 ;
 
 stmt_list: expr

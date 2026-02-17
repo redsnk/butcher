@@ -585,7 +585,8 @@ int n,b;
                 }
             }
             */
-            reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn);
+            // The OF, SF, ZF, AF, CF, and PF flags
+            reg0 = lang_x64->Translate(handle,".add_of(bits,op0,op1);|.op0 = op0 + op1;|.zf(op0 == 0);|.sf(sop0 < 0);",insn);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

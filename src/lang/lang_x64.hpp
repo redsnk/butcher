@@ -5,7 +5,18 @@
 
 class Lang_x64 : public Language {
     public:
-    
+
+    const char *EQUAL = "";
+    const char *NEQUAL = "";
+    const char *GT = "";
+    const char *LT = "";
+    const char *GTE = "";
+    const char *LTE = "";
+    const char *F_ZF = "";
+    const char *F_SF = "";
+    const char *F_ADD_OF = "";
+    const char *F_ADD_CF = "";
+
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
     const char *OP_REG = "";

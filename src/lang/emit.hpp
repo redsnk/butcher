@@ -13,11 +13,20 @@ enum _id_item {
     NUMBER,
     FUNCTION,
     EQUAL,
+    NEQUAL,
+    GT,
+    LT,
+    GTE,
+    LTE,
     ADD,
     SUB,
     MULT,
+    LIST,
     ASSIGN,
-    END
+    END,
+    ID_TRUE,
+    ID_FALSE,
+    LF
 }; 
 
 #define MAX_ITEM_NAME   (256)
@@ -40,16 +49,10 @@ class Emit {
 
     void reset (void);
     void add_item (_s_item *i);
-    void emit_name (const char *name);
-    void emit_number (uint64_t num);
-    void emit_func (const char *name);
-    void emit_assign (const char *name);
-    void emit_equal (void);
-    void emit_add (void);
-    void emit_sub (void);
-    void emit_mult (void);
-    void emit_end (void);
-    void emit_indent (void);
+    void del_item (int i);
+    void emit_item_number (enum _id_item id,const char *label,uint64_t num);
+    void emit_item_name (enum _id_item id,const char *label,const char *name);
+    void emit_item (enum _id_item id,const char *label);
     void _emit (char *s, ...);
 
     Emit();

@@ -6,6 +6,16 @@ Lang_Py_x64::Lang_Py_x64() {
     INDENT = "    ";
     ENDS = "";
     SEPS = ";";
+    EQUAL = "==";
+    NEQUAL = "!=";
+    GT = ">";
+    LT = "<";
+    GTE = ">=";
+    LTE = "<=";
+    F_ZF = "cpu.flag_z";
+    F_SF = "cpu.flag_s";
+    F_ADD_OF = "cpu.add_flag_o";
+    F_ADD_CF = "cpu.add_flag_c";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";
