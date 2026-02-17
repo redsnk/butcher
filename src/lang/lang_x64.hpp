@@ -16,6 +16,7 @@ class Lang_x64 : public Language {
     const char *F_SF = "";
     const char *F_ADD_OF = "";
     const char *F_ADD_CF = "";
+    const char *ENDF = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
@@ -34,6 +35,7 @@ class Lang_x64 : public Language {
     const char *E_JA = "";
     const char *E_JAE = "";
     const char *E_JL = "";
+    const char *E_JO = "";
     const char *E_PUSH = "";
     const char *E_POP = "";
     const char *E_SUB_RR = "";
@@ -82,7 +84,7 @@ class Lang_x64 : public Language {
     const char *ptr(cs_x86_op op);
     char *op_str(csh handle,cs_x86_op op,int sign,int lset);
     char *get_op_str(csh handle,cs_x86_op op,int sign);
-    char *set_op_str(csh handle,cs_x86_op op);
+    char *set_op_str(csh handle,cs_x86_op op,int sign);
 
     char *Translate_var (csh handle,cs_insn *insn,char *name);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i);

@@ -12,16 +12,17 @@ Lang_C_x64::Lang_C_x64() {
     LT = "<";
     GTE = ">=";
     LTE = "<=";
-    F_ZF = "flag_z";
-    F_SF = "flag_s";
-    F_ADD_OF = "add_flag_o";
-    F_ADD_CF = "add_flag_c";
+    F_ZF = "set_flag_z(cpu,";
+    F_SF = "set_flag_s(cpu,";
+    F_ADD_OF = "add_flag_o(cpu,";
+    F_ADD_CF = "add_flag_c(cpu,";
+    ENDF = ")";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";
     OP_REG = "\"%s\",";
     OP_IMM = "0x%llx,";
-    OP_MEM = "\"%s\",\"%s\",%i,0x%llx,";
+    OP_MEM = "\"%s\",\"%s\",%i,%+lld,";
 
     E_CALL_FROM_IAT =       "call_from_iat(cpu,\"%s\",\"%s\");";
     E_FUNC_NAME =           "%s(cpu);";
@@ -35,6 +36,7 @@ Lang_C_x64::Lang_C_x64() {
     E_JA =                  "if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
     E_JAE =                 "if (!flag_c(cpu)) goto label_0x%llx;";
     E_JL =                  "if (flag_o(cpu) != flag_s(cpu)) goto label_0x%llx;";
+    E_JO =                  "if (flag_o(cpu)) goto label_0x%llx;";
     E_PUSH =                "_push_%s(%s);";
     E_POP =                 "%s = _pop_%s();";
     E_SUB_RR =              "%s = %s - %s;";

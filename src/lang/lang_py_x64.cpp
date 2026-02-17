@@ -12,16 +12,17 @@ Lang_Py_x64::Lang_Py_x64() {
     LT = "<";
     GTE = ">=";
     LTE = "<=";
-    F_ZF = "cpu.flag_z";
-    F_SF = "cpu.flag_s";
-    F_ADD_OF = "cpu.add_flag_o";
-    F_ADD_CF = "cpu.add_flag_c";
+    F_ZF = "cpu.flag_z(";
+    F_SF = "cpu.flag_s(";
+    F_ADD_OF = "cpu.add_flag_o(";
+    F_ADD_CF = "cpu.add_flag_c(";
+    ENDF = ")";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";
     OP_REG = "\"%s\",";
     OP_IMM = "0x%llx,";
-    OP_MEM = "\"%s\",\"%s\",%i,0x%llx,";
+    OP_MEM = "\"%s\",\"%s\",%i,%+lld,";
 
     E_CALL_FROM_IAT =       "cpu.call_from_iat(\"%s\",\"%s\")";
     E_FUNC_NAME =           "%s(cpu)";
@@ -35,6 +36,7 @@ Lang_Py_x64::Lang_Py_x64() {
     E_JA =                  "if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JAE =                 "if not cpu.flag_c():\n        goto .label_0x%llx";
     E_JL =                  "if cpu.flag_o() != cpu.flag_s():\n        goto .label_0x%llx";
+    E_JO =                  "if cpu.flag_o():\n        goto .label_0x%llx";
     E_PUSH =                "cpu.push_%s(%s)";
     E_POP =                 "%s = cpu.pop_%s()";
     E_SUB_RR =              "%s = %s - %s";

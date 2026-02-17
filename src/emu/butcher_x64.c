@@ -324,6 +324,41 @@ int flag_s(struct _cpu *cpu) {
 	return(cpu->eflags.SF);
 }
 
+void set_flag_z(struct _cpu *cpu,int value) {
+	cpu->eflags.ZF = value;
+}
+
+void set_flag_s(struct _cpu *cpu,int value) {
+	cpu->eflags.SF = value;
+}
+
+void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2) {
+
+}
+
+void add_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {
+__int128 t;
+
+	switch(bits) {
+		case 8:
+			t = (__int128) (uint8_t) op1 + (__int128) (uint8_t) op2;
+			cpu->eflags.CF = (t > 0xff);
+			break;
+		case 16:
+			t = (__int128) (uint16_t) op1 + (__int128) (uint16_t) op2;
+			cpu->eflags.CF = (t > 0xffff);
+			break;
+		case 32:
+			t = (__int128) (uint32_t) op1 + (__int128) (uint32_t) op2;
+			cpu->eflags.CF = (t > 0xffffffff);
+			break;
+		case 64:
+			t = (__int128) (uint64_t) op1 + (__int128) (uint64_t) op2;
+			cpu->eflags.CF = (t > 0xffffffffffffffff);
+			break;
+	}
+}
+
 void push(struct _cpu *cpu,int b,uint64_t n) {
 	/*
 	switch (bits) {

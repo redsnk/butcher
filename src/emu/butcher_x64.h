@@ -18,6 +18,17 @@ struct _r8 {
     uint8_t h4;
 };
 
+struct _s8 {
+	int8_t l;
+	int8_t h;
+    int8_t l2;
+    int8_t h2;
+    int8_t l3;
+    int8_t h3;
+    int8_t l4;
+    int8_t h4;
+};
+
 struct _r16 {
 	uint16_t l;
 	uint16_t h;
@@ -25,17 +36,32 @@ struct _r16 {
 	uint16_t h2;
 };
 
+struct _s16 {
+	int16_t l;
+	int16_t h;
+	int16_t l2;
+	int16_t h2;
+};
+
 struct _r32 {
 	uint32_t l;
 	uint32_t h;
+};
+
+struct _s32 {
+	int32_t l;
+	int32_t h;
 };
 
 union _reg {
 	uint64_t r64;
 	int64_t s64;
 	struct _r32 r32;
+	struct _s32 s32;
 	struct _r16 r16;
+	struct _s16 s16;
 	struct _r8 r8;
+	struct _s8 s8;
 };
 
 union _eflags {
@@ -105,6 +131,23 @@ struct _cpu {
 #define _ebp	(cpu->rbp.r32.l)
 #define _esp	(cpu->rsp.r32.l)
 
+#define s_eax	(cpu->rax.s32.l)
+#define s_ebx	(cpu->rbx.s32.l)
+#define s_ecx	(cpu->rcx.s32.l)
+#define s_edx	(cpu->rdx.s32.l)
+#define s_r8d	(cpu->r8.s32.l)
+#define s_r9d	(cpu->r9.s32.l)
+#define s_r10d	(cpu->r10.s32.l)
+#define s_r11d	(cpu->r11.s32.l)
+#define s_r12d	(cpu->r12.s32.l)
+#define s_r13d	(cpu->r13.s32.l)
+#define s_r14d	(cpu->r14.s32.l)
+#define s_r15d	(cpu->r15.s32.l)
+#define s_esi	(cpu->rsi.s32.l)
+#define s_edi	(cpu->rdi.s32.l)
+#define s_ebp	(cpu->rbp.s32.l)
+#define s_esp	(cpu->rsp.s32.l)
+
 // 16
 #define _ax		(cpu->rax.r16.l)
 #define _bx		(cpu->rbx.r16.l)
@@ -142,6 +185,25 @@ struct _cpu {
 #define _r15b	(cpu->r15.r8.l)
 #define _bpl	(cpu->rbp.r8.l)
 #define _spl	(cpu->rsp.r8.l)
+
+#define s_al	(cpu->rax.s8.l)
+#define s_bl	(cpu->rbx.s8.l)
+#define s_cl	(cpu->rcx.s8.l)
+#define s_dl	(cpu->rdx.s8.l)
+#define s_ah	(cpu->rax.s8.h)
+#define s_bh	(cpu->rbx.s8.h)
+#define s_ch	(cpu->rcx.s8.h)
+#define s_dh	(cpu->rdx.s8.h)
+#define s_r8b	(cpu->r8.s8.l)
+#define s_r9b	(cpu->r9.s8.l)
+#define s_r10b	(cpu->r10.s8.l)
+#define s_r11b	(cpu->r11.s8.l)
+#define s_r12b	(cpu->r12.s8.l)
+#define s_r13b	(cpu->r13.s8.l)
+#define s_r14b	(cpu->r14.s8.l)
+#define s_r15b	(cpu->r15.s8.l)
+#define s_bpl	(cpu->rbp.s8.l)
+#define s_spl	(cpu->rsp.s8.l)
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)
@@ -200,6 +262,10 @@ int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
 int flag_o(struct _cpu *cpu);
 int flag_s(struct _cpu *cpu);
+void set_flag_z(struct _cpu *cpu,int value);
+void set_flag_s(struct _cpu *cpu,int value);
+void add_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2);
+void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 void push(struct _cpu *cpu,int b,uint64_t n);
 uint64_t pop(struct _cpu *cpu,int b);
 

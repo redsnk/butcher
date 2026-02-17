@@ -49,19 +49,19 @@ char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int sign) {
     return(op_str(handle,op,sign,false));
 }
 
-char *Lang_x64::set_op_str(csh handle,cs_x86_op op) {
-    return(op_str(handle,op,false,true));
+char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int sign) {
+    return(op_str(handle,op,sign,true));
 }
 
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name) {
     if (!strcmp(name,"op0")) {
-        return (set_op_str(handle,insn->detail->x86.operands[0]));
+        return (set_op_str(handle,insn->detail->x86.operands[0],false));
     }
     else if (!strcmp(name,"op1")) {
         return (get_op_str(handle,insn->detail->x86.operands[1],false));
     }
     else if (!strcmp(name,"sop0")) {
-        return (set_op_str(handle,insn->detail->x86.operands[0]));
+        return (set_op_str(handle,insn->detail->x86.operands[0],true));
     }
     else if (!strcmp(name,"sop1")) {
         return (get_op_str(handle,insn->detail->x86.operands[1],true));
@@ -244,12 +244,12 @@ std::string str;
                 if (list.size()>0) {
                     str = list.back();
                     list.pop_back();
-                    sprintf(tmp,"%s(%s)",it1,str.c_str());
+                    sprintf(tmp,"%s%s%s",it1,str.c_str(),ENDF);
                     strcat (buffer,tmp);
                 }
                 else {
                     it2 = Translate_item(handle,insn,&e->items[n-1]);
-                    sprintf(tmp,"%s(%s)",it1,it2);
+                    sprintf(tmp,"%s%s%s",it1,it2,ENDF);
                     strcat (buffer,tmp);
                     free(it2);
                 }

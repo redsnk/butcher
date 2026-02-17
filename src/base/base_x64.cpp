@@ -426,13 +426,13 @@ char out[1024];
     }
     strcat (out,buffer);
     char *p = out;
-    /*
-    for (int n=0;n<strlen(buffer);n++) {
-        if (buffer[n] == '\n') {
-            p = buffer+n+1;
+    
+    for (int n=0;n<strlen(out);n++) {
+        if (out[n] == '\n') {
+            p = out+n+1;
         }
     }
-    */
+    
     //while (strlen(buffer) < lang_x64->COMM_SEP) strcat(buffer," ");
     if ((insn == NULL) || !lasm) {
         printf("%s\n", out);
@@ -544,6 +544,10 @@ int n,b;
             PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
             num++;
             break;
+        case X86_INS_JO:
+            PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
         case X86_INS_PUSH:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -586,7 +590,7 @@ int n,b;
             }
             */
             // The OF, SF, ZF, AF, CF, and PF flags
-            reg0 = lang_x64->Translate(handle,".add_of(bits,op0,op1);|.op0 = op0 + op1;|.zf(op0 == 0);|.sf(sop0 < 0);",insn);
+            reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);|.add_of(bits,sop0,sop1);|.op0 = op0 + op1;|.zf(op0 == 0);|.sf(sop0 < 0);",insn);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
