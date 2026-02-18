@@ -16,7 +16,7 @@ const char *Lang_x64::ptr(cs_x86_op op) {
     return ("ptr_error");
 }
 
-char *Lang_x64::op_str(csh handle,cs_x86_op op,int sign, int lset) {
+char *Lang_x64::op_str(csh handle,cs_x86_op op,int bits,int sign, int lset) {
 char buffer[MAX_STR_OP];
 char *str;
 
@@ -39,32 +39,48 @@ char *str;
             free(str);
             return (strdup(buffer));
         case X86_OP_IMM:
-            sprintf(buffer,"0x%llx",op.imm);
+            switch (bits) {
+                case 8:
+                    sprintf(buffer,"0x%"PRIx8,(int8_t)op.imm);
+                    break;
+                case 16:
+                    sprintf(buffer,"0x%"PRIx16,(int16_t)op.imm);
+                    break;
+                case 32:
+                    sprintf(buffer,"0x%"PRIx32,(int32_t)op.imm);
+                    break;
+                case 64:
+                    sprintf(buffer,"0x%"PRIx64,op.imm);
+                    break;
+            }
             return (strdup(buffer));
     }
     return(NULL);
 }
 
-char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int sign) {
-    return(op_str(handle,op,sign,false));
+char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int bits,int sign) {
+    return(op_str(handle,op,bits,sign,false));
 }
 
-char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int sign) {
-    return(op_str(handle,op,sign,true));
+char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
+    return(op_str(handle,op,bits,sign,true));
 }
 
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name) {
+int bits;
+
+    bits = insn->detail->x86.addr_size * 8;
     if (!strcmp(name,"op0")) {
-        return (set_op_str(handle,insn->detail->x86.operands[0],false));
+        return (set_op_str(handle,insn->detail->x86.operands[0],bits,false));
     }
     else if (!strcmp(name,"op1")) {
-        return (get_op_str(handle,insn->detail->x86.operands[1],false));
+        return (get_op_str(handle,insn->detail->x86.operands[1],bits,false));
     }
     else if (!strcmp(name,"sop0")) {
-        return (set_op_str(handle,insn->detail->x86.operands[0],true));
+        return (set_op_str(handle,insn->detail->x86.operands[0],bits,true));
     }
     else if (!strcmp(name,"sop1")) {
-        return (get_op_str(handle,insn->detail->x86.operands[1],true));
+        return (get_op_str(handle,insn->detail->x86.operands[1],bits,true));
     }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_ZF));

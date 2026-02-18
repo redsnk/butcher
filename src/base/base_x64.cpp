@@ -8,7 +8,7 @@ const char *reg_name(csh handle,int id_reg) {
     }
     return (cs_reg_name(handle,id_reg));
 }
-
+/*
 uint32_t memto32 (uint8_t *mem) {
 uint32_t v;
 
@@ -32,6 +32,7 @@ uint64_t v;
         ((uint64_t ) mem[0]);
     return(v);
 }
+*/
 
 /*
 const char *get_reg64(const char *reg) {
@@ -241,6 +242,23 @@ int Base_x64::IsCall(cs_insn *insn, uint64_t *addr) {
                 *addr = insn->detail->x86.operands[0].imm;
                 return (true);
             }
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
+                    /*
+                    if (arch->ValidMemory(insn->detail->x86.operands[0].mem.disp)) {
+                        // 
+                        *addr = insn->detail->x86.operands[0].mem.disp;
+                        return (true);
+                    }
+                    */
+                    if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,addr,insn->detail->x86.addr_size*8)) {
+                        if (arch->ValidMemory(*addr)) {
+                            return (true);
+                        }
+                    }
+                }
+            }
         }
     }
     return (false);
@@ -256,6 +274,10 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
             // nop             word ptr [rax + rax]
             return(true);
         }
+    }
+    else if ((insn[n].size == 2) && !insn[n].bytes[0] && !insn[n].bytes[1]) {
+        // 0000           add byte [eax], al
+        return (true);
     }
     return (false);
 }
@@ -310,7 +332,7 @@ int Base_x64::IsJmp(cs_insn *insn, uint64_t *addr) {
 int Base_x64::IsJmp(cs_insn *insn, uint64_t *addr[],int *count) {
 int n,b,c;
 uint8_t *mem;
-uint64_t read,a;
+uint64_t read,a,d;
 
     c = 0;
     if (insn->id == X86_INS_JMP) {
@@ -325,6 +347,24 @@ uint64_t read,a;
                 for (n=0;n<MAX_JMPS;n++) {
                     a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                     b = insn->detail->x86.addr_size;
+                    if (arch->Get_Address_At(a,&d,b*8)) {
+                        if (arch->ValidMemory(d)) {
+                            if (c == 0) {
+                                *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                            }
+                            else {
+                                *addr = (uint64_t *) realloc(*addr,sizeof(uint64_t)*(c+1));
+                            }
+                            (*addr)[c++] = d;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                    /*
                     mem = arch->GetMemory(a,b,&read);
                     if ((mem != NULL) && (read == b)) {
                         if (b == 4) {
@@ -351,6 +391,7 @@ uint64_t read,a;
                     else {
                         break;
                     }
+                    */
                 }       
             }
         }
@@ -445,14 +486,16 @@ char out[1024];
 
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
-uint64_t read;
+uint64_t read,d;
 char *reg0,*reg1,*mstr;
 uint64_t addr;
 char *lib,*func,*name;
 uint8_t *mem;
 int n,b;
+int bits;
 
     insn = &sc->insn[num];
+    bits = insn->detail->x86.addr_size*8;
     switch (insn->id) {
         case X86_INS_RET:
             // ret
@@ -494,6 +537,21 @@ int n,b;
                     for (n=0;n<MAX_JMPS;n++) {
                         addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                         b = insn->detail->x86.addr_size;
+                        if (arch->Get_Address_At(addr,&d,b*8)) {
+                            if (arch->ValidMemory(d)) {
+                                PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I:lang_x64->E_ELIF_R_EQ_I,reg0,n);
+                                //PrintLine(insn,2,"case %i:",n);
+                                PrintLine(insn,2,lang_x64->E_GOTO,d);
+                                PrintLine(insn,1,lang_x64->E_ENDIF);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                        /*
                         mem = arch->GetMemory(addr,b,&read);
                         if ((mem != NULL) && (read == b)) {
                             if (b == 4) {
@@ -517,6 +575,7 @@ int n,b;
                         else {
                             break;
                         }
+                        */
                     }
                     free(reg0);
                     //PrintLine(insn,1,lang_x64->E_ENDIF);
@@ -568,7 +627,7 @@ int n,b;
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],false);
+                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
                     PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,reg1);
                     num++;
                     free(reg1);
@@ -625,7 +684,7 @@ int n,b;
                         PrintLine(insn,1,lang_x64->E_XOR_R,reg0);   
                     }
                     else {
-                        reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],false);
+                        reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
                         PrintLine(insn,1,lang_x64->E_XOR_RR,reg0,reg0,reg1);
                         free(reg1);
                     }
@@ -680,7 +739,7 @@ int n,b;
                         // (ZF=1 or SF!=OF).
                         if (FlagsNotUsed(sc,num+1)) {
                             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                                reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
+                                reg0 = lang_x64->s_reg_name(handle,insn->detail->x86.operands[0].reg);
                                 if (insn->detail->x86.operands[1].type == X86_OP_REG) {
                                     if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
                                         // test		eax, eax
@@ -705,8 +764,8 @@ int n,b;
                     case X86_INS_JA:
                         // (CF=0 and ZF=0)
                         if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],false);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],false);
+                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,false);
+                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLine(next,1,lang_x64->E_JA_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
                             free(reg0);
@@ -717,8 +776,8 @@ int n,b;
                     case X86_INS_JGE:
                         // (SF=OF)
                         if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],true);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],true);
+                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,true);
+                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,true);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLine(next,1,lang_x64->E_JGE_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
                             free(reg0);
@@ -850,6 +909,21 @@ int n,b;
                         free(func);
                         num++;
                     }    
+                }
+                else if ((insn->detail->x86.operands[0].mem.base == X86_OP_INVALID) && 
+                        (insn->detail->x86.operands[0].mem.index == X86_OP_INVALID)) {
+                    if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
+                        if (arch->ValidMemory(addr)) {
+                            PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                            num++;
+                        }
+                    }
+                    /*
+                    if (arch->ValidMemory(addr)) {
+                        PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                        num++;
+                    }
+                    */
                 }
             }
             break;

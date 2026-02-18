@@ -1,6 +1,10 @@
 #ifndef _ARCHIVE_H
 #define _ARCHIVE_H
 
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 struct _Section {
     uint64_t d_Offset;
     uint64_t d_Size;
@@ -21,6 +25,8 @@ class Archive {
         virtual int IsSymbolFunction (uint64_t addr, char **func) = 0;
         virtual int IsSymbolObject (uint64_t addr, char **name) = 0;
         virtual struct _Section *GetSections(int *count) = 0;
+
+        int Get_Address_At(uint64_t ptr,uint64_t *addr,int bits);
 };
 
 #endif // _ARCHIVE_H

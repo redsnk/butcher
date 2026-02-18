@@ -68,7 +68,7 @@ Lang_C_x64::Lang_C_x64() {
     E_GET_MEM =             "_get_%s_ptr(%s)";
     E_S_GET_MEM =           "s_get_%s_ptr(%s)";
     E_LOAD_MEM =            "load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);";
-    E_SET_MEM =             "_set_%s_ptr(%s,%s);";
+    E_SET_MEM =             "_set_%s_ptr(%s,%s)";
 }
 
 #define C_HEADER "\

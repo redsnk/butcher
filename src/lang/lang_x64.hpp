@@ -82,9 +82,9 @@ class Lang_x64 : public Language {
     virtual char *s_reg_name(csh handle,int id_reg) = 0;
 
     const char *ptr(cs_x86_op op);
-    char *op_str(csh handle,cs_x86_op op,int sign,int lset);
-    char *get_op_str(csh handle,cs_x86_op op,int sign);
-    char *set_op_str(csh handle,cs_x86_op op,int sign);
+    char *op_str(csh handle,cs_x86_op op,int bits,int sign,int lset);
+    char *get_op_str(csh handle,cs_x86_op op,int bits,int sign);
+    char *set_op_str(csh handle,cs_x86_op op,int bits,int sign);
 
     char *Translate_var (csh handle,cs_insn *insn,char *name);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i);
