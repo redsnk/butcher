@@ -648,6 +648,9 @@ int bits;
                 }
             }
             */
+            if (insn->address == 0x405c5e) {
+                printf("\n");
+            }
             // The OF, SF, ZF, AF, CF, and PF flags
             reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);|.add_of(bits,sop0,sop1);|.op0 = op0 + op1;|.zf(op0 == 0);|.sf(sop0 < 0);",insn);
             if (reg0 != NULL) {
