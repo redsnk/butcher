@@ -28,6 +28,7 @@ class Lang_x64 : public Language {
     const char *F_FALSE = "";
     const char *F_PUSH = "";
     const char *F_POP = "";
+    const char *F_POW = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";

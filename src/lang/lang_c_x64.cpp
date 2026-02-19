@@ -28,6 +28,7 @@ Lang_C_x64::Lang_C_x64() {
     F_FALSE = "0";
     F_PUSH = "push(cpu,";
     F_POP = "pop(cpu,";
+    F_POW = "Pow(";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

@@ -20,9 +20,9 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 {name}      yylval->emplace<std::string>(yytext); return Parser::token::NAME; 
 {integer}   yylval->emplace<long long>(strtoll(yytext, nullptr, 10)); return Parser::token::INT;
 {float}     yylval->emplace<double>(strtod(yytext, nullptr)); return Parser::token::FLT;
-"*"         return Parser::token::MULTIPLY;
-"/"         return Parser::token::DIVIDE;
-"%"         return Parser::token::MODULO;
+"*"         return Parser::token::MUL;
+"/"         return Parser::token::DIV;
+"%"         return Parser::token::MOD;
 "!"         return Parser::token::FACTORIAL;
 "$"         return Parser::token::EXPONENT;
 "=="        return Parser::token::EQUAL;

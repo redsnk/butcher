@@ -28,6 +28,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_FALSE = "false";
     F_PUSH = "cpu.push(";
     F_POP = "cpu.pop(";
+    F_POW = "pow(";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

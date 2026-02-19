@@ -40,6 +40,11 @@ int n;
     }
 }
 
+void Emit::res_item (int i,char *str) {
+    items[i].id = RESULT;
+    strcpy (items[i].item.name,str);
+}
+
 void Emit::emit_item (enum _id_item id,const char *label) {
 _s_item i;
 

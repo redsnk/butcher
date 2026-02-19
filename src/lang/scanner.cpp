@@ -786,17 +786,17 @@ yylval->emplace<double>(strtod(yytext, nullptr)); return Parser::token::FLT;
 case 4:
 YY_RULE_SETUP
 #line 23 "lexer.l"
-return Parser::token::MULTIPLY;
+return Parser::token::MUL;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 24 "lexer.l"
-return Parser::token::DIVIDE;
+return Parser::token::DIV;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 25 "lexer.l"
-return Parser::token::MODULO;
+return Parser::token::MOD;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP

@@ -412,9 +412,9 @@ namespace lang {
         B_AND = 272,
         B_OR = 273,
         B_XOR = 274,
-        MULTIPLY = 275,
-        DIVIDE = 276,
-        MODULO = 277,
+        MUL = 275,
+        DIV = 276,
+        MOD = 277,
         UMINUS = 278,
         FACTORIAL = 279,
         EXPONENT = 280,
@@ -629,13 +629,13 @@ switch (yytype)
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == 61 || tok == token::LIST || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == 61 || tok == token::LIST || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
       }
 #else
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == 61 || tok == token::LIST || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MULTIPLY || tok == token::DIVIDE || tok == token::MODULO || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == 61 || tok == token::LIST || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -984,46 +984,46 @@ switch (yytype)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_MULTIPLY ()
+      make_MUL ()
       {
-        return symbol_type (token::MULTIPLY);
+        return symbol_type (token::MUL);
       }
 #else
       static
       symbol_type
-      make_MULTIPLY ()
+      make_MUL ()
       {
-        return symbol_type (token::MULTIPLY);
+        return symbol_type (token::MUL);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_DIVIDE ()
+      make_DIV ()
       {
-        return symbol_type (token::DIVIDE);
+        return symbol_type (token::DIV);
       }
 #else
       static
       symbol_type
-      make_DIVIDE ()
+      make_DIV ()
       {
-        return symbol_type (token::DIVIDE);
+        return symbol_type (token::DIV);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
-      make_MODULO ()
+      make_MOD ()
       {
-        return symbol_type (token::MODULO);
+        return symbol_type (token::MOD);
       }
 #else
       static
       symbol_type
-      make_MODULO ()
+      make_MOD ()
       {
-        return symbol_type (token::MODULO);
+        return symbol_type (token::MOD);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -1389,9 +1389,9 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 91,     ///< Last index in yytable_.
+      yylast_ = 105,     ///< Last index in yytable_.
       yynnts_ = 3,  ///< Number of nonterminal symbols.
-      yyfinal_ = 25, ///< Termination state number.
+      yyfinal_ = 26, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 32  ///< Number of tokens.

@@ -887,7 +887,19 @@ int bits;
             }
             */
             break;
-        
+        case X86_INS_SHR:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn);
+            }
+            else {
+                reg0 = NULL;
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_LEA:
             reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
             if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
@@ -910,6 +922,7 @@ int bits;
             free(reg0);
             num++;
             break;
+        case X86_INS_MOVZX:
         case X86_INS_MOV:
             reg0 = lang_x64->Translate(handle,".op0 = op1;",insn);
             if (reg0 != NULL) {

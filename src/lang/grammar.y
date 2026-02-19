@@ -46,9 +46,9 @@
 %precedence         END
 %precedence         '='
 %left				LIST
-%precedence         EQUAL NEQUAL LT GT LTE GTE
+%left               EQUAL NEQUAL LT GT LTE GTE
 %left               '+' '-' B_AND B_OR B_XOR
-%left               MULTIPLY DIVIDE MODULO
+%left               MUL DIV MOD
 %precedence         UMINUS
 %precedence         FACTORIAL
 %right              EXPONENT
@@ -80,7 +80,8 @@ expr:
 | expr B_AND expr       { emit->emit_item(AND,"AND"); }
 | expr B_XOR expr       { emit->emit_item(XOR,"XOR"); }
 | expr B_OR expr        { emit->emit_item(OR,"OR"); }
-| expr MULTIPLY expr	{ emit->emit_item(MULT,"MULT"); }
+| expr MUL expr			{ emit->emit_item(MUL,"MUL"); }
+| expr DIV expr         { emit->emit_item(DIV,"DIV"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
 | expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }

@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 enum _id_item {
+    RESULT,
     INDENT,
     NAME,
     NUMBER,
@@ -20,7 +21,9 @@ enum _id_item {
     LTE,
     ADD,
     SUB,
-    MULT,
+    MUL,
+    DIV,
+    MOD,
     LIST,
     ASSIGN,
     END,
@@ -52,6 +55,7 @@ class Emit {
     void reset (void);
     void add_item (_s_item *i);
     void del_item (int i);
+    void res_item (int i,char *str);
     void emit_item_number (enum _id_item id,const char *label,uint64_t num);
     void emit_item_name (enum _id_item id,const char *label,const char *name);
     void emit_item (enum _id_item id,const char *label);

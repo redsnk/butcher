@@ -519,6 +519,16 @@ uint64_t ret=0;
 	return (ret);
 }
 
+uint64_t Pow(uint64_t b,uint64_t p) {
+uint64_t n,r;
+
+	r = 1;
+	for (n=0;n<p;n++) {
+		r = r * b;
+	}
+	return (r);
+}
+
 uint64_t get_ins_mem(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int *bits) {
 void *rb,*ri;
 int bi;

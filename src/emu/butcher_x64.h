@@ -273,6 +273,7 @@ void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 void sub_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 void push(struct _cpu *cpu,int b,uint64_t n);
 uint64_t pop(struct _cpu *cpu,int b);
+uint64_t Pow(uint64_t b,uint64_t p);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);
