@@ -623,18 +623,6 @@ int bits;
                 num++;
             }
             break;
-        case X86_INS_SUB:
-            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                if (FlagsNotUsed(sc,num)) {
-                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
-                    PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,reg1);
-                    num++;
-                    free(reg1);
-                    free(reg0);
-                }
-            }
-            break;
         case X86_INS_ADD:
             /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
@@ -653,7 +641,7 @@ int bits;
                 reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);|.add_of(bits,sop0,sop1);|.op0 = op0 + op1;|.zf(op0 == 0);|.sf(sop0 < 0);",insn);
+                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -662,6 +650,7 @@ int bits;
             }
             break;
         case X86_INS_INC:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -670,8 +659,93 @@ int bits;
                     free(reg0);
                 }
             }
+            */
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 + 1;",insn);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,1);:.add_of(bits,sop0,1);:.op0 = op0 + 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SUB:
+            /*
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
+                    PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,reg1);
+                    num++;
+                    free(reg1);
+                    free(reg0);
+                }
+            }
+            */
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - op1;",insn);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMP:
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = strdup("");
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.zf((op0-op1) == 0);:.sf((sop0-sop1) < 0);",insn);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            /*
+            if ((num+1) < sc->count) {
+                cs_insn *next = &sc->insn[num+1];
+                switch (next->id) {
+                    case X86_INS_JA:
+                        // (CF=0 and ZF=0)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,false);
+                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JA_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            free(reg1);
+                            num += 2;
+                        }
+                        break;
+                    case X86_INS_JGE:
+                        // (SF=OF)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,true);
+                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,true);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JGE_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            free(reg1);
+                            num += 2;
+                        }
+                        break;
+                }
+            }
+            */
             break;
         case X86_INS_DEC:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -679,6 +753,19 @@ int bits;
                     num++;
                     free(reg0);
                 }
+            }
+            */
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - 1;",insn);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(op0 == 0);:.sub_of(bits,sop0,1);:.op0 = op0 - 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
             }
             break;
         case X86_INS_XOR:
@@ -699,6 +786,19 @@ int bits;
             }
             break;
         case X86_INS_TEST:
+            // The OF and CF flags are set to 0. The SF, ZF, and PF flags are set
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = strdup("");
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.zf((op0&op1) == 0);:.sf((sop0&sop1) < 0);",insn);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            /*
             if ((num+1) < sc->count) {
                 cs_insn *next = &sc->insn[num+1];
                 switch (next->id) {
@@ -761,38 +861,9 @@ int bits;
                         break;
                 }
             }
+            */
             break;
-        case X86_INS_CMP:
-            if ((num+1) < sc->count) {
-                cs_insn *next = &sc->insn[num+1];
-                switch (next->id) {
-                    case X86_INS_JA:
-                        // (CF=0 and ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,false);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
-                            PrintLine(next,1,lang_x64->E_JA_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
-                            free(reg0);
-                            free(reg1);
-                            num += 2;
-                        }
-                        break;
-                    case X86_INS_JGE:
-                        // (SF=OF)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,true);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,true);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
-                            PrintLine(next,1,lang_x64->E_JGE_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
-                            free(reg0);
-                            free(reg1);
-                            num += 2;
-                        }
-                        break;
-                }
-            }
-            break;
+        
         case X86_INS_LEA:
             reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
             if (IsRIP(insn->detail->x86.operands[1].mem.base)) {

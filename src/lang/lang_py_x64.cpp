@@ -14,9 +14,18 @@ Lang_Py_x64::Lang_Py_x64() {
     LTE = "<=";
     F_ZF = "cpu.flag_z(";
     F_SF = "cpu.flag_s(";
+    F_CF = "cpu.flag_c(";
+    F_OF = "cpu.flag_o(";
     F_ADD_OF = "cpu.add_flag_o(";
     F_ADD_CF = "cpu.add_flag_c(";
+    F_SUB_OF = "cpu.sub_flag_o(";
+    //F_SUB_CF = "cpu.sub_flag_c(";
     ENDF = ")";
+    AND = "&";
+    OR = "|";
+    XOR = "^";
+    F_TRUE = "true";
+    F_FALSE = "false";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

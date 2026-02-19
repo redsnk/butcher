@@ -42,14 +42,12 @@
 %nterm <long long>  iexp
 %nterm <double>     fexp
 
-%precedence			TRUE
-%precedence         FALSE
 %precedence			LF
 %precedence         END
 %precedence         '='
-%right				LIST
+%left				LIST
 %precedence         EQUAL NEQUAL LT GT LTE GTE
-%left               '+' '-' 
+%left               '+' '-' B_AND B_OR B_XOR
 %left               MULTIPLY DIVIDE MODULO
 %precedence         UMINUS
 %precedence         FACTORIAL
@@ -75,9 +73,13 @@
 
 expr: 
 | NAME '(' expr ')'     { emit->emit_item_name(FUNCTION,"FUNCTION",$1.c_str()); }
+| '(' expr ')'          { emit->emit_item(ENC,"ENC"); };
 | expr LIST expr        { emit->emit_item(LIST,"LIST"); }
 | expr '+' expr			{ emit->emit_item(ADD,"ADD"); }
 | expr '-' expr			{ emit->emit_item(SUB,"SUB"); }
+| expr B_AND expr       { emit->emit_item(AND,"AND"); }
+| expr B_XOR expr       { emit->emit_item(XOR,"XOR"); }
+| expr B_OR expr        { emit->emit_item(OR,"OR"); }
 | expr MULTIPLY expr	{ emit->emit_item(MULT,"MULT"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
@@ -89,8 +91,6 @@ expr:
 | NAME					{ emit->emit_item_name(NAME,"NAME",$1.c_str()); }
 | INT					{ emit->emit_item_number(NUMBER,"NUMBER",$1); }
 | END					{ emit->emit_item(END,"END"); }
-| TRUE					{ emit->emit_item(ID_TRUE,"TRUE"); }
-| FALSE                 { emit->emit_item(ID_FALSE,"FALSE"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
 ;

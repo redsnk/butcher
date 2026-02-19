@@ -14,9 +14,18 @@ Lang_C_x64::Lang_C_x64() {
     LTE = "<=";
     F_ZF = "set_flag_z(cpu,";
     F_SF = "set_flag_s(cpu,";
+    F_CF = "set_flag_c(cpu,";
+    F_OF = "set_flag_o(cpu,";
     F_ADD_OF = "add_flag_o(cpu,";
     F_ADD_CF = "add_flag_c(cpu,";
+    F_SUB_OF = "sub_flag_o(cpu,";
+    //F_SUB_CF = "sub_flag_c(cpu,";
     ENDF = ")";
+    AND = "&";
+    OR = "|";
+    XOR = "^";
+    F_TRUE = "1";
+    F_FALSE = "0";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

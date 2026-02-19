@@ -264,8 +264,12 @@ int flag_o(struct _cpu *cpu);
 int flag_s(struct _cpu *cpu);
 void set_flag_z(struct _cpu *cpu,int value);
 void set_flag_s(struct _cpu *cpu,int value);
+void set_flag_c(struct _cpu *cpu,int value);
+void set_flag_o(struct _cpu *cpu,int value);
 void add_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2);
 void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
+//void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2);
+void sub_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 void push(struct _cpu *cpu,int b,uint64_t n);
 uint64_t pop(struct _cpu *cpu,int b);
 

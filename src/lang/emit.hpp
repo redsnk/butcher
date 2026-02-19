@@ -24,9 +24,11 @@ enum _id_item {
     LIST,
     ASSIGN,
     END,
-    ID_TRUE,
-    ID_FALSE,
-    LF
+    LF,
+    ENC,
+    AND,
+    OR,
+    XOR
 }; 
 
 #define MAX_ITEM_NAME   (256)

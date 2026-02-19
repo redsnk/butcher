@@ -332,57 +332,83 @@ void set_flag_s(struct _cpu *cpu,int value) {
 	cpu->eflags.SF = value;
 }
 
+void set_flag_c(struct _cpu *cpu,int value) {
+	cpu->eflags.CF = value;
+}
+
+void set_flag_o(struct _cpu *cpu,int value) {
+	cpu->eflags.OF = value;
+}
+
+#define SIGN(a)	(a<0)
+
 void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2) {
 int32_t op1_32,op2_32;
 int16_t op1_16,op2_16;
 int8_t op1_8,op2_8;
 
+	cpu->eflags.OF = 0;
 	switch (bits) {
 		case 8:
 			op1_8 = (int8_t) op1;
 			op2_8 = (int8_t) op2;
-			if ((op1_8>=0) && (op2_8>=0)) {
-				cpu->eflags.OF = ((op1_8+op2_8) < 0);
-			}
-			else if ((op1_8<0) && (op2_8<0)){
-				cpu->eflags.OF = ((op1_8+op2_8) > 0);
+			if (SIGN(op1_8) == SIGN(op2_8)) {
+				cpu->eflags.OF = (SIGN(op1_8+op2_8) != SIGN(op1_8));
 			}
 			break;
 		case 16:
 			op1_16 = (int16_t) op1;
 			op2_16 = (int16_t) op2;
-			if ((op1_16>=0) && (op2_16>=0)) {
-				cpu->eflags.OF = ((op1_16+op2_16) < 0);
-			}
-			else if ((op1_16<0) && (op2_16<0)){
-				cpu->eflags.OF = ((op1_16+op2_16) > 0);
-			}
-			else {
-				cpu->eflags.OF = 0;
+			if (SIGN(op1_16) == SIGN(op2_16)) {
+				cpu->eflags.OF = (SIGN(op1_16+op2_16) != SIGN(op1_16));
 			}
 			break;
 		case 32:
 			op1_32 = (int32_t) op1;
 			op2_32 = (int32_t) op2;
-			if ((op1_32>=0) && (op2_32>=0)) {
-				cpu->eflags.OF = ((op1_32+op2_32) < 0);
-			}
-			else if ((op1_32<0) && (op2_32<0)){
-				cpu->eflags.OF = ((op1_32+op2_32) > 0);
-			}
-			else {
-				cpu->eflags.OF = 0;
+			if (SIGN(op1_32) == SIGN(op2_32)) {
+				cpu->eflags.OF = (SIGN(op1_32+op2_32) != SIGN(op1_32));
 			}
 			break;
 		case 64:
-			if ((op1>=0) && (op2>=0)) {
-				cpu->eflags.OF = ((op1+op2) < 0);
+			if (SIGN(op1) == SIGN(op2)) {
+				cpu->eflags.OF = (SIGN(op1+op2) != SIGN(op1));
 			}
-			else if ((op1<0) && (op2<0)){
-				cpu->eflags.OF = ((op1+op2) > 0);
+			break;
+	}
+}
+
+void sub_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2) {
+int32_t op1_32,op2_32;
+int16_t op1_16,op2_16;
+int8_t op1_8,op2_8;
+
+	cpu->eflags.OF = 0;
+	switch (bits) {
+		case 8:
+			op1_8 = (int8_t) op1;
+			op2_8 = (int8_t) op2;
+			if (SIGN(op1_8) != SIGN(op2_8)) {
+				cpu->eflags.OF = (SIGN(op1_8-op2_8) != SIGN(op1_8));
 			}
-			else {
-				cpu->eflags.OF = 0;
+			break;
+		case 16:
+			op1_16 = (int16_t) op1;
+			op2_16 = (int16_t) op2;
+			if (SIGN(op1_16) != SIGN(op2_16)) {
+				cpu->eflags.OF = (SIGN(op1_16-op2_16) != SIGN(op1_16));
+			}
+			break;
+		case 32:
+			op1_32 = (int32_t) op1;
+			op2_32 = (int32_t) op2;
+			if (SIGN(op1_32) != SIGN(op2_32)) {
+				cpu->eflags.OF = (SIGN(op1_32-op2_32) != SIGN(op1_32));
+			}
+			break;
+		case 64:
+			if (SIGN(op1) != SIGN(op2)) {
+				cpu->eflags.OF = (SIGN(op1-op2) != SIGN(op1));
 			}
 			break;
 	}
@@ -410,6 +436,31 @@ __int128 t;
 			break;
 	}
 }
+
+/*
+void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {
+__int128 t;
+
+	switch(bits) {
+		case 8:
+			t = (__int128) (uint8_t) op1 - (__int128) (uint8_t) op2;
+			cpu->eflags.CF = (t > 0xff);
+			break;
+		case 16:
+			t = (__int128) (uint16_t) op1 - (__int128) (uint16_t) op2;
+			cpu->eflags.CF = (t > 0xffff);
+			break;
+		case 32:
+			t = (__int128) (uint32_t) op1 - (__int128) (uint32_t) op2;
+			cpu->eflags.CF = (t > 0xffffffff);
+			break;
+		case 64:
+			t = (__int128) (uint64_t) op1 - (__int128) (uint64_t) op2;
+			cpu->eflags.CF = (t > 0xffffffffffffffff);
+			break;
+	}
+}
+*/
 
 void push(struct _cpu *cpu,int b,uint64_t n) {
 	/*

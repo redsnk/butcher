@@ -14,9 +14,18 @@ class Lang_x64 : public Language {
     const char *LTE = "";
     const char *F_ZF = "";
     const char *F_SF = "";
+    const char *F_CF = "";
+    const char *F_OF = "";
     const char *F_ADD_OF = "";
     const char *F_ADD_CF = "";
+    const char *F_SUB_OF = "";
+    //const char *F_SUB_CF = "";
     const char *ENDF = "";
+    const char *AND = "";
+    const char *OR = "";
+    const char *XOR = "";
+    const char *F_TRUE = "";
+    const char *F_FALSE = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
