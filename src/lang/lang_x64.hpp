@@ -26,6 +26,8 @@ class Lang_x64 : public Language {
     const char *XOR = "";
     const char *F_TRUE = "";
     const char *F_FALSE = "";
+    const char *F_PUSH = "";
+    const char *F_POP = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
@@ -44,6 +46,8 @@ class Lang_x64 : public Language {
     const char *E_JA = "";
     const char *E_JAE = "";
     const char *E_JL = "";
+    const char *E_JLE = "";
+    const char *E_JGE = "";
     const char *E_JO = "";
     const char *E_PUSH = "";
     const char *E_POP = "";

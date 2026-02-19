@@ -485,8 +485,8 @@ void push(struct _cpu *cpu,int b,uint64_t n) {
 			panic("push bits","");
 	}
 	*/
-	cpu->rsp.r64 -= b;
-	set_mem(cpu,cpu->rsp.r64,b,(uint8_t *)&n);
+	cpu->rsp.r64 -= b/8;
+	set_mem(cpu,cpu->rsp.r64,b/8,(uint8_t *)&n);
 }
 
 uint64_t pop(struct _cpu *cpu,int b) {
@@ -514,8 +514,8 @@ uint64_t ret=0;
 			panic("pop bits","");
 	}
 	*/
-	get_mem(cpu,cpu->rsp.r64,b,(uint8_t*) &ret);
-	cpu->rsp.r64 += b;
+	get_mem(cpu,cpu->rsp.r64,b/8,(uint8_t*) &ret);
+	cpu->rsp.r64 += b/8;
 	return (ret);
 }
 

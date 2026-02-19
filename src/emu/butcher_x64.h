@@ -220,6 +220,7 @@ struct _cpu {
 #define _set_dword_ptr(m,v)	set_dword_ptr(cpu,m,v)
 #define _set_qword_ptr(m,v)	set_qword_ptr(cpu,m,v)
 
+/*
 #define _push_byte(v)		push(cpu,1,v)
 #define _push_word(v)		push(cpu,2,v)
 #define _push_dword(v)		push(cpu,4,v)
@@ -229,7 +230,7 @@ struct _cpu {
 #define _pop_word()			pop(cpu,2)
 #define _pop_dword()		pop(cpu,4)
 #define _pop_qword()		pop(cpu,8)
-
+*/
 
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);

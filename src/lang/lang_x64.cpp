@@ -139,6 +139,12 @@ int bits;
     else if (!strcmp(name,"false")) {
         return (strdup(F_FALSE));
     }
+    else if (!strcmp(name,"push")) {
+        return (strdup(F_PUSH));
+    }
+    else if (!strcmp(name,"pop")) {
+        return (strdup(F_POP));
+    }
     return (strdup("<Translate_var error>"));
 }
 
@@ -381,12 +387,14 @@ std::string str;
                     str = list.back();
                     list.pop_back();
                     sprintf(tmp,"%s%s%s",it1,str.c_str(),ENDF);
-                    strcat (buffer,tmp);
+                    //strcat (buffer,tmp);
+                    list.push_back(tmp);
                 }
                 else {
                     it2 = Translate_item(handle,insn,&e->items[n-1],false);
                     sprintf(tmp,"%s%s%s",it1,it2,ENDF);
-                    strcat (buffer,tmp);
+                    //strcat (buffer,tmp);
+                    list.push_back(tmp);
                     free(it2);
                 }
                 free(it1);

@@ -26,6 +26,8 @@ Lang_C_x64::Lang_C_x64() {
     XOR = "^";
     F_TRUE = "1";
     F_FALSE = "0";
+    F_PUSH = "push(cpu,";
+    F_POP = "pop(cpu,";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";
@@ -45,6 +47,8 @@ Lang_C_x64::Lang_C_x64() {
     E_JA =                  "if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
     E_JAE =                 "if (!flag_c(cpu)) goto label_0x%llx;";
     E_JL =                  "if (flag_o(cpu) != flag_s(cpu)) goto label_0x%llx;";
+    E_JLE =                 "if (flag_z(cpu) || (flag_o(cpu) != flag_s(cpu))) goto label_0x%llx;";
+    E_JGE =                 "if (flag_o(cpu) == flag_s(cpu)) goto label_0x%llx;";
     E_JO =                  "if (flag_o(cpu)) goto label_0x%llx;";
     E_PUSH =                "_push_%s(%s);";
     E_POP =                 "%s = _pop_%s();";

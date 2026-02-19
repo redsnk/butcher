@@ -603,24 +603,48 @@ int bits;
             PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
             num++;
             break;
+        case X86_INS_JLE:
+            PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
+        case X86_INS_JGE:
+            PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
         case X86_INS_JO:
             PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_PUSH:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
                 PrintLine(insn,1,lang_x64->E_PUSH,lang_x64->ptr(insn->detail->x86.operands[0]),reg0);
                 free(reg0);
                 num++;
             }
+            */
+            reg0 = lang_x64->Translate(handle,".push(bits,op0);",insn);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
             break;
         case X86_INS_POP:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
                 PrintLine(insn,1,lang_x64->E_POP,reg0,lang_x64->ptr(insn->detail->x86.operands[0]));
                 free(reg0);
                 num++;
+            }
+            */
+            reg0 = lang_x64->Translate(handle,".op0 = pop(bits);",insn);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
             }
             break;
         case X86_INS_ADD:
