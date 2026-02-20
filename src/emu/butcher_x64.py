@@ -13,23 +13,46 @@ class _r8(Structure):
                 ("h4",c_uint8),
                 ("l4",c_uint8),
                 ("h4",c_uint8)]
+    
+class _s8(Structure):
+    _fields_ = [("l",c_int8),
+                ("h",c_int8),
+                ("l2",c_int8),
+                ("h2",c_int8),
+                ("l3",c_int8),
+                ("h4",c_int8),
+                ("l4",c_int8),
+                ("h4",c_int8)]
 
 class _r16(Structure):
     _fields_ = [("l",c_uint16),
                 ("h",c_uint16),
                 ("l2",c_uint16),
                 ("h2",c_uint16)]
+    
+class _s16(Structure):
+    _fields_ = [("l",c_int16),
+                ("h",c_int16),
+                ("l2",c_int16),
+                ("h2",c_int16)]
 
 class _r32(Structure):
     _fields_ = [("l",c_uint32),
                 ("h",c_uint32)]
 
+class _s32(Structure):
+    _fields_ = [("l",c_int32),
+                ("h",c_int32)]
+
 class _reg(Union):
     _fields_ = [("r64",c_uint64),
                 ("s64",c_int64),
                 ("r32",_r32),
+                ("s32",_s32),
                 ("r16",_r16),
-                ("r8",_r8)]
+                ("s16",_s16),
+                ("r8",_r8),
+                ("s8",_s8)]
 
 class _mem:
     def __init__(self, addr, data):
@@ -77,7 +100,7 @@ class _cpu:
     rbp = _reg()
     rsp = _reg()
 
-    eflasg = _eflags()
+    eflags = _eflags()
 
     mems = []
 
@@ -239,7 +262,8 @@ class _cpu:
             return self.pop_dword()
         else:
             return self.pop_qword()
-        
+
+    #---------------------------------------------------------------
     # 64
     @property
     def _rax(self):
@@ -263,11 +287,25 @@ class _cpu:
         self.rbx.r64 = v
 
     @property
+    def s_rbx(self):
+        return self.rbx.s64
+    @s_rbx.setter
+    def s_rbx(self,v):
+        self.rbx.s64 = v
+
+    @property
     def _rcx(self):
         return self.rcx.r64
     @_rcx.setter
     def _rcx(self,v):
         self.rcx.r64 = v
+
+    @property
+    def s_rcx(self):
+        return self.rcx.s64
+    @s_rcx.setter
+    def s_rcx(self,v):
+        self.rcx.s64 = v
 
     @property
     def _rdx(self):
@@ -277,11 +315,25 @@ class _cpu:
         self.rdx.r64 = v
 
     @property
+    def s_rdx(self):
+        return self.rdx.s64
+    @s_rdx.setter
+    def s_rdx(self,v):
+        self.rdx.s64 = v
+
+    @property
     def _r8(self):
         return self.r8.r64
     @_r8.setter
     def _r8(self,v):
         self.r8.r64 = v
+
+    @property
+    def s_r8(self):
+        return self.r8.s64
+    @s_r8.setter
+    def s_r8(self,v):
+        self.r8.s64 = v
 
     @property
     def _r9(self):
@@ -291,11 +343,25 @@ class _cpu:
         self.r9.r64 = v
 
     @property
+    def s_r9(self):
+        return self.r9.s64
+    @s_r9.setter
+    def s_r9(self,v):
+        self.r9.s64 = v
+
+    @property
     def _r10(self):
         return self.r10.r64
     @_r10.setter
     def _r10(self,v):
         self.r10.r64 = v
+
+    @property
+    def s_r10(self):
+        return self.r10.s64
+    @s_r10.setter
+    def s_r10(self,v):
+        self.r10.s64 = v
 
     @property
     def _r11(self):
@@ -305,11 +371,25 @@ class _cpu:
         self.r11.r64 = v
 
     @property
+    def s_r11(self):
+        return self.r11.s64
+    @s_r11.setter
+    def s_r11(self,v):
+        self.r11.s64 = v
+
+    @property
     def _r12(self):
         return self.r12.r64
     @_r12.setter
     def _r12(self,v):
         self.r12.r64 = v
+
+    @property
+    def s_r12(self):
+        return self.r12.s64
+    @s_r12.setter
+    def s_r12(self,v):
+        self.r12.s64 = v
 
     @property
     def _r13(self):
@@ -319,11 +399,25 @@ class _cpu:
         self.r13.r64 = v
 
     @property
+    def s_r13(self):
+        return self.r13.s64
+    @s_r13.setter
+    def s_r13(self,v):
+        self.r13.s64 = v
+
+    @property
     def _r14(self):
         return self.r14.r64
     @_r14.setter
     def _r14(self,v):
         self.r14.r64 = v
+
+    @property
+    def s_r14(self):
+        return self.r14.s64
+    @s_r14.setter
+    def s_r14(self,v):
+        self.r14.s64 = v
 
     @property
     def _r15(self):
@@ -333,11 +427,11 @@ class _cpu:
         self.r15.r64 = v
 
     @property
-    def _rdi(self):
-        return self.rdi.r64
-    @_rdi.setter
-    def _rdi(self,v):
-        self.rdi.r64 = v
+    def s_r15(self):
+        return self.r15.s64
+    @s_r15.setter
+    def s_r15(self,v):
+        self.r15.s64 = v
 
     @property
     def _rsi(self):
@@ -347,6 +441,27 @@ class _cpu:
         self.rsi.r64 = v
 
     @property
+    def s_rsi(self):
+        return self.rsi.s64
+    @s_rsi.setter
+    def s_rsi(self,v):
+        self.rsi.s64 = v
+
+    @property
+    def _rdi(self):
+        return self.rdi.r64
+    @_rdi.setter
+    def _rdi(self,v):
+        self.rdi.r64 = v
+
+    @property
+    def s_rdi(self):
+        return self.rdi.s64
+    @s_rdi.setter
+    def s_rdi(self,v):
+        self.rdi.s64 = v
+
+    @property
     def _rbp(self):
         return self.rbp.r64
     @_rbp.setter
@@ -354,11 +469,25 @@ class _cpu:
         self.rbp.r64 = v
 
     @property
+    def s_rbp(self):
+        return self.rbp.s64
+    @s_rbp.setter
+    def s_rbp(self,v):
+        self.rbp.s64 = v
+
+    @property
     def _rsp(self):
         return self.rsp.r64
     @_rsp.setter
     def _rsp(self,v):
         self.rsp.r64 = v
+
+    @property
+    def s_rsp(self):
+        return self.rsp.s64
+    @s_rsp.setter
+    def s_rsp(self,v):
+        self.rsp.s64 = v
 
     # 32
     @property
@@ -369,11 +498,25 @@ class _cpu:
         self.rax.r32.l = v
 
     @property
+    def s_eax(self):
+        return self.rax.s32.l
+    @s_eax.setter
+    def s_eax(self,v):
+        self.rax.s32.l = v
+
+    @property
     def _ebx(self):
         return self.rbx.r32.l
     @_ebx.setter
     def _ebx(self,v):
         self.rbx.r32.l = v
+
+    @property
+    def s_ebx(self):
+        return self.rbx.s32.l
+    @s_ebx.setter
+    def s_ebx(self,v):
+        self.rbx.s32.l = v
 
     @property
     def _ecx(self):
@@ -383,11 +526,25 @@ class _cpu:
         self.rcx.r32.l = v
 
     @property
+    def s_ecx(self):
+        return self.rcx.s32.l
+    @s_ecx.setter
+    def s_ecx(self,v):
+        self.rcx.s32.l = v
+
+    @property
     def _edx(self):
         return self.rdx.r32.l
     @_edx.setter
     def _edx(self,v):
         self.rdx.r32.l = v
+
+    @property
+    def s_edx(self):
+        return self.rdx.s32.l
+    @s_edx.setter
+    def s_edx(self,v):
+        self.rdx.s32.l = v
 
     @property
     def _r8d(self):
@@ -397,6 +554,13 @@ class _cpu:
         self.r8.r32.l = v
 
     @property
+    def s_r8d(self):
+        return self.r8.s32.l
+    @s_r8d.setter
+    def s_r8d(self,v):
+        self.r8.s32.l = v
+
+    @property
     def _r9d(self):
         return self.r9.r32.l
     @_r9d.setter
@@ -404,11 +568,25 @@ class _cpu:
         self.r9.r32.l = v
 
     @property
+    def s_r9d(self):
+        return self.r9.s32.l
+    @s_r9d.setter
+    def s_r9d(self,v):
+        self.r9.s32.l = v
+
+    @property
     def _r10d(self):
-        return self.r8.r32.l
+        return self.r10.r32.l
     @_r10d.setter
     def _r10d(self,v):
         self.r10.r32.l = v
+
+    @property
+    def s_r10d(self):
+        return self.r10.s32.l
+    @s_r10d.setter
+    def s_r10d(self,v):
+        self.r10.s32.l = v
 
     @property
     def _r11d(self):
@@ -418,11 +596,25 @@ class _cpu:
         self.r11.r32.l = v
 
     @property
+    def s_r11d(self):
+        return self.r11.s32.l
+    @s_r11d.setter
+    def s_r11d(self,v):
+        self.r11.s32.l = v
+
+    @property
     def _r12d(self):
         return self.r12.r32.l
     @_r12d.setter
     def _r12d(self,v):
         self.r12.r32.l = v
+
+    @property
+    def s_r12d(self):
+        return self.r12.s32.l
+    @s_r12d.setter
+    def s_r12d(self,v):
+        self.r12.s32.l = v
 
     @property
     def _r13d(self):
@@ -432,11 +624,25 @@ class _cpu:
         self.r13.r32.l = v
 
     @property
+    def s_r13d(self):
+        return self.r13.s32.l
+    @s_r13d.setter
+    def s_r13d(self,v):
+        self.r13.s32.l = v
+
+    @property
     def _r14d(self):
         return self.r14.r32.l
     @_r14d.setter
     def _r14d(self,v):
         self.r14.r32.l = v
+
+    @property
+    def s_r14d(self):
+        return self.r14.s32.l
+    @s_r14d.setter
+    def s_r14d(self,v):
+        self.r14.s32.l = v
 
     @property
     def _r15d(self):
@@ -446,11 +652,11 @@ class _cpu:
         self.r15.r32.l = v
 
     @property
-    def _edi(self):
-        return self.rdi.r32.l
-    @_edi.setter
-    def _edi(self,v):
-        self.rdi.r32.l = v
+    def s_r15d(self):
+        return self.r15.s32.l
+    @s_r15d.setter
+    def s_r15d(self,v):
+        self.r15.s32.l = v
 
     @property
     def _esi(self):
@@ -460,11 +666,39 @@ class _cpu:
         self.rsi.r32.l = v
 
     @property
+    def s_esi(self):
+        return self.rsi.s32.l
+    @s_esi.setter
+    def s_esi(self,v):
+        self.rsi.s32.l = v
+
+    @property
+    def _edi(self):
+        return self.rdi.r32.l
+    @_edi.setter
+    def _edi(self,v):
+        self.rdi.r32.l = v
+
+    @property
+    def s_edi(self):
+        return self.rdi.s32.l
+    @s_edi.setter
+    def s_edi(self,v):
+        self.rdi.s32.l = v
+
+    @property
     def _ebp(self):
         return self.rbp.r32.l
     @_ebp.setter
     def _ebp(self,v):
-        self.rsi.r32.l = v
+        self.rbp.r32.l = v
+
+    @property
+    def s_ebp(self):
+        return self.rbp.s32.l
+    @s_ebp.setter
+    def s_ebp(self,v):
+        self.rbp.s32.l = v
 
     @property
     def _esp(self):
@@ -472,6 +706,13 @@ class _cpu:
     @_esp.setter
     def _esp(self,v):
         self.rsp.r32.l = v
+
+    @property
+    def s_esp(self):
+        return self.rsp.s32.l
+    @s_esp.setter
+    def s_esp(self,v):
+        self.rsp.s32.l = v
 
     # 16
     @property
@@ -482,11 +723,25 @@ class _cpu:
         self.rax.r16.l = v
 
     @property
+    def s_ax(self):
+        return self.rax.s16.l
+    @s_ax.setter
+    def s_ax(self,v):
+        self.rax.s16.l = v
+
+    @property
     def _bx(self):
         return self.rbx.r16.l
     @_bx.setter
     def _bx(self,v):
         self.rbx.r16.l = v
+
+    @property
+    def s_bx(self):
+        return self.rbx.s16.l
+    @s_bx.setter
+    def s_bx(self,v):
+        self.rbx.s16.l = v
 
     @property
     def _cx(self):
@@ -496,11 +751,25 @@ class _cpu:
         self.rcx.r16.l = v
 
     @property
+    def s_cx(self):
+        return self.rcx.s16.l
+    @s_cx.setter
+    def s_cx(self,v):
+        self.rcx.s16.l = v
+
+    @property
     def _dx(self):
         return self.rdx.r16.l
     @_dx.setter
     def _dx(self,v):
         self.rdx.r16.l = v
+
+    @property
+    def s_dx(self):
+        return self.rdx.s16.l
+    @s_dx.setter
+    def s_dx(self,v):
+        self.rdx.s16.l = v
 
     @property
     def _r8w(self):
@@ -510,11 +779,25 @@ class _cpu:
         self.r8.r16.l = v
 
     @property
+    def s_r8w(self):
+        return self.r8.s16.l
+    @s_r8w.setter
+    def s_r8w(self,v):
+        self.r8.s16.l = v
+
+    @property
     def _r9w(self):
         return self.r9.r16.l
     @_r9w.setter
     def _r9w(self,v):
         self.r9.r16.l = v
+
+    @property
+    def s_r9w(self):
+        return self.r9.s16.l
+    @s_r9w.setter
+    def s_r9w(self,v):
+        self.r9.s16.l = v
 
     @property
     def _r10w(self):
@@ -524,11 +807,25 @@ class _cpu:
         self.r10.r16.l = v
 
     @property
+    def s_r10w(self):
+        return self.r10.s16.l
+    @s_r10w.setter
+    def s_r10w(self,v):
+        self.r10.s16.l = v
+
+    @property
     def _r11w(self):
         return self.r11.r16.l
     @_r11w.setter
     def _r11w(self,v):
         self.r11.r16.l = v
+
+    @property
+    def s_r11w(self):
+        return self.r11.s16.l
+    @s_r11w.setter
+    def s_r11w(self,v):
+        self.r11.s16.l = v
 
     @property
     def _r12w(self):
@@ -538,11 +835,25 @@ class _cpu:
         self.r12.r16.l = v
 
     @property
+    def s_r12w(self):
+        return self.r12.s16.l
+    @s_r12w.setter
+    def s_r12w(self,v):
+        self.r12.s16.l = v
+
+    @property
     def _r13w(self):
         return self.r13.r16.l
     @_r13w.setter
     def _r13w(self,v):
         self.r13.r16.l = v
+
+    @property
+    def s_r13w(self):
+        return self.r13.s16.l
+    @s_r13w.setter
+    def s_r13w(self,v):
+        self.r13.s16.l = v
 
     @property
     def _r14w(self):
@@ -552,6 +863,13 @@ class _cpu:
         self.r14.r16.l = v
 
     @property
+    def s_r14w(self):
+        return self.r14.s16.l
+    @s_r14w.setter
+    def s_r14w(self,v):
+        self.r14.s16.l = v
+
+    @property
     def _r15w(self):
         return self.r15.r16.l
     @_r15w.setter
@@ -559,11 +877,11 @@ class _cpu:
         self.r15.r16.l = v
 
     @property
-    def _di(self):
-        return self.rdi.r16.l
-    @_di.setter
-    def _di(self,v):
-        self.rdi.r16.l = v
+    def s_r15w(self):
+        return self.r15.s16.l
+    @s_r15w.setter
+    def s_r15w(self,v):
+        self.r15.s16.l = v
 
     @property
     def _si(self):
@@ -573,11 +891,39 @@ class _cpu:
         self.rsi.r16.l = v
 
     @property
+    def s_si(self):
+        return self.rsi.s16.l
+    @s_si.setter
+    def s_si(self,v):
+        self.rsi.s16.l = v
+
+    @property
+    def _di(self):
+        return self.rdi.r16.l
+    @_di.setter
+    def _di(self,v):
+        self.rdi.r16.l = v
+
+    @property
+    def s_di(self):
+        return self.rdi.s16.l
+    @s_di.setter
+    def s_di(self,v):
+        self.rdi.s16.l = v
+
+    @property
     def _bp(self):
         return self.rbp.r16.l
     @_bp.setter
     def _bp(self,v):
-        self.rsi.r16.l = v
+        self.rbp.r16.l = v
+
+    @property
+    def s_bp(self):
+        return self.rbp.s16.l
+    @s_bp.setter
+    def s_bp(self,v):
+        self.rbp.s16.l = v
 
     @property
     def _sp(self):
@@ -586,13 +932,26 @@ class _cpu:
     def _sp(self,v):
         self.rsp.r16.l = v
 
-    # 8
+    @property
+    def s_sp(self):
+        return self.rsp.s16.l
+    @s_sp.setter
+    def s_sp(self,v):
+        self.rsp.s16.l = v
+
     @property
     def _al(self):
         return self.rax.r8.l
     @_al.setter
     def _al(self,v):
         self.rax.r8.l = v
+
+    @property
+    def s_al(self):
+        return self.rax.s8.l
+    @s_al.setter
+    def s_al(self,v):
+        self.rax.s8.l = v
 
     @property
     def _bl(self):
@@ -602,11 +961,25 @@ class _cpu:
         self.rbx.r8.l = v
 
     @property
+    def s_bl(self):
+        return self.rbx.s8.l
+    @s_bl.setter
+    def s_bl(self,v):
+        self.rbx.s8.l = v
+
+    @property
     def _cl(self):
         return self.rcx.r8.l
     @_cl.setter
     def _cl(self,v):
         self.rcx.r8.l = v
+
+    @property
+    def s_cl(self):
+        return self.rcx.s8.l
+    @s_cl.setter
+    def s_cl(self,v):
+        self.rcx.s8.l = v
 
     @property
     def _dl(self):
@@ -616,32 +989,11 @@ class _cpu:
         self.rdx.r8.l = v
 
     @property
-    def _ah(self):
-        return self.rax.r8.h
-    @_ah.setter
-    def _ah(self,v):
-        self.rax.r8.h = v
-
-    @property
-    def _bh(self):
-        return self.rbx.r8.h
-    @_bh.setter
-    def _bh(self,v):
-        self.rbx.r8.h = v
-
-    @property
-    def _ch(self):
-        return self.rcx.r8.h
-    @_ch.setter
-    def _ch(self,v):
-        self.rcx.r8.h = v
-
-    @property
-    def _dh(self):
-        return self.rdx.r8.h
-    @_dh.setter
-    def _dh(self,v):
-        self.rdx.r8.h = v
+    def s_dl(self):
+        return self.rdx.s8.l
+    @s_dl.setter
+    def s_dl(self,v):
+        self.rdx.s8.l = v
 
     @property
     def _r8b(self):
@@ -651,11 +1003,25 @@ class _cpu:
         self.r8.r8.l = v
 
     @property
+    def s_r8b(self):
+        return self.r8.s8.l
+    @s_r8b.setter
+    def s_r8b(self,v):
+        self.r8.s8.l = v
+
+    @property
     def _r9b(self):
         return self.r9.r8.l
     @_r9b.setter
     def _r9b(self,v):
         self.r9.r8.l = v
+
+    @property
+    def s_r9b(self):
+        return self.r9.s8.l
+    @s_r9b.setter
+    def s_r9b(self,v):
+        self.r9.s8.l = v
 
     @property
     def _r10b(self):
@@ -665,11 +1031,25 @@ class _cpu:
         self.r10.r8.l = v
 
     @property
+    def s_r10b(self):
+        return self.r10.s8.l
+    @s_r10b.setter
+    def s_r10b(self,v):
+        self.r10.s8.l = v
+
+    @property
     def _r11b(self):
         return self.r11.r8.l
     @_r11b.setter
     def _r11b(self,v):
         self.r11.r8.l = v
+
+    @property
+    def s_r11b(self):
+        return self.r11.s8.l
+    @s_r11b.setter
+    def s_r11b(self,v):
+        self.r11.s8.l = v
 
     @property
     def _r12b(self):
@@ -679,11 +1059,25 @@ class _cpu:
         self.r12.r8.l = v
 
     @property
+    def s_r12b(self):
+        return self.r12.s8.l
+    @s_r12b.setter
+    def s_r12b(self,v):
+        self.r12.s8.l = v
+
+    @property
     def _r13b(self):
         return self.r13.r8.l
     @_r13b.setter
     def _r13b(self,v):
-        self.r13.r18.l = v
+        self.r13.r8.l = v
+
+    @property
+    def s_r13b(self):
+        return self.r13.s8.l
+    @s_r13b.setter
+    def s_r13b(self,v):
+        self.r13.s8.l = v
 
     @property
     def _r14b(self):
@@ -693,6 +1087,13 @@ class _cpu:
         self.r14.r8.l = v
 
     @property
+    def s_r14b(self):
+        return self.r14.s8.l
+    @s_r14b.setter
+    def s_r14b(self,v):
+        self.r14.s8.l = v
+
+    @property
     def _r15b(self):
         return self.r15.r8.l
     @_r15b.setter
@@ -700,11 +1101,25 @@ class _cpu:
         self.r15.r8.l = v
 
     @property
+    def s_r15b(self):
+        return self.r15.s8.l
+    @s_r15b.setter
+    def s_r15b(self,v):
+        self.r15.s8.l = v
+
+    @property
     def _bpl(self):
         return self.rbp.r8.l
     @_bpl.setter
     def _bpl(self,v):
-        self.rsi.r8.l = v
+        self.rbp.r8.l = v
+
+    @property
+    def s_bpl(self):
+        return self.rbp.s8.l
+    @s_bpl.setter
+    def s_bpl(self,v):
+        self.rbp.s8.l = v
 
     @property
     def _spl(self):
@@ -713,6 +1128,72 @@ class _cpu:
     def _spl(self,v):
         self.rsp.r8.l = v
 
+    @property
+    def s_spl(self):
+        return self.rsp.s8.l
+    @s_spl.setter
+    def s_spl(self,v):
+        self.rsp.s8.l = v
+
+    # 8
+    @property
+    def _ah(self):
+        return self.rax.r8.h
+    @_ah.setter
+    def _ah(self,v):
+        self.rax.r8.h = v
+
+    @property
+    def s_ah(self):
+        return self.rax.s8.h
+    @s_ah.setter
+    def s_ah(self,v):
+        self.rax.s8.h = v
+
+    @property
+    def _bh(self):
+        return self.rbx.r8.h
+    @_bh.setter
+    def _bh(self,v):
+        self.rbx.r8.h = v
+
+    @property
+    def s_bh(self):
+        return self.rbx.s8.h
+    @s_bh.setter
+    def s_bh(self,v):
+        self.rbx.s8.h = v
+
+    @property
+    def _ch(self):
+        return self.rcx.r8.h
+    @_ch.setter
+    def _ch(self,v):
+        self.rcx.r8.h = v
+
+    @property
+    def s_ch(self):
+        return self.rcx.s8.h
+    @s_ch.setter
+    def s_ch(self,v):
+        self.rcx.s8.h = v
+
+    @property
+    def _dh(self):
+        return self.rdx.r8.h
+    @_dh.setter
+    def _dh(self,v):
+        self.rdx.r8.h = v
+
+    @property
+    def s_dh(self):
+        return self.rdx.s8.h
+    @s_dh.setter
+    def s_dh(self,v):
+        self.rdx.s8.h = v
+
+    #---------------------------------------------------------------     
+    
 '''
 @with_goto
 def test():
