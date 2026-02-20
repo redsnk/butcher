@@ -29,6 +29,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_PUSH = "cpu.push(";
     F_POP = "cpu.pop(";
     F_POW = "pow(";
+    E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

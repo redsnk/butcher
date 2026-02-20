@@ -29,6 +29,7 @@ Lang_C_x64::Lang_C_x64() {
     F_PUSH = "push(cpu,";
     F_POP = "pop(cpu,";
     F_POW = "Pow(";
+    E_JCC_GOTO = "if (%s) goto label_0x%llx;";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";
@@ -201,6 +202,7 @@ char *buffer;
     }
     if (op.mem.disp) {
         sprintf(tmp,"%+lld",op.mem.disp);
+        //sprintf(tmp,"+0x%llx",op.mem.disp);
         strcat (buffer,tmp);
     }
     return (buffer);

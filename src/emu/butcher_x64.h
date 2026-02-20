@@ -113,6 +113,23 @@ struct _cpu {
 #define _rbp	(cpu->rbp.r64)
 #define _rsp	(cpu->rsp.r64)
 
+#define s_rax	(cpu->rax.s64)
+#define s_rbx	(cpu->rbx.s64)
+#define s_rcx	(cpu->rcx.s64)
+#define s_rdx	(cpu->rdx.s64)
+#define s_r8	(cpu->r8.s64)
+#define s_r9	(cpu->r9.s64)
+#define s_r10	(cpu->r10.s64)
+#define s_r11	(cpu->r11.s64)
+#define s_r12	(cpu->r12.s64)
+#define s_r13	(cpu->r13.s64)
+#define s_r14	(cpu->r14.s64)
+#define s_r15	(cpu->r15.s64)
+#define s_rsi	(cpu->rsi.s64)
+#define s_rdi	(cpu->rdi.s64)
+#define s_rbp	(cpu->rbp.s64)
+#define s_rsp	(cpu->rsp.s64)
+
 // 32
 #define _eax	(cpu->rax.r32.l)
 #define _ebx	(cpu->rbx.r32.l)
@@ -254,11 +271,13 @@ void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
 void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
 void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
+/*
 void *get_reg(struct _cpu *cpu,char *reg,int *bits);
 uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
 uint16_t *get_reg_16(struct _cpu *cpu,char *reg);
 uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
 uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
+*/
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
 int flag_o(struct _cpu *cpu);
@@ -287,5 +306,7 @@ void op_i(struct _cpu *cpu,char *op,uint64_t i);
 void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i);
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
+
+wchar_t *get_mem_unicode (struct _cpu *cpu, uint64_t addr);
 
 #endif // _BUTCHER_X64_H

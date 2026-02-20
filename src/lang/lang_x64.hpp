@@ -29,6 +29,7 @@ class Lang_x64 : public Language {
     const char *F_PUSH = "";
     const char *F_POP = "";
     const char *F_POW = "";
+    const char *E_JCC_GOTO = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";
@@ -102,7 +103,7 @@ class Lang_x64 : public Language {
 
     char *Translate_var (csh handle,cs_insn *insn,char *name, int lset);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i,int lset);
-    char *Translate (csh handle,char *s, cs_insn *insn);
+    char *Translate (csh handle,char *s, cs_insn *insn,int ends);
 };
 
 #endif // _LANG_X64_H

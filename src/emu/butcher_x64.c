@@ -1,5 +1,6 @@
 #include "butcher_x64.h"
 
+/*
 void print_cpu(struct _cpu *cpu) {
 	printf("------------------------------\n");
 	printf("rbp:0x%016llx ",cpu->rbp.r64);
@@ -22,6 +23,7 @@ void print_cpu(struct _cpu *cpu) {
     printf("r15:0x%016llx ",cpu->r15.r64);
 	printf("\n------------------------------\n");
 }
+*/
 
 void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
@@ -189,6 +191,7 @@ void panic(char *str1,char *str2) {
 	exit(0);
 }
 
+/*
 union _reg *get_reg64(struct _cpu *cpu,char *reg) {
 // rax, eax, ax, ah, al
 #define STRCMPREG(r)	!strcmp(reg,"r"#r"x") || !strcmp(reg,"e"#r"x") || !strcmp(reg,#r"x") || !strcmp(reg,#r"h") || !strcmp(reg,#r"l")
@@ -299,7 +302,7 @@ uint32_t *get_reg_32(struct _cpu *cpu,char *reg) {
 uint64_t *get_reg_64(struct _cpu *cpu,char *reg) {
 	return ((uint64_t *)get_reg(cpu,reg,NULL));
 }
-
+*/
 void set_z(struct _cpu *cpu,uint64_t i) {
 	cpu->eflags.ZF = (i == 0);
 }
@@ -437,6 +440,23 @@ __int128 t;
 	}
 }
 
+#define MAX_U_STR	(1024)
+
+wchar_t *get_mem_unicode (struct _cpu *cpu, uint64_t addr) {
+uint8_t *m;
+int n;
+
+	m = (uint8_t *) malloc(MAX_U_STR*2);
+	n = 0;
+	for (n=0;n<(MAX_U_STR*2);n+=2) {
+		get_mem(cpu,addr+n,2,m+n);
+		if (!m[n] && !m[n+1]) {
+			break;
+		}
+	}
+	return ((wchar_t *) m);
+}
+
 /*
 void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {
 __int128 t;
@@ -529,6 +549,7 @@ uint64_t n,r;
 	return (r);
 }
 
+/*
 uint64_t get_ins_mem(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int *bits) {
 void *rb,*ri;
 int bi;
@@ -562,6 +583,7 @@ uint64_t ret = 0;
 	}
 	return (ret);
 }
+*/
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func) {
 	panic("call_from_iat not implemented",func);
@@ -572,7 +594,7 @@ void jmp_from_iat (struct _cpu *cpu,char *lib,char *func) {
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 //TODO: The OF and CF flags are set to 0. The SF, ZF, and PF flags are set according to the result (see the “Operation” section above). The state of the AF flag is undefined.
 #define OP_TEST(bits) \
 void op_test_##bits(struct _cpu *cpu,uint##bits##_t d,uint##bits##_t s) {\
@@ -613,15 +635,16 @@ OP_XOR(32)
 OP_XOR(64)
 
 // ---------------------------------------------------------------------------------
-
+*/
 void op(struct _cpu *cpu,char *op) {
 	printf("%s\n",op);
 	panic("op",op);
-	print_cpu(cpu);
+	//print_cpu(cpu);
 }
 
 // ---------------------------------------------------------------------------------
 
+/*
 #define OP_R(bits) \
 void op_r_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r) {\
 	if (!strcmp(op,"push")) {		\
@@ -639,8 +662,11 @@ OP_R(8)
 OP_R(16)
 OP_R(32)
 OP_R(64)
+*/
 
 void op_r(struct _cpu *cpu,char *op,char *reg) {
+	printf("%s %s\n",op,reg);
+/*
 void *r;
 int b;
 
@@ -663,10 +689,12 @@ int b;
 			panic("op_r bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_r","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_RR(bits) \
 void op_rr_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs) {\
 	if (!strcmp(op,"mov")) {		\
@@ -688,8 +716,11 @@ OP_RR(8)
 OP_RR(16)
 OP_RR(32)
 OP_RR(64)
+*/
 
 void op_rr(struct _cpu *cpu,char *op,char *regd,char *regs) {
+	printf("%s %s,%s\n",op,regd,regs);
+/*
 void *rd,*rs;
 int bs,bd;
 
@@ -713,10 +744,12 @@ int bs,bd;
 			panic("op_rr bits","");
 	}
 	print_cpu(cpu);	
+*/
+	panic("op_rr","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_RI(bits) \
 void op_ri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r,uint##bits##_t i) {\
 	if (!strcmp(op,"mov") || !strcmp(op,"movabs")) {		\
@@ -738,8 +771,11 @@ OP_RI(8)
 OP_RI(16)
 OP_RI(32)
 OP_RI(64)
+*/
 
 void op_ri(struct _cpu *cpu,char *op,char *reg,uint64_t i) {
+	printf("%s %s,0x%llx\n",op,reg,i);
+/*
 void *r;
 int b;
 
@@ -762,10 +798,12 @@ int b;
 			panic("op_ri bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_ri","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_RM(bits) \
 void op_rm_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r,uint64_t mem) {\
 	if (!strcmp(op,"mov")) {		\
@@ -785,8 +823,11 @@ OP_RM(8)
 OP_RM(16)
 OP_RM(32)
 OP_RM(64)
+*/
 
 void op_rm(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp) {
+	printf("%s %s,[%s+%s*%i+0x%llx]\n",op,reg,base,index,mult,disp);
+/*
 void *r;
 int b,bm;
 uint64_t mem;
@@ -808,10 +849,12 @@ uint64_t mem;
 			panic("op_rm bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_rm","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_MR(bits) \
 void op_mr_##bits(struct _cpu *cpu,char *op,uint64_t mem,uint##bits##_t *r) {\
 	if (!strcmp(op,"mov")) {				\
@@ -831,8 +874,11 @@ OP_MR(8)
 OP_MR(16)
 OP_MR(32)
 OP_MR(64)
+*/
 
 void op_mr(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,char *reg) {
+	printf("%s [%s+%s*%i+0x%llx],%s\n",op,base,index,mult,disp,reg);
+/*
 void *r;
 int b,bm;
 uint64_t mem;
@@ -857,10 +903,12 @@ uint64_t mem;
 			panic("op_mr bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_mr","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_MI(bits) \
 void op_mi_##bits(struct _cpu *cpu,char *op,uint64_t mem,uint##bits##_t i) {\
 	if (!strcmp(op,"mov")) {				\
@@ -875,8 +923,11 @@ OP_MI(8)
 OP_MI(16)
 OP_MI(32)
 OP_MI(64)
+*/
 
 void op_mi(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
+	printf("%s [%s+%s*%i+0x%llx],%llx\n",op,base,index,mult,disp,i);
+/*
 int b;
 uint64_t mem;
 
@@ -899,10 +950,12 @@ uint64_t mem;
 			panic("op_mi bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_mi","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_M(bits) \
 void op_m_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
 	panic("op_m_"#bits" error",op);	\
@@ -912,8 +965,11 @@ OP_M(8)
 OP_M(16)
 OP_M(32)
 OP_M(64)
+*/
 
 void op_m(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp) {
+	printf("%s [%s+%s*%i+0x%llx]\n",op,base,index,mult,disp);
+/*
 int b;
 uint64_t mem;
 
@@ -936,10 +992,12 @@ uint64_t mem;
 			panic("op_m bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_m","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_I(bits) \
 void op_i_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
 	panic("op_i_"#bits" error",op);	\
@@ -949,8 +1007,11 @@ OP_I(8)
 OP_I(16)
 OP_I(32)
 OP_I(64)
+*/
 
 void op_i(struct _cpu *cpu,char *op,uint64_t i) {
+	printf("%s %llx\n",op,i);
+/*
 int b=0;
 
 	printf("%s %llx\n",op,i);
@@ -971,10 +1032,12 @@ int b=0;
 			panic("op_i bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_i","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_RRI(bits) \
 void op_rri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs,uint64_t i) {\
 	panic("op_rri_"#bits" error",op);	\
@@ -984,8 +1047,11 @@ OP_RRI(8)
 OP_RRI(16)
 OP_RRI(32)
 OP_RRI(64)
+*/
 
 void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i) {
+	printf("%s %s,%s,%llx\n",op,regd,regs,i);
+/*
 void *rd,*rs;
 int bs,bd;
 
@@ -1009,10 +1075,12 @@ int bs,bd;
 			panic("op_rri bits","");
 	}
 	print_cpu(cpu);	
+*/
+	panic("op_rri","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_MM(bits) \
 void op_mm_##bits(struct _cpu *cpu,char *op,uint64_t memd,uint64_t mems) {\
 	panic("op_mm_"#bits" error",op);	\
@@ -1022,8 +1090,11 @@ OP_MM(8)
 OP_MM(16)
 OP_MM(32)
 OP_MM(64)
+*/
 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps) {
+	printf("%s [%s+%s*%i+0x%llx],[%s+%s*%i+0x%llx]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
+/*
 int bd,bs;
 uint64_t memd,mems;
 
@@ -1047,10 +1118,12 @@ uint64_t memd,mems;
 			panic("op_mm bits","");
 	}
 	print_cpu(cpu);
+*/
+	panic("op_mm","");
 }
 
 // ---------------------------------------------------------------------------------
-
+/*
 #define OP_RRRI(bits) \
 void op_rrri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs,uint##bits##_t *re,uint64_t i) {\
 	panic("op_rrri_"#bits" error",op);	\
@@ -1060,8 +1133,11 @@ OP_RRRI(8)
 OP_RRRI(16)
 OP_RRRI(32)
 OP_RRRI(64)
+*/
 
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i) {
+	printf("%s %s,%s,%s,%llx\n",op,regd,regs,rege,i);
+/*
 void *rd,*rs,*re;
 int bs,bd,be;
 
@@ -1086,4 +1162,6 @@ int bs,bd,be;
 			panic("op_rrri bits","");
 	}
 	print_cpu(cpu);	
+*/
+	panic("op_rrri","");
 }

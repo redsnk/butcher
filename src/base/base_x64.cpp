@@ -491,7 +491,7 @@ char *reg0,*reg1,*mstr;
 uint64_t addr;
 char *lib,*func,*name;
 uint8_t *mem;
-int n,b;
+int n,b,ldone;
 int bits;
 
     insn = &sc->insn[num];
@@ -624,7 +624,7 @@ int bits;
                 num++;
             }
             */
-            reg0 = lang_x64->Translate(handle,".push(bits,op0);",insn);
+            reg0 = lang_x64->Translate(handle,".push(bits,op0);",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -640,7 +640,7 @@ int bits;
                 num++;
             }
             */
-            reg0 = lang_x64->Translate(handle,".op0 = pop(bits);",insn);
+            reg0 = lang_x64->Translate(handle,".op0 = pop(bits);",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -662,10 +662,10 @@ int bits;
             */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -686,10 +686,10 @@ int bits;
             */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 + 1;",insn);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 + 1;",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,1);:.add_of(bits,sop0,1);:.op0 = op0 + 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,1);:.add_of(bits,sop0,1);:.op0 = op0 + 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -712,10 +712,10 @@ int bits;
             */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 - op1;",insn);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - op1;",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -724,17 +724,97 @@ int bits;
             }
             break;
         case X86_INS_CMP:
-            // The OF, SF, ZF, AF, CF, and PF flags
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = strdup("");
+            ldone = false;
+            if ((num+1) < sc->count) {
+                cs_insn *next = &sc->insn[num+1];
+                switch (next->id) {
+                    case X86_INS_JA:
+                        // (CF=0 and ZF=0)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s > %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 > op1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JGE:
+                        // (SF=OF)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s >= %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"sop0 >= sop1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JE:
+                        // (ZF=1)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s == %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 == op1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JNE:
+                        // (ZF=0)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s != %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 != op1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JBE:
+                        // (CF=1 or ZF=1)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s <= %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 <= op1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JB:
+                        // (CF=1)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s < %s) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 < op1;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                }
             }
-            else {
-                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.zf((op0-op1) == 0);:.sf((sop0-sop1) < 0);",insn);
-            }
-            if (reg0 != NULL) {
-                PrintLine(insn,0,reg0);
-                num++;
-                free(reg0);
+            if (!ldone) {
+                // The OF, SF, ZF, AF, CF, and PF flags
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = strdup("");
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.zf((op0-op1) == 0);:.sf((sop0-sop1) < 0);",insn,true);
+                }
+                if (reg0 != NULL) {
+                    PrintLine(insn,0,reg0);
+                    num++;
+                    free(reg0);
+                }
             }
             /*
             if ((num+1) < sc->count) {
@@ -781,10 +861,10 @@ int bits;
             */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 - 1;",insn);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - 1;",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".cf(op0 == 0);:.sub_of(bits,sop0,1);:.op0 = op0 - 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn);
+                reg0 = lang_x64->Translate(handle,".cf(op0 == 0);:.sub_of(bits,sop0,1);:.op0 = op0 - 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -810,17 +890,61 @@ int bits;
             }
             break;
         case X86_INS_TEST:
-            // The OF and CF flags are set to 0. The SF, ZF, and PF flags are set
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = strdup("");
+            ldone = false;
+            if ((num+1) < sc->count) {
+                cs_insn *next = &sc->insn[num+1];
+                switch (next->id) {
+                    case X86_INS_JNE:
+                        // (ZF=0)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s != 0) goto label_0x%llx;";
+                            reg0 = lang_x64->Translate(handle,"op0 != 0;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JE:
+                        // (ZF=1)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s == 0) goto label_0x%llx;"
+                            reg0 = lang_x64->Translate(handle,"op0 == 0;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                    case X86_INS_JLE:
+                        // (ZF=1 or SF!=OF)
+                        if (FlagsNotUsed(sc,num+1)) {
+                            // "if (%s <= 0) goto label_0x%llx;"
+                            reg0 = lang_x64->Translate(handle,"sop0 <= 0;",insn,false);
+                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            free(reg0);
+                            num += 2;
+                            ldone = true;
+                        }
+                        break;
+                }
             }
-            else {
-                reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.zf((op0&op1) == 0);:.sf((sop0&sop1) < 0);",insn);
-            }
-            if (reg0 != NULL) {
-                PrintLine(insn,0,reg0);
-                num++;
-                free(reg0);
+            if (!ldone) {
+                // The OF and CF flags are set to 0. The SF, ZF, and PF flags are set
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = strdup("");
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.zf((op0&op1) == 0);:.sf((sop0&sop1) < 0);",insn,true);
+                }
+                if (reg0 != NULL) {
+                    PrintLine(insn,0,reg0);
+                    num++;
+                    free(reg0);
+                }
             }
             /*
             if ((num+1) < sc->count) {
@@ -889,7 +1013,7 @@ int bits;
             break;
         case X86_INS_SHR:
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn,true);
             }
             else {
                 reg0 = NULL;
@@ -924,7 +1048,7 @@ int bits;
             break;
         case X86_INS_MOVZX:
         case X86_INS_MOV:
-            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn);
+            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
