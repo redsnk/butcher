@@ -183,6 +183,23 @@ struct _cpu {
 #define _bp		(cpu->rbp.r16.l)
 #define _sp		(cpu->rsp.r16.l)
 
+#define s_ax	(cpu->rax.s16.l)
+#define s_bx	(cpu->rbx.s16.l)
+#define s_cx	(cpu->rcx.s16.l)
+#define s_dx	(cpu->rdx.s16.l)
+#define s_r8w	(cpu->r8.s16.l)
+#define s_r9w	(cpu->r9.s16.l)
+#define s_r10w	(cpu->r10.s16.l)
+#define s_r11w	(cpu->r11.s16.l)
+#define s_r12w	(cpu->r12.s16.l)
+#define s_r13w	(cpu->r13.s16.l)
+#define s_r14w	(cpu->r14.s16.l)
+#define s_r15w	(cpu->r15.s16.l)
+#define s_si	(cpu->rsi.s16.l)
+#define s_di	(cpu->rdi.s16.l)
+#define s_bp	(cpu->rbp.s16.l)
+#define s_sp	(cpu->rsp.s16.l)
+
 // 8
 #define _al		(cpu->rax.r8.l)
 #define _bl		(cpu->rbx.r8.l)

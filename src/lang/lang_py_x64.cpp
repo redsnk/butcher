@@ -105,7 +105,9 @@ void Lang_Py_x64::PrintMainOpen(Code *c) {
 }
 
 #define PY_FOOTER_2 "\
+    # Insert code here ...\n\
     func_0x%llx(cpu)\n\
+    # Insert code here ...\n\
 \n\
 if __name__==\"__main__\":\n\
     main()\n\

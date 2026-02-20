@@ -80,7 +80,10 @@ union _eflags {
 };
 '''
 class _eflags(Structure):
-    _fields_ = [("r32",c_uint32)]
+    _fields_ = [("CF",c_bool),
+                ("PF",c_bool),
+                ("ZF",c_bool),
+                ("SF",c_bool)]
 
 class _cpu:
     rax = _reg()
@@ -262,6 +265,26 @@ class _cpu:
             return self.pop_dword()
         else:
             return self.pop_qword()
+        
+    def flag_z(self,b):
+        self.eflags.ZF = b
+
+    def flag_c(self,b):
+        self.eflags.CF = b
+    
+    def flag_o(self,b):
+        self.eflags.OF = b
+
+    def add_flag_c(self,bits,op1,op2):
+        if bits == 8:
+            self.panic("add_flag_c")
+        elif bits == 16:
+            self.panic("add_flag_c")
+        elif bits == 32:
+            self.panic("add_flag_c")
+        else:
+            self.panic("add_flag_c")
+        
 
     #---------------------------------------------------------------
     # 64
