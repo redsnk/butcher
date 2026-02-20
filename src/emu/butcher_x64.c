@@ -440,21 +440,49 @@ __int128 t;
 	}
 }
 
-#define MAX_U_STR	(1024)
-
-wchar_t *get_mem_unicode (struct _cpu *cpu, uint64_t addr) {
-uint8_t *m;
+char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max) {
+char *m;
 int n;
 
-	m = (uint8_t *) malloc(MAX_U_STR*2);
+	m = (char *) malloc(max);
 	n = 0;
-	for (n=0;n<(MAX_U_STR*2);n+=2) {
+	for (n=0;n<(max);n++) {
+		get_mem(cpu,addr+n,1,m+n);
+		if (!m[n]) {
+			break;
+		}
+	}
+	return (m);
+}
+
+char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max) {
+char *m;
+int n;
+
+	m = (char *) malloc(max);
+	n = 0;
+	for (n=0;n<(max);n+=2) {
 		get_mem(cpu,addr+n,2,m+n);
 		if (!m[n] && !m[n+1]) {
 			break;
 		}
 	}
-	return ((wchar_t *) m);
+	return (m);
+}
+
+char *uni16_to_str(char *su) {
+char *str;
+int n;
+
+	// TODO: max
+	str = (char *) malloc(1024);
+	n = 0;
+	while (su[n] != 0) {
+		str[n/2] = su[n];
+		n += 2;
+	}
+	str[n/2] = 0;
+	return (str);
 }
 
 /*

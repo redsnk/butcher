@@ -49,8 +49,8 @@ Lang_Py_x64::Lang_Py_x64() {
     E_JA =                  "if not cpu.flag_c() and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JAE =                 "if not cpu.flag_c():\n        goto .label_0x%llx";
     E_JL =                  "if cpu.flag_o() != cpu.flag_s():\n        goto .label_0x%llx";
-    E_JLE =                 "if cpu.flag_z() or (cpu.flag_o() != cpu.flag_s()):\n        goto label_0x%llx;";
-    E_JGE =                 "if cpu.flag_o() == cpu.flag_s():\n        goto label_0x%llx;";
+    E_JLE =                 "if cpu.flag_z() or (cpu.flag_o() != cpu.flag_s()):\n        goto .label_0x%llx";
+    E_JGE =                 "if cpu.flag_o() == cpu.flag_s():\n        goto .label_0x%llx";
     E_JO =                  "if cpu.flag_o():\n        goto .label_0x%llx";
     E_PUSH =                "cpu.push_%s(%s)";
     E_POP =                 "%s = cpu.pop_%s()";

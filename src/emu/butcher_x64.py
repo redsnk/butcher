@@ -81,10 +81,6 @@ class _cpu:
 
     mems = []
 
-    def print(self):
-        print(">> rax = "+hex(self.rax.r64)+", rbx = "+hex(self.rbx.r64)+", rcx = "+hex(self.rcx.r64)+", rdx = "+hex(self.rdx.r64))
-        print(">> rbp = "+hex(self.rbp.r64)+", rsp = "+hex(self.rsp.r64)+"\n")
-
     def panic(self,text):
         for line in traceback.format_stack():
             print(line.strip())
@@ -114,6 +110,18 @@ class _cpu:
                 m.mem = pre+data+post
                 return
         self.panic("set_mem - "+hex(addr))
+
+    def load_mem (self,name,d_Offset,d_Size,v_Address,v_Size):
+        if d_Size > 0:
+            f = open(name,'rb')
+            f.seek(d_Offset,1)
+            data = f.read(d_Size)
+            if d_Size < v_Size:
+                a = bytearray(v_Size-d_Size)
+                data += a
+        else:
+            data = bytearray(v_Size)
+        self.add_mem(v_Address,data)
     
     def call_from_iat (self,lib,func):
         self.panic("call_from_iat")
@@ -124,18 +132,34 @@ class _cpu:
     def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)
         return data[0]
+    
+    def s_get_byte_ptr(self,addr):
+        data = self.get_byte_ptr(addr)
+        return c_int8(data).value
 
     def get_word_ptr(self,addr):
         data = self.get_mem(addr,2)
         return (data[1] << 8) | data[0]
 
+    def s_get_word_ptr(self,addr):
+        data = self.get_word_ptr(addr)
+        return c_int16(data).value
+
     def get_dword_ptr(self,addr):
         data = self.get_mem(addr,4)
         return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
+    
+    def s_get_dword_ptr(self,addr):
+        data = self.get_dword_ptr(addr)
+        return c_int32(data).value
 
     def get_qword_ptr(self,addr):
         data = self.get_mem(addr,8)
         return (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
+    
+    def s_get_qword_ptr(self,addr):
+        data = self.get_qword_ptr(addr)
+        return c_int64(data).value
 
     def set_byte_ptr(self,addr,value):
         self.set_mem(addr,[value])
@@ -176,26 +200,46 @@ class _cpu:
         self.rsp.r64 = self.rsp.r64 - 8
         self.set_qword_ptr(self.rsp.r64,value)
 
-    def pop_byte(self,b):
+    def push(self,bits,value):
+        if bits == 8:
+            self.push_byte(value)
+        elif bits == 16:
+            self.push_word(value)
+        elif bits == 32:
+            self.push_dword(value)
+        else:
+            self.push_qword(value)
+     
+    def pop_byte(self):
         v = self.get_byte_ptr(self.rsp.r64)
         self.rsp.r64 = self.rsp.r64 + 1
         return v
 
-    def pop_word(self,b):
+    def pop_word(self):
         v = self.get_word_ptr(self.rsp.r64)
         self.rsp.r64 = self.rsp.r64 + 2
         return v
 
-    def pop_dword(self,b):
+    def pop_dword(self):
         v = self.get_dword_ptr(self.rsp.r64)
         self.rsp.r64 = self.rsp.r64 + 4
         return v
 
-    def pop_qword(self,b):
+    def pop_qword(self):
         v = self.get_qword_ptr(self.rsp.r64)
         self.rsp.r64 = self.rsp.r64 + 8
         return v
     
+    def pop(self,bits):
+        if bits == 8:
+            return self.pop_byte()
+        elif bits == 16:
+            return self.pop_word()
+        elif bits == 32:
+            return self.pop_dword()
+        else:
+            return self.pop_qword()
+        
     # 64
     @property
     def _rax(self):

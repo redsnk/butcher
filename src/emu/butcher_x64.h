@@ -307,6 +307,8 @@ void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i);
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
-wchar_t *get_mem_unicode (struct _cpu *cpu, uint64_t addr);
+char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
+char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
+char *uni16_to_str(char *str);
 
 #endif // _BUTCHER_X64_H
