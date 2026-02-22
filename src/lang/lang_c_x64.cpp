@@ -205,6 +205,11 @@ char *buffer;
         //sprintf(tmp,"+0x%llx",op.mem.disp);
         strcat (buffer,tmp);
     }
+    else if (!op.mem.disp && (op.mem.base == X86_REG_INVALID) && (op.mem.index == X86_REG_INVALID)) {
+        // TODO: pop		dword ptr fs:[0]
+        sprintf(tmp,"0");
+        strcat (buffer,tmp);
+    }
     return (buffer);
 }
 

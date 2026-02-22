@@ -321,6 +321,8 @@ void op_mi(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64
 void op_m(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp);
 void op_i(struct _cpu *cpu,char *op,uint64_t i);
 void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i);
+void op_rrr(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege);
+void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i);
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 

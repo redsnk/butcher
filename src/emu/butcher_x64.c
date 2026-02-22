@@ -1107,6 +1107,15 @@ int bs,bd;
 	panic("op_rri","");
 }
 
+void op_rrr(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege) {
+	printf("%s %s,%s,%s\n",op,regd,regs,rege);
+	panic("op_rrr","");
+}
+
+void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
+	printf("%s %s,[%s+%s*%i+0x%llx],%llx\n",op,reg,base,index,mult,disp,i);
+}
+
 // ---------------------------------------------------------------------------------
 /*
 #define OP_MM(bits) \

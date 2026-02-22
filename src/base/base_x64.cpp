@@ -484,6 +484,12 @@ char out[1024];
     }
 }
 
+void Base_x64::PrintLabel(Code *c,uint64_t addr) {
+    if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
+        printf(lang_x64->E_LABEL,addr);
+    }
+}
+
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
 uint64_t read,d;
@@ -496,6 +502,10 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
+    if (insn->address == 0x4bca31) {
+        // test
+        bits = 0;
+    }
     switch (insn->id) {
         case X86_INS_RET:
             // ret
@@ -734,6 +744,7 @@ int bits;
                             // "if (%s > %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 > op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -746,6 +757,7 @@ int bits;
                             // "if (%s >= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"sop0 >= sop1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -758,6 +770,7 @@ int bits;
                             // "if (%s == %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 == op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -770,6 +783,7 @@ int bits;
                             // "if (%s != %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 != op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -782,6 +796,7 @@ int bits;
                             // "if (%s <= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 <= op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -794,6 +809,7 @@ int bits;
                             // "if (%s < %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 < op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -900,6 +916,7 @@ int bits;
                             // "if (%s != 0) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 != 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -912,6 +929,7 @@ int bits;
                             // "if (%s == 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"op0 == 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -924,6 +942,7 @@ int bits;
                             // "if (%s <= 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"sop0 <= 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
@@ -1248,9 +1267,12 @@ int id;
                 if (sc->insn[n].address > sc->last) {
                     break;
                 }
+                /*
                 if (std::find(c->labels.begin(), c->labels.end(), sc->insn[n].address) != c->labels.end()) {
                     printf(lang_x64->E_LABEL,sc->insn[n].address);
                 }
+                */
+                PrintLabel(c,sc->insn[n].address);
                 n = PrintInst(c,sc,n);
             }
         }
