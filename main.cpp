@@ -6,7 +6,7 @@
 #include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
 
-#define MY_VERSION  "v0.03"
+#define MY_VERSION  "v0.01"
 
 #define MAX_STR     (1024)
 
@@ -14,6 +14,7 @@ int opt_t = false;
 int opt_a = false;
 int opt_m = false;
 enum Languages opt_l = C;
+std::set<uint64_t> exclude;
 
 uint64_t string_to_num(char *num) {
 uint64_t n;
@@ -23,6 +24,27 @@ uint64_t n;
         return (n);
     }
     return (atol(num));
+}
+
+void parse_ex(char *list) {
+char *t;
+char  *p,*i;
+
+    t = strdup(list);
+    i = p = t;
+    while (*i) {
+        p = strchr(i,',');
+        if (p != NULL) {
+            *p = 0;
+            exclude.insert(string_to_num(i));
+            i = p+1;
+        }
+        else {
+            exclude.insert(string_to_num(i));
+            break;
+        }
+    }
+    free(t);
 }
 
 int butcher(char *path,uint64_t addr) {
@@ -68,6 +90,7 @@ Archive *a;
     b->ltraces = opt_t;
     b->lasm = opt_a;
     b->loadm = opt_m;
+    b->ex = exclude;
     b->Cut(path,addr);
     delete b;
     return (1);
@@ -77,15 +100,16 @@ const char* HELP = "\
 --------------------------------------------------------------\n\
 Butcher ("MY_VERSION") programed by Alex Bassas.\n\
 --------------------------------------------------------------\n\
-usage: Butcher [-l<lang>][-a][-t] <path> <addr>\n\
+usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>] <path> <addr>\n\
 \n\
 -l<lang>    => Output language: [c|p]\n\
                     - c -> C\n\
                     - p -> Python\n\
 \n\
--m          => Load memory from file\n\
--t          => Enable traces\n\
--a          => Enable asm code\n\
+-m              => Load memory from the file\n\
+-t              => Enable traces\n\
+-a              => Enable asm code\n\
+-e[addr,addr,]  => Exclude addresses\n\
 \n";
 
 int main (int argc, char **argv) {
@@ -93,7 +117,7 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"mtal:")) != -1) {
+    while ((p = getopt(argc,argv,"mtal:e:")) != -1) {
         switch (p) {
                 case 't':
                     opt_t = true;
@@ -113,6 +137,9 @@ uint64_t addr;
                             opt_l = PYTHON;
                             break;
                     }
+                    break;
+                case 'e':
+                    parse_ex(optarg);
                     break;
                 case '?':
                 default:

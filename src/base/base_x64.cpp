@@ -1152,7 +1152,12 @@ int bits;
                     free(name);
                 }
                 else {
-                    PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                    if (!Excluded(addr)) {
+                        PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                    }
+                    else {
+                        PrintLine(insn,0,lang_x64->E_SPACE);
+                    }
                 }
                 num++;
             } 
@@ -1170,7 +1175,12 @@ int bits;
                         (insn->detail->x86.operands[0].mem.index == X86_OP_INVALID)) {
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
                         if (arch->ValidMemory(addr)) {
-                            PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                            if (!Excluded(addr)) {
+                                PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                            }
+                            else {
+                                PrintLine(insn,0,lang_x64->E_SPACE);
+                            }
                             num++;
                         }
                     }

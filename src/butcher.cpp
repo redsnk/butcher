@@ -14,6 +14,14 @@ int Butcher::IsGroup (cs_insn *insn, int group) {
     return (false);
 }
 
+int Butcher::Excluded(uint64_t addr) {
+    if (std::find(ex.begin(), ex.end(), addr) != ex.end()) {
+        return (true);
+    }
+    return (false);
+}
+
+
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
@@ -58,24 +66,24 @@ uint8_t *mem;
                         free(mem);
                     }
                     if (IsCall(&sc.insn[n],&addr)) {
-                        // New subcode 
-                        //printf("// *** Add call 0x%llx\n",addr);
-                        //calls.insert(addr);
-                        if (!ncalls) {
-                            calls = (struct _call *) malloc(sizeof(struct _call));
+                        if (!Excluded(addr)) {
+                            // New subcode 
+                            if (!ncalls) {
+                                calls = (struct _call *) malloc(sizeof(struct _call));
+                            }
+                            else {
+                                calls = (struct _call *) realloc(calls,sizeof(struct _call)*(ncalls+1));
+                            }
+                            calls[ncalls].addr = addr;
+                            calls[ncalls].name = NULL;
+                            if (arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                                if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM,addr,calls[ncalls].name);
+                            }
+                            else {
+                                if (ltraces) printf("%s *** Add call 0x%llx\n",lang->COMM,addr);
+                            }
+                            ncalls++;
                         }
-                        else {
-                            calls = (struct _call *) realloc(calls,sizeof(struct _call)*(ncalls+1));
-                        }
-                        calls[ncalls].addr = addr;
-                        calls[ncalls].name = NULL;
-                        if (arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
-                            if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM,addr,calls[ncalls].name);
-                        }
-                        else {
-                            if (ltraces) printf("%s *** Add call 0x%llx\n",lang->COMM,addr);
-                        }
-                        ncalls++;
                     }
                     else if (IsJcc(&sc.insn[n],&addr)) {
                         //printf("jcc 0x%llx\n",addr);

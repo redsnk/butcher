@@ -22,6 +22,7 @@ class Butcher {
         int ltraces;
         int lasm;
         int loadm;
+        std::set<uint64_t> ex;
 
         virtual cs_err Cs_open(void) = 0;
         virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
@@ -37,6 +38,7 @@ class Butcher {
         Butcher(Archive *a,Language *l);
         ~Butcher();
         int IsGroup (cs_insn *insn, int group);
+        int Excluded(uint64_t addr);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);
 };
