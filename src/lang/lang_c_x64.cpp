@@ -12,10 +12,14 @@ Lang_C_x64::Lang_C_x64() {
     LT = "<";
     GTE = ">=";
     LTE = "<=";
-    F_ZF = "set_flag_z(cpu,";
-    F_SF = "set_flag_s(cpu,";
-    F_CF = "set_flag_c(cpu,";
-    F_OF = "set_flag_o(cpu,";
+    F_SET_ZF = "set_flag_z(cpu,";
+    F_SET_SF = "set_flag_s(cpu,";
+    F_SET_CF = "set_flag_c(cpu,";
+    F_SET_OF = "set_flag_o(cpu,";
+    F_GET_ZF = "flag_z(cpu";
+    F_GET_SF = "flag_s(cpu";
+    F_GET_CF = "flag_c(cpu";
+    F_GET_OF = "flag_o(cpu";
     F_ADD_OF = "add_flag_o(cpu,";
     F_ADD_CF = "add_flag_c(cpu,";
     F_SUB_OF = "sub_flag_o(cpu,";
@@ -30,6 +34,8 @@ Lang_C_x64::Lang_C_x64() {
     F_POP = "pop(cpu,";
     F_POW = "Pow(";
     E_JCC_GOTO = "if (%s) goto label_0x%llx;";
+    E_IFTHENELSE= "if (%s) { %s; } else  { %s; }";
+    F_NOT = "not(";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

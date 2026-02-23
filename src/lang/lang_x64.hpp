@@ -12,10 +12,14 @@ class Lang_x64 : public Language {
     const char *LT = "";
     const char *GTE = "";
     const char *LTE = "";
-    const char *F_ZF = "";
-    const char *F_SF = "";
-    const char *F_CF = "";
-    const char *F_OF = "";
+    const char *F_SET_ZF = "";
+    const char *F_SET_SF = "";
+    const char *F_SET_CF = "";
+    const char *F_SET_OF = "";
+    const char *F_GET_ZF = "";
+    const char *F_GET_SF = "";
+    const char *F_GET_CF = "";
+    const char *F_GET_OF = "";
     const char *F_ADD_OF = "";
     const char *F_ADD_CF = "";
     const char *F_SUB_OF = "";
@@ -30,6 +34,8 @@ class Lang_x64 : public Language {
     const char *F_POP = "";
     const char *F_POW = "";
     const char *E_JCC_GOTO = "";
+    const char *E_IFTHENELSE = "";
+    const char *F_NOT = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";

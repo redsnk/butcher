@@ -923,6 +923,14 @@ int bits;
                 }
             }
             break;
+        case X86_INS_NOT:
+            reg0 = lang_x64->Translate(handle,".op0 = not(bits,op0);",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_TEST:
             ldone = false;
             if ((num+1) < sc->count) {
@@ -1084,7 +1092,7 @@ int bits;
             num++;
             break;
         case X86_INS_SETNE:
-            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn,true);
+            reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

@@ -50,7 +50,7 @@
 
 
 // Unqualified %code blocks.
-#line 60 "grammar.y" // lalr1.cc:435
+#line 61 "grammar.y" // lalr1.cc:435
 
     namespace lang {
         void _emit(char *s, ...) {
@@ -703,139 +703,145 @@ namespace lang {
           switch (yyn)
             {
   case 3:
-#line 75 "grammar.y" // lalr1.cc:919
+#line 76 "grammar.y" // lalr1.cc:919
     { emit->emit_item_name(FUNCTION,"FUNCTION",yystack_[3].value.as < std::string > ().c_str()); }
 #line 709 "parser.cpp" // lalr1.cc:919
     break;
 
   case 4:
-#line 76 "grammar.y" // lalr1.cc:919
+#line 77 "grammar.y" // lalr1.cc:919
     { emit->emit_item(ENC,"ENC"); }
 #line 715 "parser.cpp" // lalr1.cc:919
     break;
 
   case 5:
-#line 77 "grammar.y" // lalr1.cc:919
+#line 78 "grammar.y" // lalr1.cc:919
     { emit->emit_item(LIST,"LIST"); }
 #line 721 "parser.cpp" // lalr1.cc:919
     break;
 
   case 6:
-#line 78 "grammar.y" // lalr1.cc:919
+#line 79 "grammar.y" // lalr1.cc:919
     { emit->emit_item(ADD,"ADD"); }
 #line 727 "parser.cpp" // lalr1.cc:919
     break;
 
   case 7:
-#line 79 "grammar.y" // lalr1.cc:919
+#line 80 "grammar.y" // lalr1.cc:919
     { emit->emit_item(SUB,"SUB"); }
 #line 733 "parser.cpp" // lalr1.cc:919
     break;
 
   case 8:
-#line 80 "grammar.y" // lalr1.cc:919
+#line 81 "grammar.y" // lalr1.cc:919
     { emit->emit_item(AND,"AND"); }
 #line 739 "parser.cpp" // lalr1.cc:919
     break;
 
   case 9:
-#line 81 "grammar.y" // lalr1.cc:919
+#line 82 "grammar.y" // lalr1.cc:919
     { emit->emit_item(XOR,"XOR"); }
 #line 745 "parser.cpp" // lalr1.cc:919
     break;
 
   case 10:
-#line 82 "grammar.y" // lalr1.cc:919
+#line 83 "grammar.y" // lalr1.cc:919
     { emit->emit_item(OR,"OR"); }
 #line 751 "parser.cpp" // lalr1.cc:919
     break;
 
   case 11:
-#line 83 "grammar.y" // lalr1.cc:919
+#line 84 "grammar.y" // lalr1.cc:919
     { emit->emit_item(MUL,"MUL"); }
 #line 757 "parser.cpp" // lalr1.cc:919
     break;
 
   case 12:
-#line 84 "grammar.y" // lalr1.cc:919
+#line 85 "grammar.y" // lalr1.cc:919
     { emit->emit_item(DIV,"DIV"); }
 #line 763 "parser.cpp" // lalr1.cc:919
     break;
 
   case 13:
-#line 85 "grammar.y" // lalr1.cc:919
+#line 86 "grammar.y" // lalr1.cc:919
     { emit->emit_item_name(ASSIGN,"ASSIGN",yystack_[2].value.as < std::string > ().c_str()); }
 #line 769 "parser.cpp" // lalr1.cc:919
     break;
 
   case 14:
-#line 86 "grammar.y" // lalr1.cc:919
+#line 87 "grammar.y" // lalr1.cc:919
     { emit->emit_item(EQUAL,"EQUAL"); }
 #line 775 "parser.cpp" // lalr1.cc:919
     break;
 
   case 15:
-#line 87 "grammar.y" // lalr1.cc:919
+#line 88 "grammar.y" // lalr1.cc:919
     { emit->emit_item(NEQUAL,"NEQUAL"); }
 #line 781 "parser.cpp" // lalr1.cc:919
     break;
 
   case 16:
-#line 88 "grammar.y" // lalr1.cc:919
+#line 89 "grammar.y" // lalr1.cc:919
     { emit->emit_item(LT,"LT"); }
 #line 787 "parser.cpp" // lalr1.cc:919
     break;
 
   case 17:
-#line 89 "grammar.y" // lalr1.cc:919
+#line 90 "grammar.y" // lalr1.cc:919
     { emit->emit_item(GT,"GT"); }
 #line 793 "parser.cpp" // lalr1.cc:919
     break;
 
   case 18:
-#line 90 "grammar.y" // lalr1.cc:919
+#line 91 "grammar.y" // lalr1.cc:919
     { emit->emit_item(LTE,"LTE"); }
 #line 799 "parser.cpp" // lalr1.cc:919
     break;
 
   case 19:
-#line 91 "grammar.y" // lalr1.cc:919
+#line 92 "grammar.y" // lalr1.cc:919
     { emit->emit_item(GTE,"GTE"); }
 #line 805 "parser.cpp" // lalr1.cc:919
     break;
 
   case 20:
-#line 92 "grammar.y" // lalr1.cc:919
+#line 93 "grammar.y" // lalr1.cc:919
     { emit->emit_item_name(NAME,"NAME",yystack_[0].value.as < std::string > ().c_str()); }
 #line 811 "parser.cpp" // lalr1.cc:919
     break;
 
   case 21:
-#line 93 "grammar.y" // lalr1.cc:919
+#line 94 "grammar.y" // lalr1.cc:919
     { emit->emit_item_number(NUMBER,"NUMBER",yystack_[0].value.as < long long > ()); }
 #line 817 "parser.cpp" // lalr1.cc:919
     break;
 
   case 22:
-#line 94 "grammar.y" // lalr1.cc:919
+#line 95 "grammar.y" // lalr1.cc:919
     { emit->emit_item(END,"END"); }
 #line 823 "parser.cpp" // lalr1.cc:919
     break;
 
   case 23:
-#line 95 "grammar.y" // lalr1.cc:919
+#line 96 "grammar.y" // lalr1.cc:919
     { emit->emit_item(INDENT,"INDENT"); }
 #line 829 "parser.cpp" // lalr1.cc:919
     break;
 
   case 24:
-#line 96 "grammar.y" // lalr1.cc:919
+#line 97 "grammar.y" // lalr1.cc:919
     { emit->emit_item(LF,"LF"); }
 #line 835 "parser.cpp" // lalr1.cc:919
     break;
 
+  case 25:
+#line 98 "grammar.y" // lalr1.cc:919
+    { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
+#line 841 "parser.cpp" // lalr1.cc:919
+    break;
 
-#line 839 "parser.cpp" // lalr1.cc:919
+
+#line 845 "parser.cpp" // lalr1.cc:919
             default:
               break;
             }
@@ -1011,90 +1017,105 @@ namespace lang {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -14;
+  const signed char Parser::yypact_ninf_ = -20;
 
   const signed char Parser::yytable_ninf_ = -1;
 
-  const signed char
+  const short
   Parser::yypact_[] =
   {
-      -2,    21,   -14,   -14,   -14,   -14,    -2,    61,     0,    -2,
-      -2,     1,    -2,    -2,    -2,    -2,    -2,    -2,    -2,    -2,
-      -2,    -2,    -2,    -2,    -2,    -2,   -14,    61,    61,    22,
-     -14,    74,    81,    81,    81,    81,    81,    81,   -13,   -13,
-     -13,   -13,   -13,   -14,   -14,   -14
+      28,   -10,   -20,   -20,   -20,    28,   -20,    28,   120,    25,
+      28,    28,    90,    48,    28,    28,    28,    28,    28,    28,
+      28,    28,    28,    28,    28,    28,    28,    28,   -20,   120,
+     120,    69,    28,   -20,   133,    26,    26,    26,    26,    26,
+      26,   -19,   -19,   -19,   -19,   -19,   -20,   -20,   -20,   106,
+      28,   120
   };
 
   const unsigned char
   Parser::yydefact_[] =
   {
-       2,    20,    21,    24,    22,    23,     2,    25,     2,     2,
-       2,     0,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,    26,    13,     0,
-       4,     5,    14,    15,    16,    17,    18,    19,     6,     7,
-       8,    10,     9,    11,    12,     3
+       2,    20,    21,    24,    22,     2,    23,     2,    26,     2,
+       2,     2,     0,     0,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     1,    27,
+      13,     0,     2,     4,     5,    14,    15,    16,    17,    18,
+      19,     6,     7,     8,    10,     9,    11,    12,     3,     0,
+       2,    25
   };
 
   const signed char
   Parser::yypgoto_[] =
   {
-     -14,    46,   -14
+     -20,    -5,   -20
   };
 
   const signed char
   Parser::yydefgoto_[] =
   {
-      -1,     7,     8
+      -1,     8,     9
   };
 
   const unsigned char
   Parser::yytable_[] =
   {
-      26,     1,     2,     1,     2,     0,     3,     4,     3,     4,
-      24,    25,    12,    13,    14,    15,    16,    17,    18,    19,
-      20,    21,    22,    23,    24,    25,     0,     5,     6,     5,
-       6,     9,    30,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    23,    24,    25,     0,     0,     0,
-       0,    10,    11,    45,    27,    28,    29,     0,    31,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,    44,    12,    13,    14,    15,    16,    17,    18,    19,
-      20,    21,    22,    23,    24,    25,    13,    14,    15,    16,
-      17,    18,    19,    20,    21,    22,    23,    24,    25,    19,
-      20,    21,    22,    23,    24,    25
+      12,     0,    13,    10,    29,    30,    31,    26,    27,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    11,     0,    28,     0,    49,     1,     2,
+       0,     1,     2,     3,     4,     5,     3,     4,     5,     0,
+       0,     0,     0,     0,     0,    51,     0,    21,    22,    23,
+      24,    25,    26,    27,     0,     0,     0,     6,     7,     0,
+       6,     7,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,     0,     0,     0,     0,
+       0,     0,    33,    14,    15,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,     0,     0,     0,
+       0,    32,     0,    48,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,    50,     0,
+      14,    15,    16,    17,    18,    19,    20,    21,    22,    23,
+      24,    25,    26,    27,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      27
   };
 
   const signed char
   Parser::yycheck_[] =
   {
-       0,     3,     4,     3,     4,    -1,     8,     9,     8,     9,
-      23,    24,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    23,    24,    -1,    29,    30,    29,
-      30,    10,    31,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    22,    23,    24,    -1,    -1,    -1,
-      -1,    30,     6,    31,     8,     9,    10,    -1,    12,    13,
+       5,    -1,     7,    13,     9,    10,    11,    26,    27,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    33,    -1,     0,    -1,    32,     3,     4,
+      -1,     3,     4,     8,     9,    10,     8,     9,    10,    -1,
+      -1,    -1,    -1,    -1,    -1,    50,    -1,    21,    22,    23,
+      24,    25,    26,    27,    -1,    -1,    -1,    32,    33,    -1,
+      32,    33,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    -1,    -1,    -1,    -1,
+      -1,    -1,    34,    14,    15,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,    -1,    -1,    -1,
+      -1,    11,    -1,    34,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,    12,    -1,
       14,    15,    16,    17,    18,    19,    20,    21,    22,    23,
-      24,    25,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    23,    24,    12,    13,    14,    15,
-      16,    17,    18,    19,    20,    21,    22,    23,    24,    18,
-      19,    20,    21,    22,    23,    24
+      24,    25,    26,    27,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      27
   };
 
   const unsigned char
   Parser::yystos_[] =
   {
-       0,     3,     4,     8,     9,    29,    30,    33,    34,    10,
-      30,    33,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    20,    21,    22,    23,    24,     0,    33,    33,    33,
-      31,    33,    33,    33,    33,    33,    33,    33,    33,    33,
-      33,    33,    33,    33,    33,    31
+       0,     3,     4,     8,     9,    10,    32,    33,    36,    37,
+      13,    33,    36,    36,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,     0,    36,
+      36,    36,    11,    34,    36,    36,    36,    36,    36,    36,
+      36,    36,    36,    36,    36,    36,    36,    36,    34,    36,
+      12,    36
   };
 
   const unsigned char
   Parser::yyr1_[] =
   {
-       0,    32,    33,    33,    33,    33,    33,    33,    33,    33,
-      33,    33,    33,    33,    33,    33,    33,    33,    33,    33,
-      33,    33,    33,    33,    33,    34,    34
+       0,    35,    36,    36,    36,    36,    36,    36,    36,    36,
+      36,    36,    36,    36,    36,    36,    36,    36,    36,    36,
+      36,    36,    36,    36,    36,    36,    37,    37
   };
 
   const unsigned char
@@ -1102,7 +1123,7 @@ namespace lang {
   {
        0,     2,     0,     4,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
-       1,     1,     1,     1,     1,     1,     2
+       1,     1,     1,     1,     1,     6,     1,     2
   };
 
 
@@ -1113,19 +1134,19 @@ namespace lang {
   const Parser::yytname_[] =
   {
   "$end", "error", "$undefined", "NAME", "INT", "FLT", "INTVAR", "FLTVAR",
-  "LF", "END", "'='", "LIST", "EQUAL", "NEQUAL", "LT", "GT", "LTE", "GTE",
-  "'+'", "'-'", "B_AND", "B_OR", "B_XOR", "MUL", "DIV", "MOD", "UMINUS",
-  "FACTORIAL", "EXPONENT", "INDENT", "'('", "')'", "$accept", "expr",
-  "stmt_list", YY_NULLPTR
+  "LF", "END", "IF", "THEN", "ELSE", "'='", "LIST", "EQUAL", "NEQUAL",
+  "LT", "GT", "LTE", "GTE", "'+'", "'-'", "B_AND", "B_OR", "B_XOR", "MUL",
+  "DIV", "MOD", "UMINUS", "FACTORIAL", "EXPONENT", "INDENT", "'('", "')'",
+  "$accept", "expr", "stmt_list", YY_NULLPTR
   };
 
 
   const unsigned char
   Parser::yyrline_[] =
   {
-       0,    74,    74,    75,    76,    77,    78,    79,    80,    81,
-      82,    83,    84,    85,    86,    87,    88,    89,    90,    91,
-      92,    93,    94,    95,    96,    99,   100
+       0,    75,    75,    76,    77,    78,    79,    80,    81,    82,
+      83,    84,    85,    86,    87,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    98,   101,   102
   };
 
   // Print the state stack on the debug stream.
@@ -1170,9 +1191,9 @@ namespace lang {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      30,    31,     2,    18,     2,    19,     2,     2,     2,     2,
+      33,    34,     2,    21,     2,    22,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    10,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,    13,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1192,11 +1213,11 @@ namespace lang {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    11,    12,    13,    14,    15,
-      16,    17,    20,    21,    22,    23,    24,    25,    26,    27,
-      28,    29
+       5,     6,     7,     8,     9,    10,    11,    12,    14,    15,
+      16,    17,    18,    19,    20,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32
     };
-    const unsigned user_token_number_max_ = 281;
+    const unsigned user_token_number_max_ = 284;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int> (t) <= yyeof_)
@@ -1209,8 +1230,8 @@ namespace lang {
 
 #line 15 "grammar.y" // lalr1.cc:1242
 } // lang
-#line 1213 "parser.cpp" // lalr1.cc:1242
-#line 103 "grammar.y" // lalr1.cc:1243
+#line 1234 "parser.cpp" // lalr1.cc:1242
+#line 105 "grammar.y" // lalr1.cc:1243
 
 
 void lang::Parser::error(const std::string& msg) {

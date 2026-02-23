@@ -44,6 +44,7 @@
 
 %precedence			LF
 %precedence         END
+%left				IF THEN ELSE
 %precedence         '='
 %left				LIST
 %left               EQUAL NEQUAL LT GT LTE GTE
@@ -94,6 +95,7 @@ expr:
 | END					{ emit->emit_item(END,"END"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
+| IF expr THEN expr ELSE expr { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
 ;
 
 stmt_list: expr

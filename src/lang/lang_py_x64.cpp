@@ -12,10 +12,14 @@ Lang_Py_x64::Lang_Py_x64() {
     LT = "<";
     GTE = ">=";
     LTE = "<=";
-    F_ZF = "cpu.flag_z(";
-    F_SF = "cpu.flag_s(";
-    F_CF = "cpu.flag_c(";
-    F_OF = "cpu.flag_o(";
+    F_SET_ZF = "cpu.flag_z(";
+    F_SET_SF = "cpu.flag_s(";
+    F_SET_CF = "cpu.flag_c(";
+    F_SET_OF = "cpu.flag_o(";
+    F_GET_ZF = "cpu.get_flag_z(";
+    F_GET_SF = "cpu.get_flag_s(";
+    F_GET_CF = "cpu.get_flag_c(";
+    F_GET_OF = "cpu.get_flag_o(";
     F_ADD_OF = "cpu.add_flag_o(";
     F_ADD_CF = "cpu.add_flag_c(";
     F_SUB_OF = "cpu.sub_flag_o(";
@@ -28,8 +32,10 @@ Lang_Py_x64::Lang_Py_x64() {
     F_FALSE = "false";
     F_PUSH = "cpu.push(";
     F_POP = "cpu.pop(";
-    F_POW = "pow(";
+    F_POW = "cpu.pow(";
     E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
+    E_IFTHENELSE= "if %s:\n        %s\n    else:\n        %s";
+    F_NOT = "cpu.not(";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";
