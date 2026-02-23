@@ -92,11 +92,12 @@ class Lang_x64 : public Language {
     virtual void PrintFuncHeaderAddr(Code *c,int num) = 0;
     virtual void PrintFuncFooter(Code *c,int num) = 0;
     virtual void PrintSubCodeSep(void) = 0;
-    virtual char *mem_str(csh handle,cs_x86_op op) = 0;
+    //virtual char *mem_str(csh handle,cs_x86_op op) = 0;
     virtual char *reg_name(csh handle,int id_reg) = 0;
     virtual char *s_reg_name(csh handle,int id_reg) = 0;
 
     const char *ptr(cs_x86_op op);
+    char *mem_str(csh handle,cs_x86_op op);
     char *op_str(csh handle,cs_x86_op op,int bits,int sign,int lset);
     char *get_op_str(csh handle,cs_x86_op op,int bits,int sign);
     char *set_op_str(csh handle,cs_x86_op op,int bits,int sign);

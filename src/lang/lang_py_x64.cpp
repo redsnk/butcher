@@ -169,6 +169,7 @@ void Lang_Py_x64::PrintSubCodeSep(void) {
     printf("    # --------------------------------------------------------------\n");
 }
 
+/*
 char *Lang_Py_x64::mem_str(csh handle,cs_x86_op op) {
 char tmp[256];
 char *buffer;
@@ -191,6 +192,7 @@ char *buffer;
     }
     return (buffer);
 }
+*/
 
 char *Lang_Py_x64::reg_name(csh handle,int id_reg) {
 char *buffer;

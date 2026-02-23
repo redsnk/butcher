@@ -16,6 +16,35 @@ const char *Lang_x64::ptr(cs_x86_op op) {
     return ("ptr_error");
 }
 
+char *Lang_x64::mem_str(csh handle,cs_x86_op op) {
+char tmp[256];
+char *buffer;
+
+    // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
+    buffer = (char *) malloc(256);
+    if (op.mem.base != X86_REG_INVALID) {
+        sprintf(buffer,"%s",reg_name(handle,op.mem.base));
+    }
+    else {
+        buffer[0] = 0;
+    }
+    if (op.mem.index != X86_REG_INVALID) {
+        sprintf(tmp,"+%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        strcat (buffer,tmp);
+    }
+    if (op.mem.disp) {
+        sprintf(tmp,"%+lld",op.mem.disp);
+        //sprintf(tmp,"+0x%llx",op.mem.disp);
+        strcat (buffer,tmp);
+    }
+    else if (!op.mem.disp && (op.mem.base == X86_REG_INVALID) && (op.mem.index == X86_REG_INVALID)) {
+        // TODO: pop		dword ptr fs:[0]
+        sprintf(tmp,"0");
+        strcat (buffer,tmp);
+    }
+    return (buffer);
+}
+
 char *Lang_x64::op_str(csh handle,cs_x86_op op,int bits,int sign, int lset) {
 char buffer[MAX_STR_OP];
 char *str;

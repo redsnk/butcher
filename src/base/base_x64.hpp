@@ -31,6 +31,7 @@ class Base_x64 : public Butcher {
         void PrintLabel(Code *c,uint64_t addr);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
+        int IsFSGS(cs_insn *insn);
         void PrintCode(Code *c);
         void PrintSubCode(Code *c,int num);
 

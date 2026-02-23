@@ -490,6 +490,19 @@ void Base_x64::PrintLabel(Code *c,uint64_t addr) {
     }
 }
 
+int Base_x64::IsFSGS(cs_insn *insn) {
+int n;
+
+    for (n=0;n<insn->detail->x86.op_count;n++) {
+        if (insn->detail->x86.operands[n].type == X86_OP_MEM) {
+            if ((insn->detail->x86.operands[n].mem.segment == X86_REG_FS) || (insn->detail->x86.operands[n].mem.segment == X86_REG_GS)) {
+                return (true);
+            }
+        }
+    }
+    return (false);
+}
+
 int Base_x64::PrintExtra(Code *c,struct _subcode *sc,int num) {
 cs_insn *insn;
 uint64_t read,d;
@@ -634,7 +647,12 @@ int bits;
                 num++;
             }
             */
-            reg0 = lang_x64->Translate(handle,".push(bits,op0);",insn,true);
+            if (IsFSGS(insn)) {
+                reg0 = lang_x64->Translate(handle,".push(bits,0);",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".push(bits,op0);",insn,true);
+            }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -726,6 +744,30 @@ int bits;
             }
             else {
                 reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_DEC:
+            /*
+            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                if (FlagsNotUsed(sc,num)) {
+                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
+                    PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,"1");
+                    num++;
+                    free(reg0);
+                }
+            }
+            */
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - 1;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(op0 == 0);:.sub_of(bits,sop0,1);:.op0 = op0 - 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -863,31 +905,7 @@ int bits;
                 }
             }
             */
-            break;
-        case X86_INS_DEC:
-            /*
-            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                if (FlagsNotUsed(sc,num)) {
-                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                    PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,"1");
-                    num++;
-                    free(reg0);
-                }
-            }
-            */
-            // The OF, SF, ZF, AF, CF, and PF flags
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 - 1;",insn,true);
-            }
-            else {
-                reg0 = lang_x64->Translate(handle,".cf(op0 == 0);:.sub_of(bits,sop0,1);:.op0 = op0 - 1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
-            }
-            if (reg0 != NULL) {
-                PrintLine(insn,0,reg0);
-                num++;
-                free(reg0);
-            }
-            break;
+            break;       
         case X86_INS_XOR:
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
@@ -1065,9 +1083,22 @@ int bits;
             free(reg0);
             num++;
             break;
+        case X86_INS_SETNE:
+            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_MOVZX:
         case X86_INS_MOV:
-            reg0 = lang_x64->Translate(handle,".op0 = op1;",insn,true);
+            if (IsFSGS(insn)) {
+                reg0 = lang_x64->Translate(handle,".;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".op0 = op1;",insn,true);
+            }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -1200,13 +1231,13 @@ int bits;
 }
 
 int Base_x64::PrintInst(Code *c,struct _subcode *sc,int num) {
-int n;
+int n,ret;
 char subname[1024];
 char params[1024];
 char buffer[1024];
 cs_insn *insn;
 
-    int ret = PrintExtra(c,sc,num);
+    ret = PrintExtra(c,sc,num);
     if (ret > num) {
         // Done, next instruction
         return (ret);

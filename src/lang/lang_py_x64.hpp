@@ -14,7 +14,7 @@ class Lang_Py_x64 : public Lang_x64 {
     void PrintFuncFooter(Code *c,int num);
     void PrintSubCodeSep(void);
 
-    char *mem_str(csh handle,cs_x86_op op);
+    //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);
     char *s_reg_name(csh handle,int id_reg);
 
