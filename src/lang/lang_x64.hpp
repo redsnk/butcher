@@ -36,6 +36,7 @@ class Lang_x64 : public Language {
     const char *E_JCC_GOTO = "";
     const char *E_IFTHENELSE = "";
     const char *F_NOT = "";
+    const char *F_NEG = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";

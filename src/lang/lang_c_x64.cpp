@@ -36,6 +36,7 @@ Lang_C_x64::Lang_C_x64() {
     E_JCC_GOTO = "if (%s) goto label_0x%llx;";
     E_IFTHENELSE= "if (%s) { %s; } else  { %s; }";
     F_NOT = "not(";
+    F_NEG = "neg(";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

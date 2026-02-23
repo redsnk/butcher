@@ -931,6 +931,15 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_NEG:
+            //The CF flag set to 0 if the source operand is 0; otherwise it is set to 1. The OF, SF, ZF, AF, and PF flags are set according to the result.
+            reg0 = lang_x64->Translate(handle,".cf(op0 != 0);:.op0 = neg(bits,op0);:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_TEST:
             ldone = false;
             if ((num+1) < sc->count) {

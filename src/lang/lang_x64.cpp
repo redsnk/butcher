@@ -192,6 +192,9 @@ int bits;
     else if (!strcmp(name,"not")) {
         return (strdup(F_NOT));
     }
+    else if (!strcmp(name,"neg")) {
+        return (strdup(F_NEG));
+    }
     return (strdup("<Translate_var error>"));
 }
 

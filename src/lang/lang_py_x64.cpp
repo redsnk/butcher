@@ -36,6 +36,7 @@ Lang_Py_x64::Lang_Py_x64() {
     E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
     E_IFTHENELSE= "if %s:\n        %s\n    else:\n        %s";
     F_NOT = "cpu.not(";
+    F_NEG = "cpu.neg(";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

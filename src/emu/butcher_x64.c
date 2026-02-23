@@ -577,6 +577,14 @@ uint64_t n,r;
 	return (r);
 }
 
+uint64_t neg(uint64_t b,uint64_t p) {
+	return ((~p)+(uint64_t)1);
+}
+
+uint64_t not(uint64_t b,uint64_t p) {
+	return(~p);
+}
+
 /*
 uint64_t get_ins_mem(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int *bits) {
 void *rb,*ri;
