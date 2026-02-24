@@ -15,6 +15,7 @@ int opt_a = false;
 int opt_m = false;
 enum Languages opt_l = C;
 std::set<uint64_t> exclude;
+std::map<uint64_t, std::string> named;
 
 uint64_t string_to_num(char *num) {
 uint64_t n;
@@ -45,6 +46,27 @@ char  *p,*i;
         }
     }
     free(t);
+}
+
+#define MAX_BUFFER  (1024)
+
+void parse_named(char *name) {
+FILE *f;
+char buffer[MAX_BUFFER];
+char *p;
+
+    f = fopen(name,"r");
+    if (f != NULL) {
+        while (fgets(buffer,MAX_BUFFER-1,f) != NULL) {
+            while ((p=strchr(buffer,'\n'))!= NULL) *p = 0;
+            p = strchr(buffer,',');
+            if (p != NULL) {
+                *p = 0;
+                named.insert({ string_to_num(buffer),p+1 });
+            }
+        }
+        fclose(f);
+    }
 }
 
 int butcher(char *path,uint64_t addr) {
@@ -91,6 +113,8 @@ Archive *a;
     b->lasm = opt_a;
     b->loadm = opt_m;
     b->ex = exclude;
+    //b->named.insert({ 0x0040B440,"UStrClr" });
+    b->named = named;
     b->Cut(path,addr);
     delete b;
     return (1);
@@ -100,16 +124,17 @@ const char* HELP = "\
 --------------------------------------------------------------\n\
 Butcher ("MY_VERSION") programed by Alex Bassas.\n\
 --------------------------------------------------------------\n\
-usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>] <path> <addr>\n\
+usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>\n\
 \n\
 -l<lang>    => Output language: [c|p]\n\
                     - c -> C\n\
                     - p -> Python\n\
 \n\
--m              => Load memory from the file\n\
--t              => Enable traces\n\
--a              => Enable asm code\n\
--e[addr,addr,]  => Exclude addresses\n\
+-m                  => Load memory from the file\n\
+-t                  => Enable traces\n\
+-a                  => Enable asm code\n\
+-e[addr,addr,...]   => Exclude addresses\n\
+-n[file]            => Add named functions from <file>\n\
 \n";
 
 int main (int argc, char **argv) {
@@ -117,7 +142,7 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"mtal:e:")) != -1) {
+    while ((p = getopt(argc,argv,"mtal:e:n:")) != -1) {
         switch (p) {
                 case 't':
                     opt_t = true;
@@ -140,6 +165,9 @@ uint64_t addr;
                     break;
                 case 'e':
                     parse_ex(optarg);
+                    break;
+                case 'n':
+                    parse_named(optarg);
                     break;
                 case '?':
                 default:

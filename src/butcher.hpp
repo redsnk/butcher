@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <list>
 #include <set>
+#include <map>
 #include <algorithm>
 #include <cstring>
 #include <capstone/capstone.h>
@@ -23,6 +24,7 @@ class Butcher {
         int lasm;
         int loadm;
         std::set<uint64_t> ex;
+        std::map<uint64_t, std::string> named;
 
         virtual cs_err Cs_open(void) = 0;
         virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
@@ -39,6 +41,7 @@ class Butcher {
         ~Butcher();
         int IsGroup (cs_insn *insn, int group);
         int Excluded(uint64_t addr);
+        int IsNamedFunction (uint64_t addr, char **func);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);
 };

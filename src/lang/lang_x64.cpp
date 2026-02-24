@@ -131,6 +131,9 @@ int bits;
             return (get_op_str(handle,insn->detail->x86.operands[1],bits,true));
         }
     }
+    else if (!strcmp(name,"mem1")) {
+        return(mem_str(handle,insn->detail->x86.operands[1]));
+    }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF));
     }

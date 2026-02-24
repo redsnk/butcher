@@ -157,6 +157,29 @@ int JccInst(cs_insn *insn) {
     return (false);
 }
 
+int SetInst(cs_insn *insn) {
+    switch (insn->id) {
+        case X86_INS_SETA:
+        case X86_INS_SETAE:
+	    case X86_INS_SETBE:
+	    case X86_INS_SETB:
+	    case X86_INS_SETE:
+	    case X86_INS_SETGE:
+	    case X86_INS_SETG:
+	    case X86_INS_SETLE:
+	    case X86_INS_SETL:
+	    case X86_INS_SETNE:
+	    case X86_INS_SETNO:
+	    case X86_INS_SETNP:
+	    case X86_INS_SETNS:
+	    case X86_INS_SETO:
+	    case X86_INS_SETP:
+	    case X86_INS_SETS:
+            return (true);
+    }
+    return (false);
+}
+
 int ClearFlagInst(cs_insn *insn) {
     switch(insn->id) {
         case X86_INS_SUB:
@@ -174,7 +197,7 @@ int ClearFlagInst(cs_insn *insn) {
 }
 
 int UseFlagInst(cs_insn *insn) {
-    if (JccInst(insn)) {
+    if (JccInst(insn) || SetInst(insn)) {
         return (true);
     }
     return (false);
@@ -519,9 +542,28 @@ int bits;
         // test
         bits = 0;
     }
+    if (!num) {
+        // First instruction, push rip/eip
+        reg0 = lang_x64->Translate(handle,".push(bits,0);",insn,true);
+        if (reg0 != NULL) {
+            PrintLine(insn,0,reg0);
+            free(reg0);
+        }
+    }
     switch (insn->id) {
         case X86_INS_RET:
             // ret
+            if (insn->detail->x86.op_count > 1) {
+                bits = 0;
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".pop(bits);",insn,true);
+                if (reg0 != NULL) {
+                    PrintLine(insn,0,reg0);
+                    num++;
+                    free(reg0);
+                }
+            }
             PrintLine(insn,1,lang_x64->E_RETURN);
             num++;
             break;
@@ -1079,6 +1121,7 @@ int bits;
             }
             break;
         case X86_INS_LEA:
+            /*
             reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
             if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                 // lea		rdx, qword ptr [rip + 0x199f7]
@@ -1091,7 +1134,13 @@ int bits;
                 free(reg1);
             }
             free(reg0);
-            num++;
+            */
+            reg0 = lang_x64->Translate(handle,".op0 = mem1;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
             break;
         case X86_INS_MOVABS:
             // movabs		rdx, 0x5f3ae6d888f298a2
@@ -1102,6 +1151,14 @@ int bits;
             break;
         case X86_INS_SETNE:
             reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_XCHG:
+            reg0 = lang_x64->Translate(handle,".push(bits,op0);:.op0 = op1;:.op1 = pop(bits);",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

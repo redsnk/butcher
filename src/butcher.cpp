@@ -21,6 +21,13 @@ int Butcher::Excluded(uint64_t addr) {
     return (false);
 }
 
+int Butcher::IsNamedFunction (uint64_t addr, char **func) {
+    if (named.count(addr)) {
+        *func = strdup(named.at(addr).c_str());
+        return (true);
+    }
+    return (false);
+}
 
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
@@ -76,7 +83,7 @@ uint8_t *mem;
                             }
                             calls[ncalls].addr = addr;
                             calls[ncalls].name = NULL;
-                            if (arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                            if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
                                 if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM,addr,calls[ncalls].name);
                             }
                             else {
