@@ -292,7 +292,13 @@ int n;
                 break;
             case _id_item::ASSIGN:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,true);
-                lmem = (insn->detail->x86.operands[0].type ==X86_OP_MEM);
+                lmem = false;
+                if (!strcmp(e->items[n].item.name,"op0")) {
+                    lmem = (insn->detail->x86.operands[0].type ==X86_OP_MEM);
+                }
+                else if (!strcmp(e->items[n].item.name,"op1")) {
+                    lmem = (insn->detail->x86.operands[1].type ==X86_OP_MEM);
+                }
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
                 if (lmem) {
                     sprintf(tmp,E_SET_MEM,ptr(insn->detail->x86.operands[0]),it1,it2);
