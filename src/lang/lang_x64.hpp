@@ -57,6 +57,7 @@ class Lang_x64 : public Language {
     const char *E_JL = "";
     const char *E_JLE = "";
     const char *E_JGE = "";
+    const char *E_JG = "";
     const char *E_JO = "";
     const char *E_PUSH = "";
     const char *E_POP = "";

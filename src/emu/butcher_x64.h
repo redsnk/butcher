@@ -331,5 +331,6 @@ void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t
 char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
 char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
 char *uni16_to_str(char *str);
+void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
 
 #endif // _BUTCHER_X64_H

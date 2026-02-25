@@ -542,7 +542,7 @@ int bits;
         // test
         bits = 0;
     }
-    if (!num) {
+    if ((sc->parent == SUBCODE_TOP) && !num) {
         // First instruction, push rip/eip
         reg0 = lang_x64->Translate(handle,".push(bits,0);",insn,true);
         if (reg0 != NULL) {
@@ -670,6 +670,10 @@ int bits;
             break;
         case X86_INS_JLE:
             PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
+        case X86_INS_JG:
+            PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_JGE:
@@ -1110,6 +1114,19 @@ int bits;
         case X86_INS_SHR:
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn,true);
+            }
+            else {
+                reg0 = NULL;
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SHL:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 * pow(2,op1);",insn,true);
             }
             else {
                 reg0 = NULL;
