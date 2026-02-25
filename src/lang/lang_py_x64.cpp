@@ -35,6 +35,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_POW = "cpu.pow(";
     E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
     E_IFTHENELSE= "if %s:\n        %s\n    else:\n        %s";
+    E_IFTHEN= "if %s:\n        %s";
     F_NOT = "cpu.not(";
     F_NEG = "cpu.neg(";
 

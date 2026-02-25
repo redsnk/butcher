@@ -35,6 +35,7 @@ Lang_C_x64::Lang_C_x64() {
     F_POW = "Pow(";
     E_JCC_GOTO = "if (%s) goto label_0x%llx;";
     E_IFTHENELSE= "if (%s) { %s; } else  { %s; }";
+    E_IFTHEN= "if (%s) { %s; }";
     F_NOT = "not(";
     F_NEG = "neg(";
 

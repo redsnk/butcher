@@ -32,7 +32,8 @@ enum _id_item {
     AND,
     OR,
     XOR,
-    IFTHENELSE
+    IFTHENELSE,
+    IFTHEN
 }; 
 
 #define MAX_ITEM_NAME   (256)

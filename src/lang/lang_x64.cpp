@@ -95,6 +95,19 @@ char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
     return(op_str(handle,op,bits,sign,true));
 }
 
+char *Lang_x64::Translate_reg (cs_insn *insn,char *reg8,char *reg16,char *reg32,char *reg64) {
+    switch (insn->detail->x86.addr_size*8) {
+        case 8:
+            return (strdup(reg8));
+        case 16:
+            return (strdup(reg16));
+        case 32:
+            return (strdup(reg32));
+        case 64:
+            return (strdup(reg64));
+    }
+}
+
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name,int lset) {
 int bits;
 
@@ -133,6 +146,30 @@ int bits;
     }
     else if (!strcmp(name,"mem1")) {
         return(mem_str(handle,insn->detail->x86.operands[1]));
+    }
+    else if (!strcmp(name,"sax")) {
+        return(Translate_reg(insn,"_al","_ax","_eax","_rax"));
+    }
+    else if (!strcmp(name,"rbx")) {
+        return(Translate_reg(insn,"_bl","_bx","_ebx","_rbx"));
+    }
+    else if (!strcmp(name,"rcx")) {
+        return(Translate_reg(insn,"_cl","_cx","_ecx","_rcx"));
+    }
+    else if (!strcmp(name,"rdx")) {
+        return(Translate_reg(insn,"_dl","_dx","_edx","_rdx"));
+    }
+    else if (!strcmp(name,"s_rax")) {
+        return(Translate_reg(insn,"s_al","s_ax","s_eax","s_rax"));
+    }
+    else if (!strcmp(name,"s_rbx")) {
+        return(Translate_reg(insn,"s_bl","s_bx","s_ebx","s_rbx"));
+    }
+    else if (!strcmp(name,"s_rcx")) {
+        return(Translate_reg(insn,"s_cl","s_cx","s_ecx","s_rcx"));
+    }
+    else if (!strcmp(name,"s_rdx")) {
+        return(Translate_reg(insn,"s_dl","s_dx","s_edx","s_rdx"));
     }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF));
@@ -260,6 +297,8 @@ int n;
                 if (op == NULL) op = "*";
             case _id_item::DIV:
                 if (op == NULL) op = "/";
+            case _id_item::MOD:
+                if (op == NULL) op = "%%";
             case _id_item::EQUAL:
                 if (op == NULL) op = EQUAL;
             case _id_item::NEQUAL:
@@ -323,9 +362,25 @@ int n;
                 sprintf(tmp,"%s%s%s",it1,it2,ENDF);
                 free(it2);
                 free(it1);
+                if (n == 0) {
+                    e->res_item(n,tmp);
+                }
+                else {
+                    e->res_item(n,tmp);
+                    e->del_item(n-1);
+                    n -= 1;
+                }
+                break;
+            case _id_item::IFTHEN:
+                it1 = Translate_item(handle,insn,&e->items[n-2],false);
+                it2 = Translate_item(handle,insn,&e->items[n-1],false);
+                sprintf(tmp,E_IFTHEN,it1,it2);
+                free(it2);
+                free(it1);
                 e->res_item(n,tmp);
-                e->del_item(n-1);
-                n -= 1;
+                e->del_item(n-2);
+                e->del_item(n-2);
+                n -= 2;
                 break;
             case _id_item::IFTHENELSE:
                 it1 = Translate_item(handle,insn,&e->items[n-3],false);
@@ -336,9 +391,17 @@ int n;
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
+                
+                e->del_item(n-3);
+                e->del_item(n-3);
+                e->del_item(n-3);
+                n -= 3;
+                
+                /*
                 e->del_item(n-3);
                 e->del_item(n-3);
                 n -= 2;
+                */       
                 break;
             case _id_item::END:
                 if ((n > 0) && (e->items[n-1].id == RESULT)) {

@@ -1137,6 +1137,30 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_IMUL:
+            switch (insn->detail->x86.op_count) {
+                case 2:
+                    reg0 = lang_x64->Translate(handle,".sop0 = sop0 * sop1;",insn,true);
+                    if (reg0 != NULL) {
+                        PrintLine(insn,0,reg0);
+                        num++;
+                        free(reg0);
+                    }
+                    break;
+            }
+            break;
+        case X86_INS_IDIV:
+            reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CDQ:
+            PrintLine(insn,1,"");
+            num++;
+            break;
         case X86_INS_LEA:
             /*
             reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -1167,7 +1191,7 @@ int bits;
             num++;
             break;
         case X86_INS_SETNE:
-            reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0;",insn,true);
+            reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

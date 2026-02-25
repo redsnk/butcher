@@ -44,7 +44,7 @@
 
 %precedence			LF
 %precedence         END
-%left				IF THEN ELSE
+%left				IF THEN ELSE FI
 %precedence         '='
 %left				LIST
 %left               EQUAL NEQUAL LT GT LTE GTE
@@ -83,6 +83,7 @@ expr:
 | expr B_OR expr        { emit->emit_item(OR,"OR"); }
 | expr MUL expr			{ emit->emit_item(MUL,"MUL"); }
 | expr DIV expr         { emit->emit_item(DIV,"DIV"); }
+| expr MOD expr         { emit->emit_item(MOD,"MOD"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
 | expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }
@@ -95,7 +96,8 @@ expr:
 | END					{ emit->emit_item(END,"END"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
-| IF expr THEN expr ELSE expr { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
+| IF expr THEN expr ELSE expr FI { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
+| IF expr THEN expr FI    { emit->emit_item(IFTHEN,"IFTHEN"); }
 ;
 
 stmt_list: expr
