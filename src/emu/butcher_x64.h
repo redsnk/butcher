@@ -300,6 +300,7 @@ uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
 */
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
+uint64_t num_flag_c(struct _cpu *cpu);
 int flag_o(struct _cpu *cpu);
 int flag_s(struct _cpu *cpu);
 void set_flag_z(struct _cpu *cpu,int value);

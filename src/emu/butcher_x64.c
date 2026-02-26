@@ -114,7 +114,7 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	panic("set_mem","");
 }
 
-void hexDump(void *addr, int len) {
+void hexDump(uint64_t off,void *addr, int len) {
 int i;
 unsigned char buff[17];
 unsigned char *pc = (unsigned char*)addr;
@@ -124,7 +124,7 @@ unsigned char *pc = (unsigned char*)addr;
             if (i != 0)
                 printf("  %s\n", buff);
 
-            printf("  %04x ", i);
+            printf("  0x%016X ", off+i);
         }
 		printf(" %02x", pc[i]);
 		if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
@@ -138,6 +138,7 @@ unsigned char *pc = (unsigned char*)addr;
         printf("   ");
         i++;
     }
+	printf("\n\n");
 }
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
@@ -145,7 +146,7 @@ char *mem;
 
 	mem = (void *) malloc(size);
 	get_mem(cpu,addr,size,mem);
-	hexDump(mem,size);
+	hexDump(addr,mem,size);
 	free(mem);
 }
 
@@ -374,6 +375,10 @@ int flag_z(struct _cpu *cpu) {
 
 int flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF);
+}
+
+uint64_t num_flag_c(struct _cpu *cpu) {
+	return(cpu->eflags.CF?1:0);
 }
 
 int flag_o(struct _cpu *cpu) {

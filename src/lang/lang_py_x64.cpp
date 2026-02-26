@@ -62,6 +62,7 @@ Lang_Py_x64::Lang_Py_x64() {
     E_JGE =                 "if cpu.flag_o() == cpu.flag_s():\n        goto .label_0x%llx";
     E_JG =                  "if (cpu.flag_o() == cpu.flag_s()) and not cpu.flag_z():\n        goto .label_0x%llx";
     E_JO =                  "if cpu.flag_o():\n        goto .label_0x%llx";
+    E_JS =                  "if cpu.flag_s():\n        goto .label_0x%llx";
     E_PUSH =                "cpu.push_%s(%s)";
     E_POP =                 "%s = cpu.pop_%s()";
     E_SUB_RR =              "%s = %s - %s";

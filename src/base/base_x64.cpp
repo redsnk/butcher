@@ -200,6 +200,11 @@ int UseFlagInst(cs_insn *insn) {
     if (JccInst(insn) || SetInst(insn)) {
         return (true);
     }
+    switch (insn->id) {
+        case X86_INS_ADC:
+        case X86_INS_SBB:
+            return (true);
+    }
     return (false);
 }
 
@@ -684,6 +689,10 @@ int bits;
             PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
             num++;
             break;
+        case X86_INS_JS:
+            PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
         case X86_INS_PUSH:
             /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
@@ -950,6 +959,7 @@ int bits;
             */
             break;       
         case X86_INS_XOR:
+            /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
                 if (FlagsNotUsed(sc,num)) {
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -965,6 +975,19 @@ int bits;
                     free(reg0);
                 }
             }
+            */
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 ^ op1;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.op0 = op0 ^ op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
             break;
         case X86_INS_NOT:
             reg0 = lang_x64->Translate(handle,".op0 = not(bits,op0);",insn,true);
@@ -1108,6 +1131,19 @@ int bits;
             }
             */
             break;
+        case X86_INS_AND:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 & op1;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.op0 = op0 & op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_SHR:
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn,true);
@@ -1189,6 +1225,14 @@ int bits;
             break;
         case X86_INS_SETNE:
             reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETE:
+            reg0 = lang_x64->Translate(handle,".if get_zf()==true then op0 = 1 else op0 = 0 fi;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
