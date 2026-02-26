@@ -349,25 +349,21 @@ int n;
                 e->del_item(n-1);
                 n -= 1;
                 break;
+            case _id_item::FUNC_VOID:
+                it1 = Translate_var(handle,insn,e->items[n].item.name,false);
+                sprintf(tmp,"%s%s",it1,ENDF);
+                free(it1);
+                e->res_item(n,tmp);
+                break;
             case _id_item::FUNCTION:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,false);
-                if (n == 0) {
-                    it2 = strdup("");
-                }
-                else {
-                    it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                }
+                it2 = Translate_item(handle,insn,&e->items[n-1],false);
                 sprintf(tmp,"%s%s%s",it1,it2,ENDF);
                 free(it2);
                 free(it1);
-                if (n == 0) {
-                    e->res_item(n,tmp);
-                }
-                else {
-                    e->res_item(n,tmp);
-                    e->del_item(n-1);
-                    n -= 1;
-                }
+                e->res_item(n,tmp);
+                e->del_item(n-1);
+                n -= 1;
                 break;
             case _id_item::IFTHEN:
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);

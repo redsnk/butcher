@@ -1453,7 +1453,7 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 184,     ///< Last index in yytable_.
+      yylast_ = 198,     ///< Last index in yytable_.
       yynnts_ = 3,  ///< Number of nonterminal symbols.
       yyfinal_ = 29, ///< Termination state number.
       yyterror_ = 1,

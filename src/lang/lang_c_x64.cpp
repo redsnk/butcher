@@ -22,7 +22,7 @@ Lang_C_x64::Lang_C_x64() {
     F_GET_OF = "flag_o(cpu";
     F_ADD_OF = "add_flag_o(cpu,";
     F_ADD_CF = "add_flag_c(cpu,";
-    F_NUM_CF = "num_flag_c(cpu,";
+    F_NUM_CF = "num_flag_c(cpu";
     F_SUB_OF = "sub_flag_o(cpu,";
     //F_SUB_CF = "sub_flag_c(cpu,";
     ENDF = ")";

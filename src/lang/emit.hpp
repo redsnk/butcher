@@ -13,6 +13,7 @@ enum _id_item {
     NAME,
     NUMBER,
     FUNCTION,
+    FUNC_VOID,
     EQUAL,
     NEQUAL,
     GT,
