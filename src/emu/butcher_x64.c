@@ -149,6 +149,28 @@ char *mem;
 	free(mem);
 }
 
+int free_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
+int n;
+
+	for (n=0;n<cpu->mem_count;n++) {
+		if ((addr>=cpu->mems[n].addr) && (addr<(cpu->mems[n].addr+cpu->mems[n].size))) {
+			*next = cpu->mems[n].addr+cpu->mems[n].size;
+			return (FALSE);
+		}
+	}
+	return (TRUE);
+}
+
+uint64_t alloc_mem (struct _cpu *cpu,int size) {
+uint64_t res = 0x1000,next;
+
+	while (!free_mem(cpu,res,size,&next)) {
+		res = next;
+	}
+	add_mem(cpu,res,NULL,size);
+	return (res);
+}
+
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr) {
 uint8_t value;
 

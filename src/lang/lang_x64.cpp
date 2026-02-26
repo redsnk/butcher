@@ -95,7 +95,7 @@ char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
     return(op_str(handle,op,bits,sign,true));
 }
 
-char *Lang_x64::Translate_reg (cs_insn *insn,char *reg8,char *reg16,char *reg32,char *reg64) {
+char *Lang_x64::Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,const char *reg32,const char *reg64) {
     switch (insn->detail->x86.addr_size*8) {
         case 8:
             return (strdup(reg8));
@@ -201,14 +201,12 @@ int bits;
     else if (!strcmp(name,"add_cf")) {
         return (strdup(F_ADD_CF));
     }
+    else if (!strcmp(name,"num_cf")) {
+        return (strdup(F_NUM_CF));
+    }
     else if (!strcmp(name,"sub_of")) {
         return (strdup(F_SUB_OF));
     }
-    /*
-    else if (!strcmp(name,"sub_cf")) {
-        return (strdup(F_SUB_CF));
-    }
-    */
     else if (!strcmp(name,"bits")) {
         char *buffer = (char *) malloc(1024);
         sprintf(buffer,"%i",insn->detail->x86.addr_size*8);

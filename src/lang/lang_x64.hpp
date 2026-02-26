@@ -22,6 +22,7 @@ class Lang_x64 : public Language {
     const char *F_GET_OF = "";
     const char *F_ADD_OF = "";
     const char *F_ADD_CF = "";
+    const char *F_NUM_CF = "";
     const char *F_SUB_OF = "";
     //const char *F_SUB_CF = "";
     const char *ENDF = "";
@@ -111,7 +112,7 @@ class Lang_x64 : public Language {
     char *get_op_str(csh handle,cs_x86_op op,int bits,int sign);
     char *set_op_str(csh handle,cs_x86_op op,int bits,int sign);
 
-    char *Translate_reg (cs_insn *insn,char *reg8,char *reg16,char *reg32,char *reg64);
+    char *Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,const char *reg32,const char *reg64);
     char *Translate_var (csh handle,cs_insn *insn,char *name, int lset);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i,int lset);
     char *Translate (csh handle,char *s, cs_insn *insn,int ends);

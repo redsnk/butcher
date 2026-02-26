@@ -7,6 +7,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#define FALSE 	(0)
+#define TRUE	(-1)
+
 struct _r8 {
 	uint8_t l;
 	uint8_t h;
@@ -332,5 +335,6 @@ char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
 char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
 char *uni16_to_str(char *str);
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
+uint64_t alloc_mem (struct _cpu *cpu,int size);
 
 #endif // _BUTCHER_X64_H

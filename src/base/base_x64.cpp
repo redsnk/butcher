@@ -722,18 +722,6 @@ int bits;
             }
             break;
         case X86_INS_ADD:
-            /*
-            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                if (FlagsNotUsed(sc,num)) {
-                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],false);
-                    PrintLine(insn,1,lang_x64->E_ADD_RR,reg0,reg0,reg1);
-                    num++;
-                    free(reg1);
-                    free(reg0);
-                }
-            }
-            */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn,true);
@@ -742,6 +730,15 @@ int bits;
                 reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_ADC:
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1 + num_cf();",insn,true);
                 PrintLine(insn,0,reg0);
                 num++;
                 free(reg0);
