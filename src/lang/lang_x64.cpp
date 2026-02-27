@@ -128,6 +128,14 @@ int bits;
             return (get_op_str(handle,insn->detail->x86.operands[1],bits,false));
         }
     }
+    else if (!strcmp(name,"op2")) {
+        if (lset) {
+            return (set_op_str(handle,insn->detail->x86.operands[2],bits,false));
+        }
+        else {
+            return (get_op_str(handle,insn->detail->x86.operands[2],bits,false));
+        }
+    }
     else if (!strcmp(name,"sop0")) {
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[0],bits,true));
@@ -142,6 +150,14 @@ int bits;
         }
         else {
             return (get_op_str(handle,insn->detail->x86.operands[1],bits,true));
+        }
+    }
+    else if (!strcmp(name,"sop2")) {
+        if (lset) {
+            return (set_op_str(handle,insn->detail->x86.operands[2],bits,true));
+        }
+        else {
+            return (get_op_str(handle,insn->detail->x86.operands[2],bits,true));
         }
     }
     else if (!strcmp(name,"mem1")) {

@@ -556,6 +556,9 @@ int bits;
         }
     }
     switch (insn->id) {
+        case X86_INS_NOP:
+            PrintLine(insn,1,"");
+            break;
         case X86_INS_RET:
             // ret
             if (insn->detail->x86.op_count > 1) {
@@ -1172,8 +1175,24 @@ int bits;
             break;
         case X86_INS_IMUL:
             switch (insn->detail->x86.op_count) {
+                case 1:
+                    reg0 = lang_x64->Translate(handle,".s_rax = s_rax * sop0;",insn,true);
+                    if (reg0 != NULL) {
+                        PrintLine(insn,0,reg0);
+                        num++;
+                        free(reg0);
+                    }
+                    break;
                 case 2:
                     reg0 = lang_x64->Translate(handle,".sop0 = sop0 * sop1;",insn,true);
+                    if (reg0 != NULL) {
+                        PrintLine(insn,0,reg0);
+                        num++;
+                        free(reg0);
+                    }
+                    break;
+                case 3:
+                    reg0 = lang_x64->Translate(handle,".sop0 = sop1 * sop2;",insn,true);
                     if (reg0 != NULL) {
                         PrintLine(insn,0,reg0);
                         num++;
