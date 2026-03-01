@@ -558,6 +558,7 @@ int bits;
     switch (insn->id) {
         case X86_INS_NOP:
             PrintLine(insn,1,"");
+            num++;
             break;
         case X86_INS_RET:
             // ret
@@ -1274,14 +1275,8 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_MOVAPS:
         case X86_INS_MOVUPS:
-            reg0 = lang_x64->Translate(handle,".op0 = movups(op0,op1);",insn,true);
-            if (reg0 != NULL) {
-                PrintLine(insn,0,reg0);
-                num++;
-                free(reg0);
-            }
-            break;
         case X86_INS_MOVD:
         case X86_INS_MOVZX:
         case X86_INS_MOV:

@@ -254,9 +254,6 @@ int bits;
     else if (!strcmp(name,"pshufd")) {
         return (strdup(F_PSHUFD));
     }
-    else if (!strcmp(name,"movups")) {
-        return (strdup(F_MOVUPS));
-    }
     return (strdup("<Translate_var error>"));
 }
 
