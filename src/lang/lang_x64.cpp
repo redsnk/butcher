@@ -12,6 +12,8 @@ const char *Lang_x64::ptr(cs_x86_op op) {
             return("dword");
         case 8:
             return("qword");
+        case 16:
+            return("dqword");
     }
     return ("ptr_error");
 }
@@ -248,6 +250,12 @@ int bits;
     }
     else if (!strcmp(name,"neg")) {
         return (strdup(F_NEG));
+    }
+    else if (!strcmp(name,"pshufd")) {
+        return (strdup(F_PSHUFD));
+    }
+    else if (!strcmp(name,"movups")) {
+        return (strdup(F_MOVUPS));
     }
     return (strdup("<Translate_var error>"));
 }

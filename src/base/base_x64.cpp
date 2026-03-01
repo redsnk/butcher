@@ -1266,6 +1266,23 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_PSHUFD:
+            reg0 = lang_x64->Translate(handle,".op0 = pshufd(op1,op2);",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_MOVUPS:
+            reg0 = lang_x64->Translate(handle,".op0 = movups(op0,op1);",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_MOVD:
         case X86_INS_MOVZX:
         case X86_INS_MOV:
             if (IsFSGS(insn)) {

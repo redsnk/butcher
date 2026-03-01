@@ -39,6 +39,8 @@ Lang_Py_x64::Lang_Py_x64() {
     E_IFTHEN= "if %s:\n        %s";
     F_NOT = "cpu.not(";
     F_NEG = "cpu.neg(";
+    F_PSHUFD = "cpu.pshufd(";
+    F_MOVUPS = "cpu.movups(";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

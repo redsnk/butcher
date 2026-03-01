@@ -39,6 +39,8 @@ Lang_C_x64::Lang_C_x64() {
     E_IFTHEN= "if (%s) { %s; }";
     F_NOT = "not(";
     F_NEG = "neg(";
+    F_PSHUFD = "pshufd(cpu,";
+    F_MOVUPS = "movups(cpu,";
 
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

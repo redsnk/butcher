@@ -39,6 +39,8 @@ class Lang_x64 : public Language {
     const char *E_IFTHEN = "";
     const char *F_NOT = "";
     const char *F_NEG = "";
+    const char *F_PSHUFD = "";
+    const char *F_MOVUPS = "";
 
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";

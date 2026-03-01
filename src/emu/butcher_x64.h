@@ -67,6 +67,10 @@ union _reg {
 	struct _s8 s8;
 };
 
+union _xmm {
+	__int128_t r128;
+};
+
 union _eflags {
   	struct {
     	uint32_t CF 	: 1;
@@ -93,6 +97,7 @@ struct _mem {
 
 struct _cpu {
     union _reg rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;
+	union _xmm xmm0,xmm1,xmm2,xmm3,xmm4,xmm5,xmm6,xmm7;
 	union _eflags eflags;
 	struct _mem *mems;
 	int mem_count;
@@ -241,6 +246,15 @@ struct _cpu {
 #define s_r15b	(cpu->r15.s8.l)
 #define s_bpl	(cpu->rbp.s8.l)
 #define s_spl	(cpu->rsp.s8.l)
+
+#define _xmm0	(cpu->xmm0.r128)
+#define _xmm1	(cpu->xmm1.r128)
+#define _xmm2	(cpu->xmm2.r128)
+#define _xmm3	(cpu->xmm3.r128)
+#define _xmm4	(cpu->xmm4.r128)
+#define _xmm5	(cpu->xmm5.r128)
+#define _xmm6	(cpu->xmm6.r128)
+#define _xmm7	(cpu->xmm7.r128)
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)
