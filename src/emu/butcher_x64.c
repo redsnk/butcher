@@ -221,6 +221,13 @@ uint64_t value;
 	return (value);
 }
 
+__uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr) {
+__uint128_t value;
+
+	get_mem (cpu,addr,16,(uint8_t *)&value);
+	return (value);
+}
+
 int64_t s_qword_ptr(struct _cpu *cpu,uint64_t addr) {
 int64_t value;
 
@@ -242,6 +249,10 @@ void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value) {
 
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 	set_mem (cpu,addr,8,(uint8_t *)&value);
+}
+
+void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
+	set_mem (cpu,addr,16,(uint8_t *)&value);
 }
 
 void panic(char *str1,char *str2) {
@@ -645,6 +656,22 @@ uint64_t neg(uint64_t b,uint64_t p) {
 
 uint64_t not(uint64_t b,uint64_t p) {
 	return(~p);
+}
+
+__uint128_t pshufd (__uint128_t op1,uint8_t op2) {
+__uint128_t r;
+uint8_t c;
+
+	r = 0;
+	c = op2 & 0b00000011;
+	r |= (op1 >> (32*c)) && 0xffffffff;
+	c = (op2 & 0b00001100) >> 2;
+	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff)  << 32;
+	c = (op2 & 0b00110000) >> 4;
+	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff) << 64;
+	c = (op2 & 0b11000000) >> 6;
+	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff) << 96;
+	return (r);
 }
 
 /*

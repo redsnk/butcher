@@ -423,6 +423,11 @@ uint64_t read,a,d;
                 }       
             }
         }
+        else {
+            // Undefined jmp
+            *addr = (uint64_t *) malloc(sizeof(uint64_t));
+            (*addr)[c++] = UNDEF_ADDR_JMP;
+        }
     }
     *count = c;
     return (c);
@@ -748,6 +753,17 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_XADD:
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".push(bits,op0);:.op0 = op0 + op1;:.op1 = pop(bits);",insn,true);
+                if (reg0 != NULL) {
+                    PrintLine(insn,0,reg0);
+                    num++;
+                    free(reg0);
+                }
+            }
+            break;
         case X86_INS_ADC:
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
@@ -961,6 +977,19 @@ int bits;
                 }
             }
             */
+            break;
+        case X86_INS_OR:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 | op1;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(false);:.of(false);:.op0 = op0 | op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
             break;       
         case X86_INS_XOR:
             /*
@@ -991,7 +1020,6 @@ int bits;
                 num++;
                 free(reg0);
             }
-            break;
             break;
         case X86_INS_NOT:
             reg0 = lang_x64->Translate(handle,".op0 = not(bits,op0);",insn,true);
@@ -1261,6 +1289,7 @@ int bits;
             break;
         case X86_INS_XCHG:
             reg0 = lang_x64->Translate(handle,".push(bits,op0);:.op0 = op1;:.op1 = pop(bits);",insn,true);
+            //reg0 = lang_x64->Translate(handle,".tmp0 = op0;:.op0 = op1;:.op1 = tmp0;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -1278,6 +1307,7 @@ int bits;
         case X86_INS_MOVAPS:
         case X86_INS_MOVUPS:
         case X86_INS_MOVD:
+        case X86_INS_MOVQ:
         case X86_INS_MOVZX:
         case X86_INS_MOV:
             if (IsFSGS(insn)) {

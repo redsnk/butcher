@@ -100,8 +100,10 @@ uint8_t *mem;
                     }
                     else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
                         for (nn=0;nn<count;nn++) {
-                            jmps.insert(addr_list[nn]);
-                            c->labels.insert(addr_list[nn]);
+                            if (addr_list[nn] != UNDEF_ADDR_JMP) {
+                                jmps.insert(addr_list[nn]);
+                                c->labels.insert(addr_list[nn]);
+                            }
                         }
                         free (addr_list);
                         lend = true;

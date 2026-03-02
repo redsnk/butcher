@@ -68,7 +68,7 @@ union _reg {
 };
 
 union _xmm {
-	__int128_t r128;
+	__uint128_t r128;
 };
 
 union _eflags {
@@ -260,16 +260,18 @@ struct _cpu {
 #define _get_word_ptr(m)	word_ptr(cpu,m)
 #define _get_dword_ptr(m)	dword_ptr(cpu,m)
 #define _get_qword_ptr(m)	qword_ptr(cpu,m)
+#define _get_dqword_ptr(m)	dqword_ptr(cpu,m)
 
 #define s_get_byte_ptr(m)	s_byte_ptr(cpu,m)
 #define s_get_word_ptr(m)	s_word_ptr(cpu,m)
 #define s_get_dword_ptr(m)	s_dword_ptr(cpu,m)
 #define s_get_qword_ptr(m)	s_qword_ptr(cpu,m)
 
-#define _set_byte_ptr(m,v)	set_byte_ptr(cpu,m,v)
-#define _set_word_ptr(m,v)	set_word_ptr(cpu,m,v)
-#define _set_dword_ptr(m,v)	set_dword_ptr(cpu,m,v)
-#define _set_qword_ptr(m,v)	set_qword_ptr(cpu,m,v)
+#define _set_byte_ptr(m,v)		set_byte_ptr(cpu,m,v)
+#define _set_word_ptr(m,v)		set_word_ptr(cpu,m,v)
+#define _set_dword_ptr(m,v)		set_dword_ptr(cpu,m,v)
+#define _set_qword_ptr(m,v)		set_qword_ptr(cpu,m,v)
+#define _set_dqword_ptr(m,v)	set_dqword_ptr(cpu,m,v)
 
 /*
 #define _push_byte(v)		push(cpu,1,v)
@@ -297,6 +299,7 @@ uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
 uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+__uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr);
 int8_t s_byte_ptr(struct _cpu *cpu,uint64_t addr);
 int16_t s_word_ptr(struct _cpu *cpu,uint64_t addr);
 int32_t s_dword_ptr(struct _cpu *cpu,uint64_t addr);
@@ -305,6 +308,7 @@ void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
 void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
 void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
+void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value);
 /*
 void *get_reg(struct _cpu *cpu,char *reg,int *bits);
 uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
@@ -330,6 +334,7 @@ uint64_t pop(struct _cpu *cpu,int b);
 uint64_t Pow(uint64_t b,uint64_t p);
 uint64_t neg(uint64_t b,uint64_t p);
 uint64_t not(uint64_t b,uint64_t p);
+__uint128_t pshufd (__uint128_t op1,uint8_t op2);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);

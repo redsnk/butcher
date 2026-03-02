@@ -15,6 +15,8 @@
 #include "arch/archive.hpp"
 #include "lang/language.hpp"
 
+#define UNDEF_ADDR_JMP    0
+
 class Butcher {
     public:
         csh handle;
