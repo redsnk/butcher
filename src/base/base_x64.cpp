@@ -663,7 +663,10 @@ int bits;
             }
             break;
         case X86_INS_JE:
-            PrintLine(insn,1,lang_x64->E_JE,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_zf();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JNE:
@@ -696,6 +699,10 @@ int bits;
             break;
         case X86_INS_JO:
             PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
+        case X86_INS_JNO:
+            PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
             num++;
             break;
         case X86_INS_JS:
@@ -1009,7 +1016,11 @@ int bits;
                 }
             }
             */
-            if (FlagsNotUsed(sc,num)) {
+            if ((insn->detail->x86.operands[0].type == X86_OP_REG) && (insn->detail->x86.operands[1].type == X86_OP_REG) &&
+                (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) && FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = 0;",insn,true);
+            }
+            else if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 ^ op1;",insn,true);
             }
             else {
