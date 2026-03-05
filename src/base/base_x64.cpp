@@ -343,11 +343,13 @@ char *lib,*func;
 
 #define MAX_JMPS      (1024*10)
 
-int Base_x64::IsJmp(cs_insn *insn, uint64_t *addr[],int *count) {
+int Base_x64::IsJmp(cs_insn *in, int num, uint64_t *addr[],int *count) {
 int n,b,c;
 uint8_t *mem;
 uint64_t read,a,d;
+cs_insn *insn;
 
+    insn = &in[num];
     c = 0;
     if (insn->id == X86_INS_JMP) {
         if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
@@ -389,7 +391,40 @@ uint64_t read,a,d;
         else {
             // Undefined jmp X86_OP_REG
             *addr = (uint64_t *) malloc(sizeof(uint64_t));
-            (*addr)[c++] = UNDEF_ADDR_JMP;
+            if ((num>0) && (in[num-1].id == X86_INS_POP) && (in[num-1].detail->x86.operands[0].type == X86_OP_REG) &&
+                (in[num-1].detail->x86.operands[0].reg == insn->detail->x86.operands[0].reg)) {
+                // push <addr>
+                // [...]
+                // pop <reg>
+                // jmp <reg>
+                for (n=num-2;n>=0;n--) {
+                    if (in[n].id == X86_INS_PUSH) {
+                        if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
+                            // push <addr>
+                            if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
+                                (*addr)[c++] = in[n].detail->x86.operands[0].imm;
+                                break;
+                            }
+                            else {
+                                // exit
+                                n = -1;
+                                break;
+                            }
+                        }
+                        else {
+                            // exit
+                            n = -1;
+                            break;
+                        }
+                    }
+                }
+                if (n < 0) {
+                    (*addr)[c++] = UNDEF_ADDR_JMP;
+                }
+            }
+            else {
+                (*addr)[c++] = UNDEF_ADDR_JMP;
+            }
         }
     }
     *count = c;
@@ -511,7 +546,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x4bca31) {
+    if (insn->address == 0x40edfe) {
         // test
         bits = 0;
     }
@@ -530,14 +565,15 @@ int bits;
             break;
         case X86_INS_RET:
             // ret
-            if (insn->detail->x86.op_count > 1) {
-                bits = 0;
+            reg0 = lang_x64->Translate(handle,".pop(bits);",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                free(reg0);
             }
-            else {
-                reg0 = lang_x64->Translate(handle,".pop(bits);",insn,true);
+            if (insn->detail->x86.op_count > 0) {
+                reg0 = lang_x64->Translate(handle,".rsp = rsp + op0;",insn,true);
                 if (reg0 != NULL) {
                     PrintLine(insn,0,reg0);
-                    num++;
                     free(reg0);
                 }
             }

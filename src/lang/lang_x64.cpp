@@ -189,6 +189,9 @@ int bits;
     else if (!strcmp(name,"s_rdx")) {
         return(Translate_reg(insn,"s_dl","s_dx","s_edx","s_rdx"));
     }
+    else if (!strcmp(name,"rsp")) {
+        return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
+    }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF));
     }
