@@ -108,18 +108,8 @@ uint8_t *mem;
                         free (addr_list);
                         lend = true;
                     }
-                    /*
-                    else if (IsJmp(&sc.insn[n],&addr)) {
-                        //printf("jmp 0x%llx\n",addr);
-                        if (addr) {
-                            printf("%s *** Add jmp 0x%llx\n",lang->COMM,addr);
-                            jmps.insert(addr);
-                            c->labels.insert(addr);
-                        }
-                        lend = true;
-                    }
-                    */
-                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count) ||IsJmpIAT(&sc.insn[n]) ) {
+                    //else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count) || IsJmpIAT(&sc.insn[n]) ) {
+                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
                         lend = true;
                     }
                     if (lend) {

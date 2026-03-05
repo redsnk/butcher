@@ -310,6 +310,7 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
     return (false);
 }
 
+/*
 int Base_x64::IsJmpIAT(cs_insn *insn) {
 uint64_t addr;
 char *lib,*func;
@@ -335,21 +336,6 @@ char *lib,*func;
                 }
             }
         }
-    }
-    return (false);
-}
-
-/*
-int Base_x64::IsJmp(cs_insn *insn, uint64_t *addr) {
-    *addr = 0;
-    if (insn->id == X86_INS_JMP) {
-        // TODO: [rip + XXXX]
-        if (insn->detail->x86.op_count == 1) {
-            if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-                *addr = insn->detail->x86.operands[0].imm;
-            }
-        }
-        return (true);
     }
     return (false);
 }
@@ -392,39 +378,16 @@ uint64_t read,a,d;
                     else {
                         break;
                     }
-                    /*
-                    mem = arch->GetMemory(a,b,&read);
-                    if ((mem != NULL) && (read == b)) {
-                        if (b == 4) {
-                            a = memto32(mem);
-                        }
-                        else if (b == 8) {
-                            a = memto64(mem);
-                        }
-                        free(mem);
-                        if (arch->ValidMemory(a)) {
-                            // Valid
-                            if (c == 0) {
-                                *addr = (uint64_t *) malloc(sizeof(uint64_t));
-                            }
-                            else {
-                                *addr = (uint64_t *) realloc(*addr,sizeof(uint64_t)*(c+1));
-                            }
-                            (*addr)[c++] = a;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    else {
-                        break;
-                    }
-                    */
                 }       
+            }
+            else {
+               // Undefined jmp
+                *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                (*addr)[c++] = UNDEF_ADDR_JMP; 
             }
         }
         else {
-            // Undefined jmp
+            // Undefined jmp X86_OP_REG
             *addr = (uint64_t *) malloc(sizeof(uint64_t));
             (*addr)[c++] = UNDEF_ADDR_JMP;
         }
