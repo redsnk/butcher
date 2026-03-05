@@ -663,7 +663,6 @@ int bits;
             }
             break;
         case X86_INS_JE:
-            //PrintLine(insn,1,lang_x64->E_JE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_zf();",insn,false);
             PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
@@ -707,6 +706,12 @@ int bits;
             break;
         case X86_INS_JS:
             PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
+            num++;
+            break;
+        case X86_INS_JNS:
+            reg0 = lang_x64->Translate(handle,"!get_sf();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_PUSH:
@@ -1283,7 +1288,8 @@ int bits;
             num++;
             break;
         case X86_INS_SETNE:
-            reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi;",insn,true);
+            //reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi;",insn,true);
+            reg0 = lang_x64->Translate(handle,".if !get_zf() then op0 = 1 else op0 = 0 fi;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -1291,7 +1297,8 @@ int bits;
             }
             break;
         case X86_INS_SETE:
-            reg0 = lang_x64->Translate(handle,".if get_zf()==true then op0 = 1 else op0 = 0 fi;",insn,true);
+            //reg0 = lang_x64->Translate(handle,".if get_zf()==true then op0 = 1 else op0 = 0 fi;",insn,true);
+            reg0 = lang_x64->Translate(handle,".if get_zf() then op0 = 1 else op0 = 0 fi;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

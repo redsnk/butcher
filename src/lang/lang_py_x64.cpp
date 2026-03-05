@@ -40,6 +40,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_NOT = "cpu.not(";
     F_NEG = "cpu.neg(";
     F_PSHUFD = "cpu.pshufd(";
+    E_NOT = "not";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

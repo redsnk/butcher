@@ -418,6 +418,14 @@ int n;
                 n -= 2;
                 */       
                 break;
+            case _id_item::NOT:
+                it1 = Translate_item(handle,insn,&e->items[n-1],false);
+                sprintf(tmp,"%s %s",E_NOT,it1);
+                free(it1);
+                e->res_item(n,tmp);
+                e->del_item(n-1);
+                n -= 1;
+                break;
             case _id_item::END:
                 if ((n > 0) && (e->items[n-1].id == RESULT)) {
                     it1 = Translate_item(handle,insn,&e->items[n-1],false);

@@ -33,6 +33,7 @@ enum _id_item {
     AND,
     OR,
     XOR,
+    NOT,
     IFTHENELSE,
     IFTHEN
 }; 

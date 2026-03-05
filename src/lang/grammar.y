@@ -47,7 +47,7 @@
 %left				IF THEN ELSE FI
 %precedence         '='
 %left				LIST
-%left               EQUAL NEQUAL LT GT LTE GTE
+%left               NOT EQUAL NEQUAL LT GT LTE GTE
 %left               '+' '-' B_AND B_OR B_XOR
 %left               MUL DIV MOD
 %precedence         UMINUS
@@ -76,6 +76,7 @@ expr:
 | NAME '('')'           { emit->emit_item_name(FUNC_VOID,"FUNC_VOID",$1.c_str()); }
 | NAME '(' expr ')'     { emit->emit_item_name(FUNCTION,"FUNCTION",$1.c_str()); }
 | '(' expr ')'          { emit->emit_item(ENC,"ENC"); };
+| NOT expr              { emit->emit_item(NOT,"NOT"); };
 | expr LIST expr        { emit->emit_item(LIST,"LIST"); }
 | expr '+' expr			{ emit->emit_item(ADD,"ADD"); }
 | expr '-' expr			{ emit->emit_item(SUB,"SUB"); }

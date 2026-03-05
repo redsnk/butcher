@@ -833,7 +833,7 @@ return Parser::token::MOD;
 case 11:
 YY_RULE_SETUP
 #line 30 "lexer.l"
-return Parser::token::FACTORIAL;
+return Parser::token::NOT;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP

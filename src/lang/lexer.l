@@ -27,7 +27,7 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "*"         return Parser::token::MUL;
 "/"         return Parser::token::DIV;
 "%"         return Parser::token::MOD;
-"!"         return Parser::token::FACTORIAL;
+"!"         return Parser::token::NOT;
 "$"         return Parser::token::EXPONENT;
 "=="        return Parser::token::EQUAL;
 "!="        return Parser::token::NEQUAL;
