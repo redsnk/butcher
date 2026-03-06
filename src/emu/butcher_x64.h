@@ -356,5 +356,7 @@ char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
 char *uni16_to_str(char *str);
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
 uint64_t alloc_mem (struct _cpu *cpu,int size);
+uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
+void free_mem (struct _cpu *cpu,uint64_t addr);
 
 #endif // _BUTCHER_X64_H

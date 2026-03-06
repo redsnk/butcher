@@ -40,6 +40,11 @@ void end(struct _cpu *cpu) {
 	free(cpu->mems);
 }
 
+void panic(char *str1,char *str2) {
+	printf("PANIC: %s - %s\n",str1,str2);
+	exit(0);
+}
+
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 	if (!cpu->mem_count) {
 		cpu->mems = (struct _mem *) malloc(sizeof(struct _mem));
@@ -55,6 +60,15 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 		memcpy(cpu->mems[cpu->mem_count].mem,mem,size);
 	}
 	cpu->mem_count++;
+}
+
+int locate_mem (struct _cpu *cpu,uint64_t addr) {
+	for (int n=0;n<cpu->mem_count;n++) {
+		if (cpu->mems[n].addr == addr) {
+			return (n);
+		}
+	}
+	return (-1);
 }
 
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
@@ -150,7 +164,7 @@ char *mem;
 	free(mem);
 }
 
-int free_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
+int unasigned_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
 int n;
 
 	for (n=0;n<cpu->mem_count;n++) {
@@ -165,11 +179,32 @@ int n;
 uint64_t alloc_mem (struct _cpu *cpu,int size) {
 uint64_t res = 0x1000,next;
 
-	while (!free_mem(cpu,res,size,&next)) {
+	while (!unasigned_mem(cpu,res,size,&next)) {
 		res = next;
 	}
 	add_mem(cpu,res,NULL,size);
 	return (res);
+}
+
+uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size) {
+int n,m;
+uint64_t ret;
+
+	n = locate_mem(cpu,addr);
+	if (n >= 0) {
+		ret = alloc_mem(cpu,size);
+		m = locate_mem(cpu,ret);
+		if (m >= 0) {
+			set_mem (cpu,ret,cpu->mems[n].size,cpu->mems[n].mem);
+			free_mem(cpu,addr);
+			return (ret);
+		}
+	}
+	panic("realloc_mem","locate_mem");
+}
+
+void free_mem (struct _cpu *cpu,uint64_t addr) {
+	// TODO
 }
 
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr) {
@@ -253,11 +288,6 @@ void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
 	set_mem (cpu,addr,16,(uint8_t *)&value);
-}
-
-void panic(char *str1,char *str2) {
-	printf("PANIC: %s - %s\n",str1,str2);
-	exit(0);
 }
 
 /*
