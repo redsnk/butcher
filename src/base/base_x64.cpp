@@ -546,7 +546,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x40edfe) {
+    if (insn->address == 0x44fc985) {
         // test
         bits = 0;
     }

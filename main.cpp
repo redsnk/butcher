@@ -62,7 +62,11 @@ char *p;
             p = strchr(buffer,',');
             if (p != NULL) {
                 *p = 0;
+                //printf("named: '%s'\n",p+1);
                 named.insert({ string_to_num(buffer),p+1 });
+            }
+            else {
+                printf("Error: named format '%s'.\n",p+1);
             }
         }
         fclose(f);
