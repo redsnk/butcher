@@ -351,6 +351,7 @@ void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
+int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
 char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
 char *uni16_to_str(char *str);

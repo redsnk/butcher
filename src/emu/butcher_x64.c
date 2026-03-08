@@ -71,6 +71,15 @@ int locate_mem (struct _cpu *cpu,uint64_t addr) {
 	return (-1);
 }
 
+int locate_addr_mem (struct _cpu *cpu,uint64_t addr) {
+	for (int n=0;n<cpu->mem_count;n++) {
+		if ((addr  >= cpu->mems[n].addr) && (addr < (cpu->mems[n].addr+cpu->mems[n].size))) {
+			return (n);
+		}
+	}
+	return (-1);
+}
+
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
 FILE *f;
 char *mem;
@@ -117,6 +126,22 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	panic("get_mem","");
 }
 
+int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
+int n;
+uint64_t last;
+
+	n = locate_addr_mem (cpu,addr);
+	if (n >= 0) {
+		last = cpu->mems[n].addr + cpu->mems[n].size;
+		if ((addr+size) > last) {
+			size = last - addr;
+		}
+		get_mem(cpu,addr,size,mem);
+		return (size);
+	}
+	return (0);
+}
+
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	for (int n=0;n<cpu->mem_count;n++) {
 		if ((addr >= cpu->mems[n].addr) && ((addr+size) <= (cpu->mems[n].addr+cpu->mems[n].size))) {
@@ -157,10 +182,13 @@ unsigned char *pc = (unsigned char*)addr;
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
 char *mem;
+int n;
 
 	mem = (void *) malloc(size);
-	get_mem(cpu,addr,size,mem);
-	hexDump(addr,mem,size);
+	n = get_mem_dump (cpu,addr,size,mem);
+	if (n) {
+		hexDump(addr,mem,n);
+	}
 	free(mem);
 }
 
