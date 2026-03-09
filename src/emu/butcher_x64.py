@@ -81,6 +81,7 @@ union _eflags {
 '''
 class _eflags(Structure):
     _fields_ = [("CF",c_bool),
+                ("OF",c_bool),
                 ("PF",c_bool),
                 ("ZF",c_bool),
                 ("SF",c_bool)]
@@ -320,26 +321,72 @@ class _cpu:
         
     def flag_z(self,b):
         self.eflags.ZF = b
+    
+    def get_flag_z(self):
+        return self.eflags.ZF
 
     def flag_c(self,b):
         self.eflags.CF = b
     
+    def get_flag_c(self):
+        return self.eflags.CF
+    
     def flag_o(self,b):
         self.eflags.OF = b
 
-    def add_flag_c(self,bits,op1,op2):
+    def get_flag_o(self):
+        return self.eflags.OF
+    
+    def flag_s(self,b):
+        self.eflags.SF = b
+
+    def get_flag_s(self):
+        return self.eflags.SF
+
+    def sign(self,n):
+        return (n < 0)
+
+    def add_flag_o(self,bits,op1,op2):
+        self.flag_o = False
         if bits == 8:
-            self.panic("add_flag_c")
+            sop1 = c_int8(op1).value
+            sop2 = c_int8(op2).value         
         elif bits == 16:
-            self.panic("add_flag_c")
+            sop1 = c_int16(op1).value
+            sop2 = c_int16(op2).value
         elif bits == 32:
-            self.panic("add_flag_c")
+            sop1 = c_int32(op1).value
+            sop2 = c_int32(op2).value
         else:
-            self.panic("add_flag_c")
+            sop1 = c_int64(op1).value
+            sop2 = c_int64(op2).value
+        if self.sign(sop1) == self.sign(sop2):
+            self.flag_o = (self.sign(sop1+sop2) != self.sign(sop1))
+
+    def add_flag_c(self,bits,op1,op2):
+        t1 = c_uint64(op1).value
+        t2 = c_uint64(op2).value
+        t = c_uint64(t1 + t2).value
+        if bits == 8:
+            self.flag_c = (t > 0xff)
+        elif bits == 16:
+            self.flag_c = (t > 0xffff)
+        elif bits == 32:
+            self.flag_c = (t > 0xffffffff)
+        else:
+            t = (t1 & 0xffffffff) + (t2 & 0xffffffff)
+            r = t >> 32
+            t = (t1 >> 32) + (t2 >> 32) + r
+            self.flag_c = (t > 0xffffffff)
 
     def f_not(self,op1,op2):
         self.panic("not")
         
+    def pow(self,b,p):
+        r = 1
+        for n in range(p):
+            r = r * p
+        return r
 
     #---------------------------------------------------------------
     # 64
