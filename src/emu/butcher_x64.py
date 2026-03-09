@@ -113,6 +113,18 @@ class _cpu:
         print("panic: "+text)
         sys.exit(0)
 
+    def locate_mem(self,addr):
+        for n in range(len(self.mems)):
+            if self.mems[n].addr == addr:
+                return n
+        return -1        
+
+    def locate_addr_mem(self,addr):
+        for n in range(len(self.mems)):
+            if (addr >= self.mems[n].addr) and (addr < (self.mems[n].addr+self.mems[n].size)):
+                return n
+        return -1
+
     def add_mem(self,addr,data):
         self.mems.append(_mem(addr,data))
 
@@ -125,6 +137,15 @@ class _cpu:
                 start = addr-m.addr
                 return m.mem[start:start+size]
         self.panic("get_mem - "+hex(addr))
+
+    def get_mem_dump(self,addr,size):
+        n = self.locate_addr_mem(addr)
+        if n >= 0:
+            last = self.mems[n].addr + self.mems[n].size
+            if (addr+size) > last:
+                size = last - addr
+            return self.get_mem(addr,size)
+        return []
 
     def set_mem(self,addr,data):
         size = len(data)
@@ -148,6 +169,31 @@ class _cpu:
         else:
             data = bytearray(v_Size)
         self.add_mem(v_Address,data)
+
+    def hexdump (self,addr,mem):
+        print(mem)
+
+    def dump_mem (self,addr,size):
+        mem = self.get_mem_dump(addr,size)
+        if len(mem) > 0:
+            self.hexdump(addr,mem)
+    
+    def unasigned_mem (self,addr,size):
+        for m in self.mems:
+            if (addr >= m.addr) and (addr<(m.addr+m.size)):
+                next = m.addr+m.size
+                return False,next
+        return True,0
+
+    def alloc_mem (self,size):
+        res = 0x1000
+        while True:
+            done,next = self.unasigned_mem(res,size)
+            if done:
+                break
+            res = next
+        self.add_zero_mem(res,size)
+        return res 
     
     def call_from_iat (self,lib,func):
         self.panic("call_from_iat")
@@ -209,6 +255,12 @@ class _cpu:
         self.set_mem(addr+5,[(value >> 40) & 0xff])
         self.set_mem(addr+6,[(value >> 48) & 0xff])
         self.set_mem(addr+7,[(value >> 56) & 0xff])
+
+    def set_unicode_ptr(self,addr,str):
+        n = 0
+        for c in str:
+            self.set_word_ptr(addr+(n*2),ord(c))
+            n += 1
 
     def push_byte(self,value):
         self.rsp.r64 = self.rsp.r64 - 1
@@ -284,6 +336,9 @@ class _cpu:
             self.panic("add_flag_c")
         else:
             self.panic("add_flag_c")
+
+    def f_not(self,op1,op2):
+        self.panic("not")
         
 
     #---------------------------------------------------------------

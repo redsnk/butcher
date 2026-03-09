@@ -22,7 +22,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_GET_OF = "cpu.get_flag_o(";
     F_ADD_OF = "cpu.add_flag_o(";
     F_ADD_CF = "cpu.add_flag_c(";
-    F_ADD_CF = "cpu.num_flag_c(";
+    F_NUM_CF = "cpu.num_flag_c(";
     F_SUB_OF = "cpu.sub_flag_o(";
     //F_SUB_CF = "cpu.sub_flag_c(";
     ENDF = ")";
@@ -37,8 +37,8 @@ Lang_Py_x64::Lang_Py_x64() {
     E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
     E_IFTHENELSE= "if %s:\n        %s\n    else:\n        %s";
     E_IFTHEN= "if %s:\n        %s";
-    F_NOT = "cpu.not(";
-    F_NEG = "cpu.neg(";
+    F_NOT = "cpu.f_not(";
+    F_NEG = "cpu.f_neg(";
     F_PSHUFD = "cpu.pshufd(";
     E_NOT = "not";
     E_LABEL_NAME = "    label .label_%s\n";

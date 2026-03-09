@@ -1,36 +1,8 @@
 #include "butcher_x64.h"
 
-/*
-void print_cpu(struct _cpu *cpu) {
-	printf("------------------------------\n");
-	printf("rbp:0x%016llx ",cpu->rbp.r64);
-	printf("rsp:0x%016llx ",cpu->rsp.r64);
-	printf("rax:0x%016llx ",cpu->rax.r64);
-	printf("rbx:0x%016llx ",cpu->rbx.r64);
-	printf("rcx:0x%016llx ",cpu->rcx.r64);
-	printf("rdx:0x%016llx ",cpu->rdx.r64);
-	printf("\n");
-    printf("rdi:0x%016llx ",cpu->rdi.r64);
-    printf("rsi:0x%016llx ",cpu->rsi.r64);
-    printf(" r8:0x%016llx ",cpu->r8.r64);
-    printf(" r9:0x%016llx ",cpu->r9.r64);
-    printf("r10:0x%016llx ",cpu->r10.r64);
-    printf("r11:0x%016llx ",cpu->r11.r64);
-	printf("\n");
-    printf("r12:0x%016llx ",cpu->r12.r64);
-    printf("r13:0x%016llx ",cpu->r13.r64);
-    printf("r14:0x%016llx ",cpu->r14.r64);
-    printf("r15:0x%016llx ",cpu->r15.r64);
-	printf("\n------------------------------\n");
-}
-*/
-
 void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
-	//add_mem(cpu,STACK_ADDR,NULL,STACK_SIZE);
-	//cpu->rsp.r64 = (uint64_t) (STACK_ADDR+(STACK_SIZE/2));
-	//cpu->rbp = cpu->rsp;
 }
 
 void end(struct _cpu *cpu) {
@@ -43,6 +15,24 @@ void end(struct _cpu *cpu) {
 void panic(char *str1,char *str2) {
 	printf("PANIC: %s - %s\n",str1,str2);
 	exit(0);
+}
+
+int locate_mem (struct _cpu *cpu,uint64_t addr) {
+	for (int n=0;n<cpu->mem_count;n++) {
+		if (cpu->mems[n].addr == addr) {
+			return (n);
+		}
+	}
+	return (-1);
+}
+
+int locate_addr_mem (struct _cpu *cpu,uint64_t addr) {
+	for (int n=0;n<cpu->mem_count;n++) {
+		if ((addr >= cpu->mems[n].addr) && (addr < (cpu->mems[n].addr+cpu->mems[n].size))) {
+			return (n);
+		}
+	}
+	return (-1);
 }
 
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
@@ -60,24 +50,6 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 		memcpy(cpu->mems[cpu->mem_count].mem,mem,size);
 	}
 	cpu->mem_count++;
-}
-
-int locate_mem (struct _cpu *cpu,uint64_t addr) {
-	for (int n=0;n<cpu->mem_count;n++) {
-		if (cpu->mems[n].addr == addr) {
-			return (n);
-		}
-	}
-	return (-1);
-}
-
-int locate_addr_mem (struct _cpu *cpu,uint64_t addr) {
-	for (int n=0;n<cpu->mem_count;n++) {
-		if ((addr  >= cpu->mems[n].addr) && (addr < (cpu->mems[n].addr+cpu->mems[n].size))) {
-			return (n);
-		}
-	}
-	return (-1);
 }
 
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
@@ -123,7 +95,7 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 			return;
 		}
 	}
-	panic("get_mem","");
+	panic("get_mem","unable to find all memory");
 }
 
 int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
@@ -181,7 +153,7 @@ char c;
 		i++;
 		if ((i == len) || ((i % DUMP_LINE) == 0)) {
 			while (i % DUMP_LINE) {
-				strcat (hex,"  ");
+				strcat (hex,"   ");
 				strcat (str," ");
 				i++;
 			}
@@ -330,6 +302,34 @@ void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
 	set_mem (cpu,addr,16,(uint8_t *)&value);
+}
+
+void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str) {
+int n;
+
+	for (n=0;n<strlen(str);n++) {
+		set_word_ptr (cpu,addr+(n*2),str[n]);
+	}
+}
+
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+int n;
+char *str,c;
+
+	str = (char *) malloc(1024);
+	n = 0;
+	while (TRUE) {
+		c = byte_ptr(cpu,addr);
+		if (c) {
+			str[n++] = c;
+			addr += 2;
+		}
+		else {
+			break;
+		}
+	}
+	str[n] = 0;
+	return (str);
 }
 
 /*
@@ -585,6 +585,7 @@ __int128 t;
 	}
 }
 
+/*
 char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max) {
 char *m;
 int n;
@@ -629,6 +630,7 @@ int n;
 	str[n/2] = 0;
 	return (str);
 }
+*/
 
 /*
 void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {

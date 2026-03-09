@@ -288,11 +288,7 @@ struct _cpu {
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 void panic(char *str1,char *str2);
-void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
-void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
-void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
-void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size);
-void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func);
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
@@ -351,13 +347,24 @@ void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
+/*
 int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
 char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
 char *uni16_to_str(char *str);
+*/
+
+void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
+void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
+void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size);
+void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
 uint64_t alloc_mem (struct _cpu *cpu,int size);
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
 void free_mem (struct _cpu *cpu,uint64_t addr);
+void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str);
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr);
 
 #endif // _BUTCHER_X64_H
