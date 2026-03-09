@@ -153,31 +153,45 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	panic("set_mem","");
 }
 
-void hexDump(uint64_t off,void *addr, int len) {
-int i;
-unsigned char buff[17];
-unsigned char *pc = (unsigned char*)addr;
+#define DUMP_LINE (16)
 
-    for (i = 0; i < len; i++) {
-        if ((i % 16) == 0) {
-            if (i != 0)
-                printf("  %s\n", buff);
+void hexdump (uint64_t off,void *addr,int len) {
+char *p;
+char hex[256];
+char str[256];
+int i,n;
+char buffer[16];
+char c;
 
-            printf("  0x%016X ", off+i);
-        }
-		printf(" %02x", pc[i]);
-		if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
-            buff[i % 16] = '.';
-        } else {
-            buff[i % 16] = pc[i];
-        }
-        buff[(i % 16) + 1] = '\0';
-    }
-    while ((i % 16) != 0) {
-        printf("   ");
-        i++;
-    }
-	printf("\n\n");
+	i = 0;
+	n = 0;
+	hex[0] = 0;
+	str[0] = 0;
+	while (i < len) {
+		c = ((char *) addr)[i];
+		sprintf(buffer," %02x",(unsigned char )c);
+		strcat (hex,buffer);
+		if ((c>=0x20) && (c<=0x7e)) {
+			sprintf(buffer,"%c",c);
+			strcat(str,buffer);
+		}
+		else {
+			strcat(str,".");
+		}
+		i++;
+		if ((i == len) || ((i % DUMP_LINE) == 0)) {
+			while (i % DUMP_LINE) {
+				strcat (hex,"  ");
+				strcat (str," ");
+				i++;
+			}
+			printf("0x%llx %s  %s\n",off,hex,str);
+			off += DUMP_LINE;
+			str[0] = 0;
+			hex[0] = 0;
+		}
+	}
+
 }
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
@@ -187,7 +201,7 @@ int n;
 	mem = (void *) malloc(size);
 	n = get_mem_dump (cpu,addr,size,mem);
 	if (n) {
-		hexDump(addr,mem,n);
+		hexdump(addr,mem,n);
 	}
 	free(mem);
 }

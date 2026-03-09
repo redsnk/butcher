@@ -1099,7 +1099,7 @@ int bits;
                         // (ZF=1 or SF!=OF)
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s <= 0) goto label_0x%llx;"
-                            reg0 = lang_x64->Translate(handle,"(sop0&s_op1) <= 0;",insn,false);
+                            reg0 = lang_x64->Translate(handle,"(sop0&sop1) <= 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
