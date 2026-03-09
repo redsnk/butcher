@@ -41,6 +41,7 @@ class Lang_x64 : public Language {
     const char *F_NEG = "";
     const char *F_PSHUFD = "";
     const char *E_NOT = "";
+    const char *E_LABEL_NAME = "";
  
     const char *OP_ALONE = "";
     const char *OP_SUBNAME = "";

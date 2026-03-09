@@ -41,6 +41,7 @@ Lang_Py_x64::Lang_Py_x64() {
     F_NEG = "cpu.neg(";
     F_PSHUFD = "cpu.pshufd(";
     E_NOT = "not";
+    E_LABEL_NAME = "    label .label_%s\n";
 
     OP_ALONE =              "cpu.op(\"%s\")";
     OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";

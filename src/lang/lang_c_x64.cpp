@@ -41,6 +41,7 @@ Lang_C_x64::Lang_C_x64() {
     F_NEG = "neg(";
     F_PSHUFD = "pshufd(";
     E_NOT = "!";
+    E_LABEL_NAME = "label_%s:\n";
  
     OP_ALONE =              "op(cpu,\"%s\");";
     OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";

@@ -516,8 +516,19 @@ char out[1024];
 }
 
 void Base_x64::PrintLabel(Code *c,uint64_t addr) {
+char *name;
+
     if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
-        printf(lang_x64->E_LABEL,addr);
+        // TODO: NamedFunction
+        /*
+        if (IsNamedFunction(addr,&name)) {
+            printf(lang_x64->E_LABEL_NAME,name);
+            free(name);
+        }
+        else {
+        */
+            printf(lang_x64->E_LABEL,addr);
+        //}
     }
 }
 
@@ -546,7 +557,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x44fc985) {
+    if (insn->address == 0x40c5cd) {
         // test
         bits = 0;
     }
@@ -1062,7 +1073,7 @@ int bits;
                         // (ZF=0)
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s != 0) goto label_0x%llx;";
-                            reg0 = lang_x64->Translate(handle,"op0 != 0;",insn,false);
+                            reg0 = lang_x64->Translate(handle,"(op0&op1) != 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
@@ -1075,7 +1086,7 @@ int bits;
                         // (ZF=1)
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s == 0) goto label_0x%llx;"
-                            reg0 = lang_x64->Translate(handle,"op0 == 0;",insn,false);
+                            reg0 = lang_x64->Translate(handle,"(op0&op1) == 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
@@ -1088,7 +1099,7 @@ int bits;
                         // (ZF=1 or SF!=OF)
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s <= 0) goto label_0x%llx;"
-                            reg0 = lang_x64->Translate(handle,"sop0 <= 0;",insn,false);
+                            reg0 = lang_x64->Translate(handle,"(sop0&s_op1) <= 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE);
                             PrintLabel(c,next->address);
                             PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
