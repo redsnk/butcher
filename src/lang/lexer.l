@@ -31,6 +31,8 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "$"         return Parser::token::EXPONENT;
 "=="        return Parser::token::EQUAL;
 "!="        return Parser::token::NEQUAL;
+"<<"        return Parser::token::SHL;
+">>"        return Parser::token::SHR;
 "<"         return Parser::token::LT;
 ">"         return Parser::token::GT;
 "<="        return Parser::token::LTE;

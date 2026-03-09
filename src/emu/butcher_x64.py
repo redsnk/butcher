@@ -347,7 +347,7 @@ class _cpu:
         return (n < 0)
 
     def add_flag_o(self,bits,op1,op2):
-        self.flag_o = False
+        self.flag_o(False)
         if bits == 8:
             sop1 = c_int8(op1).value
             sop2 = c_int8(op2).value         
@@ -361,23 +361,23 @@ class _cpu:
             sop1 = c_int64(op1).value
             sop2 = c_int64(op2).value
         if self.sign(sop1) == self.sign(sop2):
-            self.flag_o = (self.sign(sop1+sop2) != self.sign(sop1))
+            self.flag_o(self.sign(sop1+sop2) != self.sign(sop1))
 
     def add_flag_c(self,bits,op1,op2):
         t1 = c_uint64(op1).value
         t2 = c_uint64(op2).value
         t = c_uint64(t1 + t2).value
         if bits == 8:
-            self.flag_c = (t > 0xff)
+            self.flag_c(t > 0xff)
         elif bits == 16:
-            self.flag_c = (t > 0xffff)
+            self.flag_c(t > 0xffff)
         elif bits == 32:
-            self.flag_c = (t > 0xffffffff)
+            self.flag_c(t > 0xffffffff)
         else:
             t = (t1 & 0xffffffff) + (t2 & 0xffffffff)
             r = t >> 32
             t = (t1 >> 32) + (t2 >> 32) + r
-            self.flag_c = (t > 0xffffffff)
+            self.flag_c(t > 0xffffffff)
 
     def f_not(self,op1,op2):
         self.panic("not")

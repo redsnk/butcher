@@ -1204,7 +1204,8 @@ int bits;
             break;
         case X86_INS_SHR:
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn,true);
+                //reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1);",insn,true);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 >> op1;",insn,true);
             }
             else {
                 reg0 = NULL;
@@ -1217,7 +1218,8 @@ int bits;
             break;
         case X86_INS_SHL:
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 * pow(2,op1);",insn,true);
+                //reg0 = lang_x64->Translate(handle,".op0 = op0 * pow(2,op1);",insn,true);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 << op1;",insn,true);
             }
             else {
                 reg0 = NULL;

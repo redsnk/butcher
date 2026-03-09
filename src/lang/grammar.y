@@ -50,6 +50,7 @@
 %left               NOT EQUAL NEQUAL LT GT LTE GTE
 %left               '+' '-' B_AND B_OR B_XOR
 %left               MUL DIV MOD
+%left               SHL SHR
 %precedence         UMINUS
 %precedence         FACTORIAL
 %right              EXPONENT
@@ -86,6 +87,8 @@ expr:
 | expr MUL expr			{ emit->emit_item(MUL,"MUL"); }
 | expr DIV expr         { emit->emit_item(DIV,"DIV"); }
 | expr MOD expr         { emit->emit_item(MOD,"MOD"); }
+| expr SHL expr         { emit->emit_item(SHL,"SHL"); }
+| expr SHR expr         { emit->emit_item(SHR,"SHR"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
 | expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }

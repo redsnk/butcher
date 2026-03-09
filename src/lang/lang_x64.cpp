@@ -321,6 +321,10 @@ int n;
                 if (op == NULL) op = "/";
             case _id_item::MOD:
                 if (op == NULL) op = "%%";
+            case _id_item::SHL:
+                if (op == NULL) op = SHL;
+            case _id_item::SHR:
+                if (op == NULL) op = SHR;
             case _id_item::EQUAL:
                 if (op == NULL) op = EQUAL;
             case _id_item::NEQUAL:

@@ -25,6 +25,8 @@ enum _id_item {
     MUL,
     DIV,
     MOD,
+    SHL,
+    SHR,
     LIST,
     ASSIGN,
     END,

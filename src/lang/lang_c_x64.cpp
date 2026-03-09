@@ -29,6 +29,8 @@ Lang_C_x64::Lang_C_x64() {
     AND = "&";
     OR = "|";
     XOR = "^";
+    SHL = "<<";
+    SHR = ">>";
     F_TRUE = "1";
     F_FALSE = "0";
     F_PUSH = "push(cpu,";

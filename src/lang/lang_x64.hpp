@@ -29,6 +29,8 @@ class Lang_x64 : public Language {
     const char *AND = "";
     const char *OR = "";
     const char *XOR = "";
+    const char *SHL = "";
+    const char *SHR = "";
     const char *F_TRUE = "";
     const char *F_FALSE = "";
     const char *F_PUSH = "";

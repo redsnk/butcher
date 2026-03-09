@@ -29,6 +29,8 @@ Lang_Py_x64::Lang_Py_x64() {
     AND = "&";
     OR = "|";
     XOR = "^";
+    SHL = "<<";
+    SHR = ">>";
     F_TRUE = "true";
     F_FALSE = "false";
     F_PUSH = "cpu.push(";
