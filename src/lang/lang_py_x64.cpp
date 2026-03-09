@@ -31,8 +31,8 @@ Lang_Py_x64::Lang_Py_x64() {
     XOR = "^";
     SHL = "<<";
     SHR = ">>";
-    F_TRUE = "true";
-    F_FALSE = "false";
+    F_TRUE = "True";
+    F_FALSE = "False";
     F_PUSH = "cpu.push(";
     F_POP = "cpu.pop(";
     F_POW = "cpu.pow(";

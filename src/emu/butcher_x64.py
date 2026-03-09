@@ -362,6 +362,23 @@ class _cpu:
             sop2 = c_int64(op2).value
         if self.sign(sop1) == self.sign(sop2):
             self.flag_o(self.sign(sop1+sop2) != self.sign(sop1))
+    
+    def sub_flag_o(self,bits,op1,op2):
+        self.flag_o(False)
+        if bits == 8:
+            sop1 = c_int8(op1).value
+            sop2 = c_int8(op2).value         
+        elif bits == 16:
+            sop1 = c_int16(op1).value
+            sop2 = c_int16(op2).value
+        elif bits == 32:
+            sop1 = c_int32(op1).value
+            sop2 = c_int32(op2).value
+        else:
+            sop1 = c_int64(op1).value
+            sop2 = c_int64(op2).value
+        if self.sign(sop1) == self.sign(sop2):
+            self.flag_o(self.sign(sop1-sop2) != self.sign(sop1))
 
     def add_flag_c(self,bits,op1,op2):
         t1 = c_uint64(op1).value
