@@ -6,7 +6,10 @@ echo "    def _$1(self):"
 echo "        return self.$1.r64"
 echo "    @_$1.setter"
 echo "    def _$1(self,v):"
-echo "        self.$1.r64 = v"
+echo "        if type(v) == tuple:"
+echo "            self.$1.r64 = v[0]"
+echo "        else:"
+echo "            self.$1.r64 = v"
 echo ""
 }
 
@@ -16,7 +19,10 @@ echo "    def s_$1(self):"
 echo "        return self.$1.s64"
 echo "    @s_$1.setter"
 echo "    def s_$1(self,v):"
-echo "        self.$1.s64 = v"
+echo "        if type(v) == tuple:"
+echo "            self.$1.s64 = v[0]"
+echo "        else:"
+echo "            self.$1.s64 = v"
 echo ""
 }
 echo "    #---------------------------------------------------------------"
@@ -32,7 +38,10 @@ echo "    def _$1(self):"
 echo "        return self.$2.r32.l"
 echo "    @_$1.setter"
 echo "    def _$1(self,v):"
-echo "        self.$2.r32.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.r32.l = v[0]"
+echo "        else:"
+echo "            self.$2.r32.l = v"
 echo ""
 }
 
@@ -42,7 +51,10 @@ echo "    def s_$1(self):"
 echo "        return self.$2.s32.l"
 echo "    @s_$1.setter"
 echo "    def s_$1(self,v):"
-echo "        self.$2.s32.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.s32.l = v[0]"
+echo "        else:"
+echo "            self.$2.s32.l = v"
 echo ""
 }
 
@@ -60,7 +72,10 @@ echo "    def _$1(self):"
 echo "        return self.$2.r16.l"
 echo "    @_$1.setter"
 echo "    def _$1(self,v):"
-echo "        self.$2.r16.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.r16.l = v[0]"
+echo "        else:"
+echo "            self.$2.r16.l = v"
 echo ""
 }
 
@@ -70,7 +85,10 @@ echo "    def s_$1(self):"
 echo "        return self.$2.s16.l"
 echo "    @s_$1.setter"
 echo "    def s_$1(self,v):"
-echo "        self.$2.s16.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.s16.l = v[0]"
+echo "        else:"
+echo "            self.$2.s16.l = v"
 echo ""
 }
 
@@ -88,7 +106,10 @@ echo "    def _$1(self):"
 echo "        return self.$2.r8.l"
 echo "    @_$1.setter"
 echo "    def _$1(self,v):"
-echo "        self.$2.r8.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.r8.l = v[0]"
+echo "        else:"
+echo "            self.$2.r8.l = v"
 echo ""
 }
 
@@ -98,7 +119,10 @@ echo "    def s_$1(self):"
 echo "        return self.$2.s8.l"
 echo "    @s_$1.setter"
 echo "    def s_$1(self,v):"
-echo "        self.$2.s8.l = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.s8.l = v[0]"
+echo "        else:"
+echo "            self.$2.s8.l = v"
 echo ""
 }
 
@@ -115,7 +139,10 @@ echo "    def _$1(self):"
 echo "        return self.$2.r8.h"
 echo "    @_$1.setter"
 echo "    def _$1(self,v):"
-echo "        self.$2.r8.h = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.r8.h = v[0]"
+echo "        else:"
+echo "            self.$2.r8.h = v"
 echo ""
 }
 
@@ -125,7 +152,10 @@ echo "    def s_$1(self):"
 echo "        return self.$2.s8.h"
 echo "    @s_$1.setter"
 echo "    def s_$1(self,v):"
-echo "        self.$2.s8.h = v"
+echo "        if type(v) == tuple:"
+echo "            self.$2.s8.h = v[0]"
+echo "        else:"
+echo "            self.$2.s8.h = v"
 echo ""
 }
 
@@ -135,6 +165,25 @@ for x in ah,rax bh,rbx ch,rcx dh,rdx; do
     b=$(echo $x | awk -F "," '{print $2}')
     r8h $a $b
     s8h $a $b
+done
+
+r128() {
+echo "    @property"
+echo "    def _xmm$1(self):"
+echo "        return (self.xmm$1.l,self.xmm$1.h)"
+echo "    @_xmm$1.setter"
+echo "    def _xmm$1(self,v):"
+echo "        if type(v) == tuple:"
+echo "            self.xmm$1.l = v[0]"
+echo "            self.xmm$1.h = v[1]"
+echo "        else:"
+echo "            self.xmm$1.l = v"
+echo "            self.xmm$1.h = 0"
+echo ""
+}
+
+for x in 0 1 2 3 4 5 6 7; do
+    r128 $x
 done
 
 echo "    #---------------------------------------------------------------"

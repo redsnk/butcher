@@ -54,6 +54,10 @@ class _reg(Union):
                 ("r8",_r8),
                 ("s8",_s8)]
 
+class _xmm(Structure):
+    _fields_ = [("l",c_uint64),
+                ("h",c_uint64)]
+
 class _mem:
     def __init__(self, addr, data):
         self.addr = addr
@@ -103,6 +107,15 @@ class _cpu:
     rsi = _reg()
     rbp = _reg()
     rsp = _reg()
+
+    xmm0 = _xmm()
+    xmm1 = _xmm()
+    xmm2 = _xmm()
+    xmm3 = _xmm()
+    xmm4 = _xmm()
+    xmm5 = _xmm()
+    xmm6 = _xmm()
+    xmm7 = _xmm()
 
     eflags = _eflags()
 
@@ -230,6 +243,12 @@ class _cpu:
         data = self.get_mem(addr,8)
         return (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
     
+    def get_dqword_ptr(self,addr):
+        data = self.get_mem(addr,16)
+        l = (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]
+        h = (data[15] << 56) | (data[14] << 48) | (data[13] << 40) | (data[12] << 32) | (data[11] << 24) | (data[10] << 16) | (data[9] << 8) | data[8]
+        return (l,h)
+
     def s_get_qword_ptr(self,addr):
         data = self.get_qword_ptr(addr)
         return c_int64(data).value
@@ -256,6 +275,24 @@ class _cpu:
         self.set_mem(addr+5,[(value >> 40) & 0xff])
         self.set_mem(addr+6,[(value >> 48) & 0xff])
         self.set_mem(addr+7,[(value >> 56) & 0xff])
+
+    def set_dqword_ptr(self,addr,value):
+        self.set_mem(addr,[value[0] & 0xff])
+        self.set_mem(addr+1,[(value[0] >> 8) & 0xff])
+        self.set_mem(addr+2,[(value[0] >> 16) & 0xff])
+        self.set_mem(addr+3,[(value[0] >> 24) & 0xff])
+        self.set_mem(addr+4,[(value[0] >> 32) & 0xff])
+        self.set_mem(addr+5,[(value[0] >> 40) & 0xff])
+        self.set_mem(addr+6,[(value[0] >> 48) & 0xff])
+        self.set_mem(addr+7,[(value[0] >> 56) & 0xff])
+        self.set_mem(addr+8,[value[1] & 0xff])
+        self.set_mem(addr+9,[(value[1] >> 8) & 0xff])
+        self.set_mem(addr+10,[(value[1] >> 16) & 0xff])
+        self.set_mem(addr+11,[(value[1] >> 24) & 0xff])
+        self.set_mem(addr+12,[(value[1] >> 32) & 0xff])
+        self.set_mem(addr+13,[(value[1] >> 40) & 0xff])
+        self.set_mem(addr+14,[(value[1] >> 48) & 0xff])
+        self.set_mem(addr+15,[(value[1] >> 56) & 0xff])
 
     def set_unicode_ptr(self,addr,str):
         n = 0
@@ -396,8 +433,11 @@ class _cpu:
             t = (t1 >> 32) + (t2 >> 32) + r
             self.flag_c(t > 0xffffffff)
 
-    def f_not(self,op1,op2):
-        self.panic("not")
+    def f_not(self,b,p):
+        return ~c_uint64(p).value
+
+    def f_neg(self,b,p):
+        return ~c_uint64(p).value + c_uint64(1).value
         
     def pow(self,b,p):
         r = 1
@@ -412,224 +452,320 @@ class _cpu:
         return self.rax.r64
     @_rax.setter
     def _rax(self,v):
-        self.rax.r64 = v
+        if type(v) == tuple:
+            self.rax.r64 = v[0]
+        else:
+            self.rax.r64 = v
 
     @property
     def s_rax(self):
         return self.rax.s64
     @s_rax.setter
     def s_rax(self,v):
-        self.rax.s64 = v
+        if type(v) == tuple:
+            self.rax.s64 = v[0]
+        else:
+            self.rax.s64 = v
 
     @property
     def _rbx(self):
         return self.rbx.r64
     @_rbx.setter
     def _rbx(self,v):
-        self.rbx.r64 = v
+        if type(v) == tuple:
+            self.rbx.r64 = v[0]
+        else:
+            self.rbx.r64 = v
 
     @property
     def s_rbx(self):
         return self.rbx.s64
     @s_rbx.setter
     def s_rbx(self,v):
-        self.rbx.s64 = v
+        if type(v) == tuple:
+            self.rbx.s64 = v[0]
+        else:
+            self.rbx.s64 = v
 
     @property
     def _rcx(self):
         return self.rcx.r64
     @_rcx.setter
     def _rcx(self,v):
-        self.rcx.r64 = v
+        if type(v) == tuple:
+            self.rcx.r64 = v[0]
+        else:
+            self.rcx.r64 = v
 
     @property
     def s_rcx(self):
         return self.rcx.s64
     @s_rcx.setter
     def s_rcx(self,v):
-        self.rcx.s64 = v
+        if type(v) == tuple:
+            self.rcx.s64 = v[0]
+        else:
+            self.rcx.s64 = v
 
     @property
     def _rdx(self):
         return self.rdx.r64
     @_rdx.setter
     def _rdx(self,v):
-        self.rdx.r64 = v
+        if type(v) == tuple:
+            self.rdx.r64 = v[0]
+        else:
+            self.rdx.r64 = v
 
     @property
     def s_rdx(self):
         return self.rdx.s64
     @s_rdx.setter
     def s_rdx(self,v):
-        self.rdx.s64 = v
+        if type(v) == tuple:
+            self.rdx.s64 = v[0]
+        else:
+            self.rdx.s64 = v
 
     @property
     def _r8(self):
         return self.r8.r64
     @_r8.setter
     def _r8(self,v):
-        self.r8.r64 = v
+        if type(v) == tuple:
+            self.r8.r64 = v[0]
+        else:
+            self.r8.r64 = v
 
     @property
     def s_r8(self):
         return self.r8.s64
     @s_r8.setter
     def s_r8(self,v):
-        self.r8.s64 = v
+        if type(v) == tuple:
+            self.r8.s64 = v[0]
+        else:
+            self.r8.s64 = v
 
     @property
     def _r9(self):
         return self.r9.r64
     @_r9.setter
     def _r9(self,v):
-        self.r9.r64 = v
+        if type(v) == tuple:
+            self.r9.r64 = v[0]
+        else:
+            self.r9.r64 = v
 
     @property
     def s_r9(self):
         return self.r9.s64
     @s_r9.setter
     def s_r9(self,v):
-        self.r9.s64 = v
+        if type(v) == tuple:
+            self.r9.s64 = v[0]
+        else:
+            self.r9.s64 = v
 
     @property
     def _r10(self):
         return self.r10.r64
     @_r10.setter
     def _r10(self,v):
-        self.r10.r64 = v
+        if type(v) == tuple:
+            self.r10.r64 = v[0]
+        else:
+            self.r10.r64 = v
 
     @property
     def s_r10(self):
         return self.r10.s64
     @s_r10.setter
     def s_r10(self,v):
-        self.r10.s64 = v
+        if type(v) == tuple:
+            self.r10.s64 = v[0]
+        else:
+            self.r10.s64 = v
 
     @property
     def _r11(self):
         return self.r11.r64
     @_r11.setter
     def _r11(self,v):
-        self.r11.r64 = v
+        if type(v) == tuple:
+            self.r11.r64 = v[0]
+        else:
+            self.r11.r64 = v
 
     @property
     def s_r11(self):
         return self.r11.s64
     @s_r11.setter
     def s_r11(self,v):
-        self.r11.s64 = v
+        if type(v) == tuple:
+            self.r11.s64 = v[0]
+        else:
+            self.r11.s64 = v
 
     @property
     def _r12(self):
         return self.r12.r64
     @_r12.setter
     def _r12(self,v):
-        self.r12.r64 = v
+        if type(v) == tuple:
+            self.r12.r64 = v[0]
+        else:
+            self.r12.r64 = v
 
     @property
     def s_r12(self):
         return self.r12.s64
     @s_r12.setter
     def s_r12(self,v):
-        self.r12.s64 = v
+        if type(v) == tuple:
+            self.r12.s64 = v[0]
+        else:
+            self.r12.s64 = v
 
     @property
     def _r13(self):
         return self.r13.r64
     @_r13.setter
     def _r13(self,v):
-        self.r13.r64 = v
+        if type(v) == tuple:
+            self.r13.r64 = v[0]
+        else:
+            self.r13.r64 = v
 
     @property
     def s_r13(self):
         return self.r13.s64
     @s_r13.setter
     def s_r13(self,v):
-        self.r13.s64 = v
+        if type(v) == tuple:
+            self.r13.s64 = v[0]
+        else:
+            self.r13.s64 = v
 
     @property
     def _r14(self):
         return self.r14.r64
     @_r14.setter
     def _r14(self,v):
-        self.r14.r64 = v
+        if type(v) == tuple:
+            self.r14.r64 = v[0]
+        else:
+            self.r14.r64 = v
 
     @property
     def s_r14(self):
         return self.r14.s64
     @s_r14.setter
     def s_r14(self,v):
-        self.r14.s64 = v
+        if type(v) == tuple:
+            self.r14.s64 = v[0]
+        else:
+            self.r14.s64 = v
 
     @property
     def _r15(self):
         return self.r15.r64
     @_r15.setter
     def _r15(self,v):
-        self.r15.r64 = v
+        if type(v) == tuple:
+            self.r15.r64 = v[0]
+        else:
+            self.r15.r64 = v
 
     @property
     def s_r15(self):
         return self.r15.s64
     @s_r15.setter
     def s_r15(self,v):
-        self.r15.s64 = v
+        if type(v) == tuple:
+            self.r15.s64 = v[0]
+        else:
+            self.r15.s64 = v
 
     @property
     def _rsi(self):
         return self.rsi.r64
     @_rsi.setter
     def _rsi(self,v):
-        self.rsi.r64 = v
+        if type(v) == tuple:
+            self.rsi.r64 = v[0]
+        else:
+            self.rsi.r64 = v
 
     @property
     def s_rsi(self):
         return self.rsi.s64
     @s_rsi.setter
     def s_rsi(self,v):
-        self.rsi.s64 = v
+        if type(v) == tuple:
+            self.rsi.s64 = v[0]
+        else:
+            self.rsi.s64 = v
 
     @property
     def _rdi(self):
         return self.rdi.r64
     @_rdi.setter
     def _rdi(self,v):
-        self.rdi.r64 = v
+        if type(v) == tuple:
+            self.rdi.r64 = v[0]
+        else:
+            self.rdi.r64 = v
 
     @property
     def s_rdi(self):
         return self.rdi.s64
     @s_rdi.setter
     def s_rdi(self,v):
-        self.rdi.s64 = v
+        if type(v) == tuple:
+            self.rdi.s64 = v[0]
+        else:
+            self.rdi.s64 = v
 
     @property
     def _rbp(self):
         return self.rbp.r64
     @_rbp.setter
     def _rbp(self,v):
-        self.rbp.r64 = v
+        if type(v) == tuple:
+            self.rbp.r64 = v[0]
+        else:
+            self.rbp.r64 = v
 
     @property
     def s_rbp(self):
         return self.rbp.s64
     @s_rbp.setter
     def s_rbp(self,v):
-        self.rbp.s64 = v
+        if type(v) == tuple:
+            self.rbp.s64 = v[0]
+        else:
+            self.rbp.s64 = v
 
     @property
     def _rsp(self):
         return self.rsp.r64
     @_rsp.setter
     def _rsp(self,v):
-        self.rsp.r64 = v
+        if type(v) == tuple:
+            self.rsp.r64 = v[0]
+        else:
+            self.rsp.r64 = v
 
     @property
     def s_rsp(self):
         return self.rsp.s64
     @s_rsp.setter
     def s_rsp(self,v):
-        self.rsp.s64 = v
+        if type(v) == tuple:
+            self.rsp.s64 = v[0]
+        else:
+            self.rsp.s64 = v
 
     # 32
     @property
@@ -637,224 +773,320 @@ class _cpu:
         return self.rax.r32.l
     @_eax.setter
     def _eax(self,v):
-        self.rax.r32.l = v
+        if type(v) == tuple:
+            self.rax.r32.l = v[0]
+        else:
+            self.rax.r32.l = v
 
     @property
     def s_eax(self):
         return self.rax.s32.l
     @s_eax.setter
     def s_eax(self,v):
-        self.rax.s32.l = v
+        if type(v) == tuple:
+            self.rax.s32.l = v[0]
+        else:
+            self.rax.s32.l = v
 
     @property
     def _ebx(self):
         return self.rbx.r32.l
     @_ebx.setter
     def _ebx(self,v):
-        self.rbx.r32.l = v
+        if type(v) == tuple:
+            self.rbx.r32.l = v[0]
+        else:
+            self.rbx.r32.l = v
 
     @property
     def s_ebx(self):
         return self.rbx.s32.l
     @s_ebx.setter
     def s_ebx(self,v):
-        self.rbx.s32.l = v
+        if type(v) == tuple:
+            self.rbx.s32.l = v[0]
+        else:
+            self.rbx.s32.l = v
 
     @property
     def _ecx(self):
         return self.rcx.r32.l
     @_ecx.setter
     def _ecx(self,v):
-        self.rcx.r32.l = v
+        if type(v) == tuple:
+            self.rcx.r32.l = v[0]
+        else:
+            self.rcx.r32.l = v
 
     @property
     def s_ecx(self):
         return self.rcx.s32.l
     @s_ecx.setter
     def s_ecx(self,v):
-        self.rcx.s32.l = v
+        if type(v) == tuple:
+            self.rcx.s32.l = v[0]
+        else:
+            self.rcx.s32.l = v
 
     @property
     def _edx(self):
         return self.rdx.r32.l
     @_edx.setter
     def _edx(self,v):
-        self.rdx.r32.l = v
+        if type(v) == tuple:
+            self.rdx.r32.l = v[0]
+        else:
+            self.rdx.r32.l = v
 
     @property
     def s_edx(self):
         return self.rdx.s32.l
     @s_edx.setter
     def s_edx(self,v):
-        self.rdx.s32.l = v
+        if type(v) == tuple:
+            self.rdx.s32.l = v[0]
+        else:
+            self.rdx.s32.l = v
 
     @property
     def _r8d(self):
         return self.r8.r32.l
     @_r8d.setter
     def _r8d(self,v):
-        self.r8.r32.l = v
+        if type(v) == tuple:
+            self.r8.r32.l = v[0]
+        else:
+            self.r8.r32.l = v
 
     @property
     def s_r8d(self):
         return self.r8.s32.l
     @s_r8d.setter
     def s_r8d(self,v):
-        self.r8.s32.l = v
+        if type(v) == tuple:
+            self.r8.s32.l = v[0]
+        else:
+            self.r8.s32.l = v
 
     @property
     def _r9d(self):
         return self.r9.r32.l
     @_r9d.setter
     def _r9d(self,v):
-        self.r9.r32.l = v
+        if type(v) == tuple:
+            self.r9.r32.l = v[0]
+        else:
+            self.r9.r32.l = v
 
     @property
     def s_r9d(self):
         return self.r9.s32.l
     @s_r9d.setter
     def s_r9d(self,v):
-        self.r9.s32.l = v
+        if type(v) == tuple:
+            self.r9.s32.l = v[0]
+        else:
+            self.r9.s32.l = v
 
     @property
     def _r10d(self):
         return self.r10.r32.l
     @_r10d.setter
     def _r10d(self,v):
-        self.r10.r32.l = v
+        if type(v) == tuple:
+            self.r10.r32.l = v[0]
+        else:
+            self.r10.r32.l = v
 
     @property
     def s_r10d(self):
         return self.r10.s32.l
     @s_r10d.setter
     def s_r10d(self,v):
-        self.r10.s32.l = v
+        if type(v) == tuple:
+            self.r10.s32.l = v[0]
+        else:
+            self.r10.s32.l = v
 
     @property
     def _r11d(self):
         return self.r11.r32.l
     @_r11d.setter
     def _r11d(self,v):
-        self.r11.r32.l = v
+        if type(v) == tuple:
+            self.r11.r32.l = v[0]
+        else:
+            self.r11.r32.l = v
 
     @property
     def s_r11d(self):
         return self.r11.s32.l
     @s_r11d.setter
     def s_r11d(self,v):
-        self.r11.s32.l = v
+        if type(v) == tuple:
+            self.r11.s32.l = v[0]
+        else:
+            self.r11.s32.l = v
 
     @property
     def _r12d(self):
         return self.r12.r32.l
     @_r12d.setter
     def _r12d(self,v):
-        self.r12.r32.l = v
+        if type(v) == tuple:
+            self.r12.r32.l = v[0]
+        else:
+            self.r12.r32.l = v
 
     @property
     def s_r12d(self):
         return self.r12.s32.l
     @s_r12d.setter
     def s_r12d(self,v):
-        self.r12.s32.l = v
+        if type(v) == tuple:
+            self.r12.s32.l = v[0]
+        else:
+            self.r12.s32.l = v
 
     @property
     def _r13d(self):
         return self.r13.r32.l
     @_r13d.setter
     def _r13d(self,v):
-        self.r13.r32.l = v
+        if type(v) == tuple:
+            self.r13.r32.l = v[0]
+        else:
+            self.r13.r32.l = v
 
     @property
     def s_r13d(self):
         return self.r13.s32.l
     @s_r13d.setter
     def s_r13d(self,v):
-        self.r13.s32.l = v
+        if type(v) == tuple:
+            self.r13.s32.l = v[0]
+        else:
+            self.r13.s32.l = v
 
     @property
     def _r14d(self):
         return self.r14.r32.l
     @_r14d.setter
     def _r14d(self,v):
-        self.r14.r32.l = v
+        if type(v) == tuple:
+            self.r14.r32.l = v[0]
+        else:
+            self.r14.r32.l = v
 
     @property
     def s_r14d(self):
         return self.r14.s32.l
     @s_r14d.setter
     def s_r14d(self,v):
-        self.r14.s32.l = v
+        if type(v) == tuple:
+            self.r14.s32.l = v[0]
+        else:
+            self.r14.s32.l = v
 
     @property
     def _r15d(self):
         return self.r15.r32.l
     @_r15d.setter
     def _r15d(self,v):
-        self.r15.r32.l = v
+        if type(v) == tuple:
+            self.r15.r32.l = v[0]
+        else:
+            self.r15.r32.l = v
 
     @property
     def s_r15d(self):
         return self.r15.s32.l
     @s_r15d.setter
     def s_r15d(self,v):
-        self.r15.s32.l = v
+        if type(v) == tuple:
+            self.r15.s32.l = v[0]
+        else:
+            self.r15.s32.l = v
 
     @property
     def _esi(self):
         return self.rsi.r32.l
     @_esi.setter
     def _esi(self,v):
-        self.rsi.r32.l = v
+        if type(v) == tuple:
+            self.rsi.r32.l = v[0]
+        else:
+            self.rsi.r32.l = v
 
     @property
     def s_esi(self):
         return self.rsi.s32.l
     @s_esi.setter
     def s_esi(self,v):
-        self.rsi.s32.l = v
+        if type(v) == tuple:
+            self.rsi.s32.l = v[0]
+        else:
+            self.rsi.s32.l = v
 
     @property
     def _edi(self):
         return self.rdi.r32.l
     @_edi.setter
     def _edi(self,v):
-        self.rdi.r32.l = v
+        if type(v) == tuple:
+            self.rdi.r32.l = v[0]
+        else:
+            self.rdi.r32.l = v
 
     @property
     def s_edi(self):
         return self.rdi.s32.l
     @s_edi.setter
     def s_edi(self,v):
-        self.rdi.s32.l = v
+        if type(v) == tuple:
+            self.rdi.s32.l = v[0]
+        else:
+            self.rdi.s32.l = v
 
     @property
     def _ebp(self):
         return self.rbp.r32.l
     @_ebp.setter
     def _ebp(self,v):
-        self.rbp.r32.l = v
+        if type(v) == tuple:
+            self.rbp.r32.l = v[0]
+        else:
+            self.rbp.r32.l = v
 
     @property
     def s_ebp(self):
         return self.rbp.s32.l
     @s_ebp.setter
     def s_ebp(self,v):
-        self.rbp.s32.l = v
+        if type(v) == tuple:
+            self.rbp.s32.l = v[0]
+        else:
+            self.rbp.s32.l = v
 
     @property
     def _esp(self):
         return self.rsp.r32.l
     @_esp.setter
     def _esp(self,v):
-        self.rsp.r32.l = v
+        if type(v) == tuple:
+            self.rsp.r32.l = v[0]
+        else:
+            self.rsp.r32.l = v
 
     @property
     def s_esp(self):
         return self.rsp.s32.l
     @s_esp.setter
     def s_esp(self,v):
-        self.rsp.s32.l = v
+        if type(v) == tuple:
+            self.rsp.s32.l = v[0]
+        else:
+            self.rsp.s32.l = v
 
     # 16
     @property
@@ -862,420 +1094,600 @@ class _cpu:
         return self.rax.r16.l
     @_ax.setter
     def _ax(self,v):
-        self.rax.r16.l = v
+        if type(v) == tuple:
+            self.rax.r16.l = v[0]
+        else:
+            self.rax.r16.l = v
 
     @property
     def s_ax(self):
         return self.rax.s16.l
     @s_ax.setter
     def s_ax(self,v):
-        self.rax.s16.l = v
+        if type(v) == tuple:
+            self.rax.s16.l = v[0]
+        else:
+            self.rax.s16.l = v
 
     @property
     def _bx(self):
         return self.rbx.r16.l
     @_bx.setter
     def _bx(self,v):
-        self.rbx.r16.l = v
+        if type(v) == tuple:
+            self.rbx.r16.l = v[0]
+        else:
+            self.rbx.r16.l = v
 
     @property
     def s_bx(self):
         return self.rbx.s16.l
     @s_bx.setter
     def s_bx(self,v):
-        self.rbx.s16.l = v
+        if type(v) == tuple:
+            self.rbx.s16.l = v[0]
+        else:
+            self.rbx.s16.l = v
 
     @property
     def _cx(self):
         return self.rcx.r16.l
     @_cx.setter
     def _cx(self,v):
-        self.rcx.r16.l = v
+        if type(v) == tuple:
+            self.rcx.r16.l = v[0]
+        else:
+            self.rcx.r16.l = v
 
     @property
     def s_cx(self):
         return self.rcx.s16.l
     @s_cx.setter
     def s_cx(self,v):
-        self.rcx.s16.l = v
+        if type(v) == tuple:
+            self.rcx.s16.l = v[0]
+        else:
+            self.rcx.s16.l = v
 
     @property
     def _dx(self):
         return self.rdx.r16.l
     @_dx.setter
     def _dx(self,v):
-        self.rdx.r16.l = v
+        if type(v) == tuple:
+            self.rdx.r16.l = v[0]
+        else:
+            self.rdx.r16.l = v
 
     @property
     def s_dx(self):
         return self.rdx.s16.l
     @s_dx.setter
     def s_dx(self,v):
-        self.rdx.s16.l = v
+        if type(v) == tuple:
+            self.rdx.s16.l = v[0]
+        else:
+            self.rdx.s16.l = v
 
     @property
     def _r8w(self):
         return self.r8.r16.l
     @_r8w.setter
     def _r8w(self,v):
-        self.r8.r16.l = v
+        if type(v) == tuple:
+            self.r8.r16.l = v[0]
+        else:
+            self.r8.r16.l = v
 
     @property
     def s_r8w(self):
         return self.r8.s16.l
     @s_r8w.setter
     def s_r8w(self,v):
-        self.r8.s16.l = v
+        if type(v) == tuple:
+            self.r8.s16.l = v[0]
+        else:
+            self.r8.s16.l = v
 
     @property
     def _r9w(self):
         return self.r9.r16.l
     @_r9w.setter
     def _r9w(self,v):
-        self.r9.r16.l = v
+        if type(v) == tuple:
+            self.r9.r16.l = v[0]
+        else:
+            self.r9.r16.l = v
 
     @property
     def s_r9w(self):
         return self.r9.s16.l
     @s_r9w.setter
     def s_r9w(self,v):
-        self.r9.s16.l = v
+        if type(v) == tuple:
+            self.r9.s16.l = v[0]
+        else:
+            self.r9.s16.l = v
 
     @property
     def _r10w(self):
         return self.r10.r16.l
     @_r10w.setter
     def _r10w(self,v):
-        self.r10.r16.l = v
+        if type(v) == tuple:
+            self.r10.r16.l = v[0]
+        else:
+            self.r10.r16.l = v
 
     @property
     def s_r10w(self):
         return self.r10.s16.l
     @s_r10w.setter
     def s_r10w(self,v):
-        self.r10.s16.l = v
+        if type(v) == tuple:
+            self.r10.s16.l = v[0]
+        else:
+            self.r10.s16.l = v
 
     @property
     def _r11w(self):
         return self.r11.r16.l
     @_r11w.setter
     def _r11w(self,v):
-        self.r11.r16.l = v
+        if type(v) == tuple:
+            self.r11.r16.l = v[0]
+        else:
+            self.r11.r16.l = v
 
     @property
     def s_r11w(self):
         return self.r11.s16.l
     @s_r11w.setter
     def s_r11w(self,v):
-        self.r11.s16.l = v
+        if type(v) == tuple:
+            self.r11.s16.l = v[0]
+        else:
+            self.r11.s16.l = v
 
     @property
     def _r12w(self):
         return self.r12.r16.l
     @_r12w.setter
     def _r12w(self,v):
-        self.r12.r16.l = v
+        if type(v) == tuple:
+            self.r12.r16.l = v[0]
+        else:
+            self.r12.r16.l = v
 
     @property
     def s_r12w(self):
         return self.r12.s16.l
     @s_r12w.setter
     def s_r12w(self,v):
-        self.r12.s16.l = v
+        if type(v) == tuple:
+            self.r12.s16.l = v[0]
+        else:
+            self.r12.s16.l = v
 
     @property
     def _r13w(self):
         return self.r13.r16.l
     @_r13w.setter
     def _r13w(self,v):
-        self.r13.r16.l = v
+        if type(v) == tuple:
+            self.r13.r16.l = v[0]
+        else:
+            self.r13.r16.l = v
 
     @property
     def s_r13w(self):
         return self.r13.s16.l
     @s_r13w.setter
     def s_r13w(self,v):
-        self.r13.s16.l = v
+        if type(v) == tuple:
+            self.r13.s16.l = v[0]
+        else:
+            self.r13.s16.l = v
 
     @property
     def _r14w(self):
         return self.r14.r16.l
     @_r14w.setter
     def _r14w(self,v):
-        self.r14.r16.l = v
+        if type(v) == tuple:
+            self.r14.r16.l = v[0]
+        else:
+            self.r14.r16.l = v
 
     @property
     def s_r14w(self):
         return self.r14.s16.l
     @s_r14w.setter
     def s_r14w(self,v):
-        self.r14.s16.l = v
+        if type(v) == tuple:
+            self.r14.s16.l = v[0]
+        else:
+            self.r14.s16.l = v
 
     @property
     def _r15w(self):
         return self.r15.r16.l
     @_r15w.setter
     def _r15w(self,v):
-        self.r15.r16.l = v
+        if type(v) == tuple:
+            self.r15.r16.l = v[0]
+        else:
+            self.r15.r16.l = v
 
     @property
     def s_r15w(self):
         return self.r15.s16.l
     @s_r15w.setter
     def s_r15w(self,v):
-        self.r15.s16.l = v
+        if type(v) == tuple:
+            self.r15.s16.l = v[0]
+        else:
+            self.r15.s16.l = v
 
     @property
     def _si(self):
         return self.rsi.r16.l
     @_si.setter
     def _si(self,v):
-        self.rsi.r16.l = v
+        if type(v) == tuple:
+            self.rsi.r16.l = v[0]
+        else:
+            self.rsi.r16.l = v
 
     @property
     def s_si(self):
         return self.rsi.s16.l
     @s_si.setter
     def s_si(self,v):
-        self.rsi.s16.l = v
+        if type(v) == tuple:
+            self.rsi.s16.l = v[0]
+        else:
+            self.rsi.s16.l = v
 
     @property
     def _di(self):
         return self.rdi.r16.l
     @_di.setter
     def _di(self,v):
-        self.rdi.r16.l = v
+        if type(v) == tuple:
+            self.rdi.r16.l = v[0]
+        else:
+            self.rdi.r16.l = v
 
     @property
     def s_di(self):
         return self.rdi.s16.l
     @s_di.setter
     def s_di(self,v):
-        self.rdi.s16.l = v
+        if type(v) == tuple:
+            self.rdi.s16.l = v[0]
+        else:
+            self.rdi.s16.l = v
 
     @property
     def _bp(self):
         return self.rbp.r16.l
     @_bp.setter
     def _bp(self,v):
-        self.rbp.r16.l = v
+        if type(v) == tuple:
+            self.rbp.r16.l = v[0]
+        else:
+            self.rbp.r16.l = v
 
     @property
     def s_bp(self):
         return self.rbp.s16.l
     @s_bp.setter
     def s_bp(self,v):
-        self.rbp.s16.l = v
+        if type(v) == tuple:
+            self.rbp.s16.l = v[0]
+        else:
+            self.rbp.s16.l = v
 
     @property
     def _sp(self):
         return self.rsp.r16.l
     @_sp.setter
     def _sp(self,v):
-        self.rsp.r16.l = v
+        if type(v) == tuple:
+            self.rsp.r16.l = v[0]
+        else:
+            self.rsp.r16.l = v
 
     @property
     def s_sp(self):
         return self.rsp.s16.l
     @s_sp.setter
     def s_sp(self,v):
-        self.rsp.s16.l = v
+        if type(v) == tuple:
+            self.rsp.s16.l = v[0]
+        else:
+            self.rsp.s16.l = v
 
     @property
     def _al(self):
         return self.rax.r8.l
     @_al.setter
     def _al(self,v):
-        self.rax.r8.l = v
+        if type(v) == tuple:
+            self.rax.r8.l = v[0]
+        else:
+            self.rax.r8.l = v
 
     @property
     def s_al(self):
         return self.rax.s8.l
     @s_al.setter
     def s_al(self,v):
-        self.rax.s8.l = v
+        if type(v) == tuple:
+            self.rax.s8.l = v[0]
+        else:
+            self.rax.s8.l = v
 
     @property
     def _bl(self):
         return self.rbx.r8.l
     @_bl.setter
     def _bl(self,v):
-        self.rbx.r8.l = v
+        if type(v) == tuple:
+            self.rbx.r8.l = v[0]
+        else:
+            self.rbx.r8.l = v
 
     @property
     def s_bl(self):
         return self.rbx.s8.l
     @s_bl.setter
     def s_bl(self,v):
-        self.rbx.s8.l = v
+        if type(v) == tuple:
+            self.rbx.s8.l = v[0]
+        else:
+            self.rbx.s8.l = v
 
     @property
     def _cl(self):
         return self.rcx.r8.l
     @_cl.setter
     def _cl(self,v):
-        self.rcx.r8.l = v
+        if type(v) == tuple:
+            self.rcx.r8.l = v[0]
+        else:
+            self.rcx.r8.l = v
 
     @property
     def s_cl(self):
         return self.rcx.s8.l
     @s_cl.setter
     def s_cl(self,v):
-        self.rcx.s8.l = v
+        if type(v) == tuple:
+            self.rcx.s8.l = v[0]
+        else:
+            self.rcx.s8.l = v
 
     @property
     def _dl(self):
         return self.rdx.r8.l
     @_dl.setter
     def _dl(self,v):
-        self.rdx.r8.l = v
+        if type(v) == tuple:
+            self.rdx.r8.l = v[0]
+        else:
+            self.rdx.r8.l = v
 
     @property
     def s_dl(self):
         return self.rdx.s8.l
     @s_dl.setter
     def s_dl(self,v):
-        self.rdx.s8.l = v
+        if type(v) == tuple:
+            self.rdx.s8.l = v[0]
+        else:
+            self.rdx.s8.l = v
 
     @property
     def _r8b(self):
         return self.r8.r8.l
     @_r8b.setter
     def _r8b(self,v):
-        self.r8.r8.l = v
+        if type(v) == tuple:
+            self.r8.r8.l = v[0]
+        else:
+            self.r8.r8.l = v
 
     @property
     def s_r8b(self):
         return self.r8.s8.l
     @s_r8b.setter
     def s_r8b(self,v):
-        self.r8.s8.l = v
+        if type(v) == tuple:
+            self.r8.s8.l = v[0]
+        else:
+            self.r8.s8.l = v
 
     @property
     def _r9b(self):
         return self.r9.r8.l
     @_r9b.setter
     def _r9b(self,v):
-        self.r9.r8.l = v
+        if type(v) == tuple:
+            self.r9.r8.l = v[0]
+        else:
+            self.r9.r8.l = v
 
     @property
     def s_r9b(self):
         return self.r9.s8.l
     @s_r9b.setter
     def s_r9b(self,v):
-        self.r9.s8.l = v
+        if type(v) == tuple:
+            self.r9.s8.l = v[0]
+        else:
+            self.r9.s8.l = v
 
     @property
     def _r10b(self):
         return self.r10.r8.l
     @_r10b.setter
     def _r10b(self,v):
-        self.r10.r8.l = v
+        if type(v) == tuple:
+            self.r10.r8.l = v[0]
+        else:
+            self.r10.r8.l = v
 
     @property
     def s_r10b(self):
         return self.r10.s8.l
     @s_r10b.setter
     def s_r10b(self,v):
-        self.r10.s8.l = v
+        if type(v) == tuple:
+            self.r10.s8.l = v[0]
+        else:
+            self.r10.s8.l = v
 
     @property
     def _r11b(self):
         return self.r11.r8.l
     @_r11b.setter
     def _r11b(self,v):
-        self.r11.r8.l = v
+        if type(v) == tuple:
+            self.r11.r8.l = v[0]
+        else:
+            self.r11.r8.l = v
 
     @property
     def s_r11b(self):
         return self.r11.s8.l
     @s_r11b.setter
     def s_r11b(self,v):
-        self.r11.s8.l = v
+        if type(v) == tuple:
+            self.r11.s8.l = v[0]
+        else:
+            self.r11.s8.l = v
 
     @property
     def _r12b(self):
         return self.r12.r8.l
     @_r12b.setter
     def _r12b(self,v):
-        self.r12.r8.l = v
+        if type(v) == tuple:
+            self.r12.r8.l = v[0]
+        else:
+            self.r12.r8.l = v
 
     @property
     def s_r12b(self):
         return self.r12.s8.l
     @s_r12b.setter
     def s_r12b(self,v):
-        self.r12.s8.l = v
+        if type(v) == tuple:
+            self.r12.s8.l = v[0]
+        else:
+            self.r12.s8.l = v
 
     @property
     def _r13b(self):
         return self.r13.r8.l
     @_r13b.setter
     def _r13b(self,v):
-        self.r13.r8.l = v
+        if type(v) == tuple:
+            self.r13.r8.l = v[0]
+        else:
+            self.r13.r8.l = v
 
     @property
     def s_r13b(self):
         return self.r13.s8.l
     @s_r13b.setter
     def s_r13b(self,v):
-        self.r13.s8.l = v
+        if type(v) == tuple:
+            self.r13.s8.l = v[0]
+        else:
+            self.r13.s8.l = v
 
     @property
     def _r14b(self):
         return self.r14.r8.l
     @_r14b.setter
     def _r14b(self,v):
-        self.r14.r8.l = v
+        if type(v) == tuple:
+            self.r14.r8.l = v[0]
+        else:
+            self.r14.r8.l = v
 
     @property
     def s_r14b(self):
         return self.r14.s8.l
     @s_r14b.setter
     def s_r14b(self,v):
-        self.r14.s8.l = v
+        if type(v) == tuple:
+            self.r14.s8.l = v[0]
+        else:
+            self.r14.s8.l = v
 
     @property
     def _r15b(self):
         return self.r15.r8.l
     @_r15b.setter
     def _r15b(self,v):
-        self.r15.r8.l = v
+        if type(v) == tuple:
+            self.r15.r8.l = v[0]
+        else:
+            self.r15.r8.l = v
 
     @property
     def s_r15b(self):
         return self.r15.s8.l
     @s_r15b.setter
     def s_r15b(self,v):
-        self.r15.s8.l = v
+        if type(v) == tuple:
+            self.r15.s8.l = v[0]
+        else:
+            self.r15.s8.l = v
 
     @property
     def _bpl(self):
         return self.rbp.r8.l
     @_bpl.setter
     def _bpl(self,v):
-        self.rbp.r8.l = v
+        if type(v) == tuple:
+            self.rbp.r8.l = v[0]
+        else:
+            self.rbp.r8.l = v
 
     @property
     def s_bpl(self):
         return self.rbp.s8.l
     @s_bpl.setter
     def s_bpl(self,v):
-        self.rbp.s8.l = v
+        if type(v) == tuple:
+            self.rbp.s8.l = v[0]
+        else:
+            self.rbp.s8.l = v
 
     @property
     def _spl(self):
         return self.rsp.r8.l
     @_spl.setter
     def _spl(self,v):
-        self.rsp.r8.l = v
+        if type(v) == tuple:
+            self.rsp.r8.l = v[0]
+        else:
+            self.rsp.r8.l = v
 
     @property
     def s_spl(self):
         return self.rsp.s8.l
     @s_spl.setter
     def s_spl(self,v):
-        self.rsp.s8.l = v
+        if type(v) == tuple:
+            self.rsp.s8.l = v[0]
+        else:
+            self.rsp.s8.l = v
 
     # 8
     @property
@@ -1283,58 +1695,178 @@ class _cpu:
         return self.rax.r8.h
     @_ah.setter
     def _ah(self,v):
-        self.rax.r8.h = v
+        if type(v) == tuple:
+            self.rax.r8.h = v[0]
+        else:
+            self.rax.r8.h = v
 
     @property
     def s_ah(self):
         return self.rax.s8.h
     @s_ah.setter
     def s_ah(self,v):
-        self.rax.s8.h = v
+        if type(v) == tuple:
+            self.rax.s8.h = v[0]
+        else:
+            self.rax.s8.h = v
 
     @property
     def _bh(self):
         return self.rbx.r8.h
     @_bh.setter
     def _bh(self,v):
-        self.rbx.r8.h = v
+        if type(v) == tuple:
+            self.rbx.r8.h = v[0]
+        else:
+            self.rbx.r8.h = v
 
     @property
     def s_bh(self):
         return self.rbx.s8.h
     @s_bh.setter
     def s_bh(self,v):
-        self.rbx.s8.h = v
+        if type(v) == tuple:
+            self.rbx.s8.h = v[0]
+        else:
+            self.rbx.s8.h = v
 
     @property
     def _ch(self):
         return self.rcx.r8.h
     @_ch.setter
     def _ch(self,v):
-        self.rcx.r8.h = v
+        if type(v) == tuple:
+            self.rcx.r8.h = v[0]
+        else:
+            self.rcx.r8.h = v
 
     @property
     def s_ch(self):
         return self.rcx.s8.h
     @s_ch.setter
     def s_ch(self,v):
-        self.rcx.s8.h = v
+        if type(v) == tuple:
+            self.rcx.s8.h = v[0]
+        else:
+            self.rcx.s8.h = v
 
     @property
     def _dh(self):
         return self.rdx.r8.h
     @_dh.setter
     def _dh(self,v):
-        self.rdx.r8.h = v
+        if type(v) == tuple:
+            self.rdx.r8.h = v[0]
+        else:
+            self.rdx.r8.h = v
 
     @property
     def s_dh(self):
         return self.rdx.s8.h
     @s_dh.setter
     def s_dh(self,v):
-        self.rdx.s8.h = v
+        if type(v) == tuple:
+            self.rdx.s8.h = v[0]
+        else:
+            self.rdx.s8.h = v
 
-    #---------------------------------------------------------------     
+    @property
+    def _xmm0(self):
+        return (self.xmm0.l,self.xmm0.h)
+    @_xmm0.setter
+    def _xmm0(self,v):
+        if type(v) == tuple:
+            self.xmm0.l = v[0]
+            self.xmm0.h = v[1]
+        else:
+            self.xmm0.l = v
+            self.xmm0.h = 0
+
+    @property
+    def _xmm1(self):
+        return (self.xmm1.l,self.xmm1.h)
+    @_xmm1.setter
+    def _xmm1(self,v):
+        if type(v) == tuple:
+            self.xmm1.l = v[0]
+            self.xmm1.h = v[1]
+        else:
+            self.xmm1.l = v
+            self.xmm1.h = 0
+
+    @property
+    def _xmm2(self):
+        return (self.xmm2.l,self.xmm2.h)
+    @_xmm2.setter
+    def _xmm2(self,v):
+        if type(v) == tuple:
+            self.xmm2.l = v[0]
+            self.xmm2.h = v[1]
+        else:
+            self.xmm2.l = v
+            self.xmm2.h = 0
+
+    @property
+    def _xmm3(self):
+        return (self.xmm3.l,self.xmm3.h)
+    @_xmm3.setter
+    def _xmm3(self,v):
+        if type(v) == tuple:
+            self.xmm3.l = v[0]
+            self.xmm3.h = v[1]
+        else:
+            self.xmm3.l = v
+            self.xmm3.h = 0
+
+    @property
+    def _xmm4(self):
+        return (self.xmm4.l,self.xmm4.h)
+    @_xmm4.setter
+    def _xmm4(self,v):
+        if type(v) == tuple:
+            self.xmm4.l = v[0]
+            self.xmm4.h = v[1]
+        else:
+            self.xmm4.l = v
+            self.xmm4.h = 0
+
+    @property
+    def _xmm5(self):
+        return (self.xmm5.l,self.xmm5.h)
+    @_xmm5.setter
+    def _xmm5(self,v):
+        if type(v) == tuple:
+            self.xmm5.l = v[0]
+            self.xmm5.h = v[1]
+        else:
+            self.xmm5.l = v
+            self.xmm5.h = 0
+
+    @property
+    def _xmm6(self):
+        return (self.xmm6.l,self.xmm6.h)
+    @_xmm6.setter
+    def _xmm6(self,v):
+        if type(v) == tuple:
+            self.xmm6.l = v[0]
+            self.xmm6.h = v[1]
+        else:
+            self.xmm6.l = v
+            self.xmm6.h = 0
+
+    @property
+    def _xmm7(self):
+        return (self.xmm7.l,self.xmm7.h)
+    @_xmm7.setter
+    def _xmm7(self,v):
+        if type(v) == tuple:
+            self.xmm7.l = v[0]
+            self.xmm7.h = v[1]
+        else:
+            self.xmm7.l = v
+            self.xmm7.h = 0
+
+    #---------------------------------------------------------------
     
 '''
 @with_goto
@@ -1350,7 +1882,7 @@ def test():
 r = _reg()
 r.r64 = 0x0102030405060708
 r.r64 = r.r64 + 1
-s64 = c_int64(r.r64)
+s64 = c_int64(r.r64).value
 print(s64 + 1)
 print(hex(r.r64))
 print(hex(r.r32.h))
