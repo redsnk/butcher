@@ -97,6 +97,7 @@ char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
     return(op_str(handle,op,bits,sign,true));
 }
 
+/*
 char *Lang_x64::Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,const char *reg32,const char *reg64) {
     switch (insn->detail->x86.addr_size*8) {
         case 8:
@@ -107,6 +108,20 @@ char *Lang_x64::Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,
             return (strdup(reg32));
         case 64:
             return (strdup(reg64));
+    }
+}
+*/
+
+char *Lang_x64::Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign) {
+    switch (insn->detail->x86.addr_size*8) {
+        case 8:
+            return (sign?s_reg_name(handle,reg8):reg_name(handle,reg8));
+        case 16:
+            return (sign?s_reg_name(handle,reg16):reg_name(handle,reg16));
+        case 32:
+            return (sign?s_reg_name(handle,reg32):reg_name(handle,reg32));
+        case 64:
+            return (sign?s_reg_name(handle,reg64):reg_name(handle,reg64));
     }
 }
 
@@ -166,31 +181,40 @@ int bits;
         return(mem_str(handle,insn->detail->x86.operands[1]));
     }
     else if (!strcmp(name,"sax")) {
-        return(Translate_reg(insn,"_al","_ax","_eax","_rax"));
+        //return(Translate_reg(insn,"_al","_ax","_eax","_rax"));
+        return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,false));
     }
     else if (!strcmp(name,"rbx")) {
-        return(Translate_reg(insn,"_bl","_bx","_ebx","_rbx"));
+        //return(Translate_reg(insn,"_bl","_bx","_ebx","_rbx"));
+        return(Translate_reg(handle,insn,X86_REG_BL,X86_REG_BX,X86_REG_EBX,X86_REG_RBX,false));
     }
     else if (!strcmp(name,"rcx")) {
-        return(Translate_reg(insn,"_cl","_cx","_ecx","_rcx"));
+        //return(Translate_reg(insn,"_cl","_cx","_ecx","_rcx"));
+        return(Translate_reg(handle,insn,X86_REG_CL,X86_REG_CX,X86_REG_ECX,X86_REG_RCX,false));
     }
     else if (!strcmp(name,"rdx")) {
-        return(Translate_reg(insn,"_dl","_dx","_edx","_rdx"));
+        //return(Translate_reg(insn,"_dl","_dx","_edx","_rdx"));
+        return(Translate_reg(handle,insn,X86_REG_DL,X86_REG_DX,X86_REG_EDX,X86_REG_RDX,false));
     }
     else if (!strcmp(name,"s_rax")) {
-        return(Translate_reg(insn,"s_al","s_ax","s_eax","s_rax"));
+        //return(Translate_reg(insn,"s_al","s_ax","s_eax","s_rax"));
+        return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,true));
     }
     else if (!strcmp(name,"s_rbx")) {
-        return(Translate_reg(insn,"s_bl","s_bx","s_ebx","s_rbx"));
+        //return(Translate_reg(insn,"s_bl","s_bx","s_ebx","s_rbx"));
+        return(Translate_reg(handle,insn,X86_REG_BL,X86_REG_BX,X86_REG_EBX,X86_REG_RBX,true));
     }
     else if (!strcmp(name,"s_rcx")) {
-        return(Translate_reg(insn,"s_cl","s_cx","s_ecx","s_rcx"));
+        //return(Translate_reg(insn,"s_cl","s_cx","s_ecx","s_rcx"));
+        return(Translate_reg(handle,insn,X86_REG_CL,X86_REG_CX,X86_REG_ECX,X86_REG_RCX,true));
     }
     else if (!strcmp(name,"s_rdx")) {
-        return(Translate_reg(insn,"s_dl","s_dx","s_edx","s_rdx"));
+        //return(Translate_reg(insn,"s_dl","s_dx","s_edx","s_rdx"));
+        return(Translate_reg(handle,insn,X86_REG_DL,X86_REG_DX,X86_REG_EDX,X86_REG_RDX,true));
     }
     else if (!strcmp(name,"rsp")) {
-        return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
+        //return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
+        return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_SP,X86_REG_ESP,X86_REG_RSP,false));
     }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF));

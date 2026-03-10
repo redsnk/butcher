@@ -91,6 +91,8 @@ class _eflags(Structure):
                 ("SF",c_bool)]
 
 class _cpu:
+    b32 = False
+
     rax = _reg()
     rbx = _reg()
     rcx = _reg()
@@ -146,6 +148,8 @@ class _cpu:
         self.add_mem(addr,[0] * size)
 
     def get_mem(self,addr,size):
+        if self.b32:
+            addr = c_uint32(addr).value
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
@@ -162,6 +166,8 @@ class _cpu:
         return []
 
     def set_mem(self,addr,data):
+        if self.b32:
+            addr = c_uint32(addr).value
         size = len(data)
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
@@ -182,7 +188,7 @@ class _cpu:
                 data += a
         else:
             data = bytearray(v_Size)
-        self.add_mem(v_Address,data)
+        self.add_mem(v_Address,list(data))
 
     def hexdump (self,addr,mem):
         print(mem)
@@ -209,6 +215,16 @@ class _cpu:
         self.add_zero_mem(res,size)
         return res 
     
+    def realloc_mem (self,addr,size):
+        n = self.locate_mem(addr)
+        if n >= 0:
+            ret = self.alloc_mem(size)
+            m = self.locate_mem(ret)
+            if m >= 0:
+                self.set_mem(ret,self.mems[n].mem)
+                return ret
+        self.panic("realloc_mem")
+
     def call_from_iat (self,lib,func):
         self.panic("call_from_iat")
 
@@ -267,6 +283,8 @@ class _cpu:
         self.set_mem(addr+3,[(value >> 24) & 0xff])
 
     def set_qword_ptr(self,addr,value):
+        if type(value) == tuple:
+            value = value[0]
         self.set_mem(addr,[value & 0xff])
         self.set_mem(addr+1,[(value >> 8) & 0xff])
         self.set_mem(addr+2,[(value >> 16) & 0xff])
@@ -367,6 +385,11 @@ class _cpu:
     
     def get_flag_c(self):
         return self.eflags.CF
+
+    def num_flag_c(self):
+        if self.eflags.CF:
+            return 1
+        return 0
     
     def flag_o(self,b):
         self.eflags.OF = b
@@ -414,7 +437,7 @@ class _cpu:
         else:
             sop1 = c_int64(op1).value
             sop2 = c_int64(op2).value
-        if self.sign(sop1) == self.sign(sop2):
+        if self.sign(sop1) != self.sign(sop2):
             self.flag_o(self.sign(sop1-sop2) != self.sign(sop1))
 
     def add_flag_c(self,bits,op1,op2):
@@ -444,6 +467,35 @@ class _cpu:
         for n in range(p):
             r = r * p
         return r
+
+    def pshufd(self,op1,op2):
+        l = c_uint64(0).value
+        h = c_uint64(0).value
+        c = op2 & 0b00000011
+        if c < 2:
+            d =  (op1[0] >> (32*c)) & 0xffffffff
+        else:
+            d =  (op1[1] >> (32*(c-2))) & 0xffffffff
+        l = l | d
+        c = (op2 & 0b00001100) >> 2
+        if c < 2:
+            d =  ((op1[0] >> (32*c)) & 0xffffffff) << 32
+        else:
+            d =  ((op1[1] >> (32*(c-2))) & 0xffffffff) << 32
+        l = l | d
+        c = (op2 & 0b00110000) >> 4
+        if c < 2:
+            d =  (op1[0] >> (32*c)) & 0xffffffff
+        else:
+            d =  (op1[1] >> (32*(c-2))) & 0xffffffff
+        h = h | d
+        c = (op2 & 0b11000000) >> 6
+        if c < 2:
+            d =  ((op1[0] >> (32*c)) & 0xffffffff) << 32
+        else:
+            d =  ((op1[1] >> (32*(c-2))) & 0xffffffff) << 32
+        h = h | d
+        return (l,h)
 
     #---------------------------------------------------------------
     # 64

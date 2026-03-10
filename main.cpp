@@ -91,15 +91,6 @@ Archive *a;
         }
     }
     */
-    switch (opt_l) {
-        case PYTHON:
-            l = (Language *) new Lang_Py_x64();
-            break;
-        case C:
-        default:
-            l = (Language *) new Lang_C_x64();
-            break;
-    }
     //l = new Lang_C();
     a = new Arch_Pe();
     if (!a->CheckFile(path)) {
@@ -111,6 +102,15 @@ Archive *a;
             printf("Error: format not compatible.\n");
             return (0);
         }
+    }
+    switch (opt_l) {
+        case PYTHON:
+            l = (Language *) new Lang_Py_x64(a->Is32()?32:64);
+            break;
+        case C:
+        default:
+            l = (Language *) new Lang_C_x64();
+            break;
     }
     b = new Base_x64(a,l);
     b->ltraces = opt_t;

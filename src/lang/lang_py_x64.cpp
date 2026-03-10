@@ -1,6 +1,7 @@
 #include "lang_py_x64.hpp"
 
-Lang_Py_x64::Lang_Py_x64() {
+Lang_Py_x64::Lang_Py_x64(int b) {
+    bits = b;
     COMM = "#";
     COMM_SEP = 70;
     INDENT = "    ";
@@ -117,8 +118,15 @@ def main():\n\
     cpu = _cpu()\n\
 "
 
+#define PY_FOOTER_32B "\
+    cpu.b32 = True\n\
+"
+
 void Lang_Py_x64::PrintMainOpen(Code *c) {
     printf(PY_FOOTER_1);
+    if (bits == 32) {
+        printf(PY_FOOTER_32B);
+    }
 }
 
 #define PY_FOOTER_2 "\

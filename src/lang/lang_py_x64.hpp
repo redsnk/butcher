@@ -5,6 +5,8 @@
 
 class Lang_Py_x64 : public Lang_x64 {
     public:
+    int bits;
+
     void PrintHeader(Code *c);
     void PrintMainOpen(Code *c);
     void PrintMainClose(Code *c);
@@ -18,7 +20,7 @@ class Lang_Py_x64 : public Lang_x64 {
     char *reg_name(csh handle,int id_reg);
     char *s_reg_name(csh handle,int id_reg);
 
-    Lang_Py_x64();
+    Lang_Py_x64(int b);
 };
 
 #endif // _LANG_PY_X64_H

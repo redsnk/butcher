@@ -332,118 +332,6 @@ char *str,c;
 	return (str);
 }
 
-/*
-union _reg *get_reg64(struct _cpu *cpu,char *reg) {
-// rax, eax, ax, ah, al
-#define STRCMPREG(r)	!strcmp(reg,"r"#r"x") || !strcmp(reg,"e"#r"x") || !strcmp(reg,#r"x") || !strcmp(reg,#r"h") || !strcmp(reg,#r"l")
-// rsp, esp, sp, spl
-#define STRCMPREG2(r)    !strcmp(reg,"r"#r) || !strcmp(reg,"e"#r) || !strcmp(reg,#r) || !strcmp(reg,#r"l")
-// r8, r8d, r8w, r8b
-#define STRCMPREG3(r)    !strcmp(reg,#r) || !strcmp(reg,#r"d") || !strcmp(reg,#r"w") || !strcmp(reg,#r"b")
-
-	if (STRCMPREG(a)) {
-		return (&cpu->rax);
-	}
-	else if (STRCMPREG(b)) {
-		return (&cpu->rbx);
-	}
-	else if (STRCMPREG(c)) {
-		return (&cpu->rcx);
-	}
-	else if (STRCMPREG(d)) {
-        return (&cpu->rdx);
-    }
-	else if (STRCMPREG2(sp)) {
-        return (&cpu->rsp);
-	}
-	else if (STRCMPREG2(bp)) {
-        return (&cpu->rbp);
-    }
-    else if (STRCMPREG2(si)) {
-        return (&cpu->rsi);
-    }
-    else if (STRCMPREG2(di)) {
-        return (&cpu->rdi);
-    }
-    else if (STRCMPREG3(r8)) {
-        return (&cpu->r8);
-    }
-    else if (STRCMPREG3(r9)) {
-        return (&cpu->r9);
-    }
-    else if (STRCMPREG3(r10)) {
-        return (&cpu->r10);
-    }
-    else if (STRCMPREG3(r11)) {
-        return (&cpu->r11);
-    }
-    else if (STRCMPREG3(r12)) {
-        return (&cpu->rdi);
-    }
-    else if (STRCMPREG3(r13)) {
-        return (&cpu->rdi);
-    }
-    else if (STRCMPREG3(r14)) {
-        return (&cpu->rdi);
-    }
-    else if (STRCMPREG3(r15)) {
-        return (&cpu->rdi);
-    }
-	else {
-		panic("get_reg64 error",reg);
-	}
-	return (NULL);
-}
-
-void *get_reg(struct _cpu *cpu,char *reg,int *bits) {
-union _reg *r;
-char f,l;
-void *ret;
-
-	r = get_reg64(cpu,reg);
-	if (r != NULL) {
-		int len = strlen(reg);
-		f = reg[0];
-		l = reg[len-1];
-		if ((f == 'r') && (l != 'd') && (l != 'w') && (l != 'b')) {
-			if (bits != NULL) *bits = 64;
-			return (&r->r64);
-		}
-		else if ((f == 'e') || (l == 'd')) {
-			if (bits != NULL) *bits = 32;
-			return (&r->r32.l);
-		}
-		else if (l == 'h') {
-			if (bits != NULL) *bits = 8;
-			return (&r->r8.h);
-		}
-		else if (l == 'l') { 
-			if (bits != NULL) *bits = 8;
-			return (&r->r8.l);
-		}
-		else {
-			if (bits != NULL) *bits = 16;
-			return (&r->r16.l);
-		}
-		return (r);
-
-	}
-	return (NULL);
-}
-
-uint8_t *get_reg_8(struct _cpu *cpu,char *reg) {
-	return ((uint8_t *)get_reg(cpu,reg,NULL));
-}
-uint16_t *get_reg_16(struct _cpu *cpu,char *reg) {
-	return ((uint16_t *)get_reg(cpu,reg,NULL));
-}
-uint32_t *get_reg_32(struct _cpu *cpu,char *reg) {
-	return ((uint32_t *)get_reg(cpu,reg,NULL));
-}
-uint64_t *get_reg_64(struct _cpu *cpu,char *reg) {
-	return ((uint64_t *)get_reg(cpu,reg,NULL));
-}
-*/
 void set_z(struct _cpu *cpu,uint64_t i) {
 	cpu->eflags.ZF = (i == 0);
 }
@@ -738,51 +626,15 @@ uint8_t c;
 
 	r = 0;
 	c = op2 & 0b00000011;
-	r |= (op1 >> (32*c)) && 0xffffffff;
+	r |= (op1 >> (32*c)) & 0xffffffff;
 	c = (op2 & 0b00001100) >> 2;
-	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff)  << 32;
+	r |= (__uint128_t)((op1 >> (32*c)) & 0xffffffff)  << 32;
 	c = (op2 & 0b00110000) >> 4;
-	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff) << 64;
+	r |= (__uint128_t)((op1 >> (32*c)) & 0xffffffff) << 64;
 	c = (op2 & 0b11000000) >> 6;
-	r |= (__uint128_t)((op1 >> (32*c)) && 0xffffffff) << 96;
+	r |= (__uint128_t)((op1 >> (32*c)) & 0xffffffff) << 96;
 	return (r);
 }
-
-/*
-uint64_t get_ins_mem(struct _cpu *cpu,char *base,char *index,uint64_t mult,uint64_t disp,int *bits) {
-void *rb,*ri;
-int bi;
-uint64_t ret = 0;
-
-	rb = get_reg(cpu,base,bits);
-	if (strlen(index)) {
-		ri = get_reg(cpu,index,&bi);
-	}
-	switch (*bits) {
-		case 16:
-			ret = *((uint16_t *)rb)+ disp;
-			if (strlen(index)) {
-				ret += *((uint16_t *)ri)*mult;
-			}
-			break;
-		case 32:
-			ret = *((uint32_t *)rb)+ disp;
-			if (strlen(index)) {
-				ret += *((uint32_t *)ri)*mult;
-			}
-			break;
-		case 64:
-			ret = *((uint64_t *)rb)+ disp;
-			if (strlen(index)) {
-				ret += *((uint64_t *)ri)*mult;
-			}
-			break;
-		default:
-			panic("get_ins_mem bits","");
-	}
-	return (ret);
-}
-*/
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func) {
 	panic("call_from_iat not implemented",func);
