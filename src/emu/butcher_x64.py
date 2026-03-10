@@ -318,6 +318,18 @@ class _cpu:
             self.set_word_ptr(addr+(n*2),ord(c))
             n += 1
 
+    def get_unicode_ptr(self,addr):
+        n = 0;
+        str = ""
+        while True:
+            c = self.get_byte_ptr(addr)
+            if c > 0:
+                str += chr(c)
+                addr += 2
+            else:
+                break
+        return str
+
     def push_byte(self,value):
         self.rsp.r64 = self.rsp.r64 - 1
         self.set_byte_ptr(self.rsp.r64,value)
