@@ -1259,7 +1259,8 @@ int bits;
             }
             break;
         case X86_INS_IDIV:
-            reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0;",insn,true);
+            reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = idiv(s_rax,sop0);",insn,true);
+            //reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;

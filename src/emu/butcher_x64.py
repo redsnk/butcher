@@ -473,6 +473,9 @@ class _cpu:
 
     def f_neg(self,b,p):
         return ~c_uint64(p).value + c_uint64(1).value
+
+    def idiv(self,a,b):
+        return int(a/b)
         
     def pow(self,b,p):
         r = 1

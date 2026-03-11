@@ -252,6 +252,9 @@ int bits;
     else if (!strcmp(name,"sub_of")) {
         return (strdup(F_SUB_OF));
     }
+    else if (!strcmp(name,"idiv")) {
+        return (strdup(F_IDIV));
+    }
     else if (!strcmp(name,"bits")) {
         char *buffer = (char *) malloc(1024);
         sprintf(buffer,"%i",insn->detail->x86.addr_size*8);

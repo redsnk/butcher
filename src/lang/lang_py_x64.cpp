@@ -25,6 +25,7 @@ Lang_Py_x64::Lang_Py_x64(int b) {
     F_ADD_CF = "cpu.add_flag_c(";
     F_NUM_CF = "cpu.num_flag_c(";
     F_SUB_OF = "cpu.sub_flag_o(";
+    F_IDIV = "cpu.idiv(";
     //F_SUB_CF = "cpu.sub_flag_c(";
     ENDF = ")";
     AND = "&";

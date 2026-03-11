@@ -24,6 +24,7 @@ class Lang_x64 : public Language {
     const char *F_ADD_CF = "";
     const char *F_NUM_CF = "";
     const char *F_SUB_OF = "";
+    const char *F_IDIV = "";
     //const char *F_SUB_CF = "";
     const char *ENDF = "";
     const char *AND = "";
