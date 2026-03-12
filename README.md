@@ -174,7 +174,7 @@ Inside the **Decrypt** function we identify two phases, **Base64 decoding** at *
 
 ![Decrypt.](./tutorial/decrypt.png "Decrypt.")
 
-10. We are going to extract de **Decrypt** function:
+10. We are going to extract the **DecryptDecoded** function:
 
 ![DecryptDecoded.](./tutorial/decdec.png "DecryptDecoded.")
 
@@ -319,7 +319,7 @@ label_0x44fcac9:
     return;                                                           // 0x44fcacd: ret
 ```
 
-14. Finally, we must patch de **main** function:
+14. Finally, we must patch de **main** function. Delphy strings have a 8 bytes header (4 bytes counter + 4 bytes length):
 
 ```
 int main (int argc, char **argv) {
@@ -352,7 +352,7 @@ struct _cpu c,*cpu;
     _eax = 0;
     func_0x44fc7ac(cpu);
     /* Insert code here ... */
-        uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
+    uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
     char *str = get_unicode_ptr(cpu,tmp);
     printf("%s\n",str);
     free(str);
