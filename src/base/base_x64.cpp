@@ -673,52 +673,94 @@ int bits;
             }
             break;
         case X86_INS_JE:
+            // (ZF=1)
             reg0 = lang_x64->Translate(handle,"get_zf();",insn,false);
             PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
         case X86_INS_JNE:
-            PrintLine(insn,1,lang_x64->E_JNE,insn->detail->x86.operands[0].imm);
+            // (ZF=0)
+            //PrintLine(insn,1,lang_x64->E_JNE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"!get_zf();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JA:
-            PrintLine(insn,1,lang_x64->E_JA,insn->detail->x86.operands[0].imm);
+            // (CF=0 and ZF=0)
+            //PrintLine(insn,1,lang_x64->E_JA,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"(!get_cf()) & (!get_zf());",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JAE:
-            PrintLine(insn,1,lang_x64->E_JAE,insn->detail->x86.operands[0].imm);
+            // (CF=0)
+            //PrintLine(insn,1,lang_x64->E_JAE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"!get_cf();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JL:
-            PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
+            // (SF!=OF)
+            //PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_sf() != get_of();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JLE:
-            PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
+            // (ZF=1 or SF!=OF)
+            //PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_zf() | (get_sf() != get_of());",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JG:
-            PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
+            // (ZF=0 and SF=OF)
+            //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"(!get_zf()) & (get_sf() == get_of());",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JGE:
-            PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
+            // (SF=OF)
+            //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_sf() == get_of();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JO:
-            PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
+            // (OF=1)
+            //PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_of();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JNO:
-            PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
+            // (OF=0)
+            //PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"!get_of();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JS:
-            PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
+            // (SF=1)
+            //PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,"get_sf();",insn,false);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            free(reg0);
             num++;
             break;
         case X86_INS_JNS:
+            // (SF=0)
             reg0 = lang_x64->Translate(handle,"!get_sf();",insn,false);
             PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
