@@ -7,7 +7,7 @@ With Butcher you can extract part of a binary as source code and use it in a new
 ## Can you put and example?
 Imagine you're analyzing a malware and you discover a function used to decrypt the configuration. With Butcher, you can extract this function as C or Python source code and use it into a different utility that decrypts malware configurations.
 ## Is Butcher a decompiler?
-Yes, it could be called a generic decompiler
+Yes, it could be called a generic decompiler.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
@@ -170,7 +170,7 @@ python3 secret.py 10
 
 Let's continue with a more complicated example.
 
-Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** y **Decrypt** at **044FCB37**.
+Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** y **DecryptDecoded** at **044FCB37**.
 
 ![Decrypt.](./tutorial/decrypt.png "Decrypt.")
 
@@ -278,7 +278,7 @@ void func_0x4198b4(struct _cpu *cpu) {
 
 13. Also, there are three jumps that **butcher** can not understand and must be patched:
 
-### 1
+### 1)
 
 ```
     //op_r(cpu,"jmp","eax");                                            // 0x436161:    jmp     eax
@@ -294,7 +294,7 @@ label_0x43616a:
     return;
 ```
 
-### 2
+### 2)
 
 ```
     //op_r(cpu,"jmp","eax");                                            // 0x44fc626:   jmp     eax
@@ -306,7 +306,7 @@ label_0x44fc62f:
     return;                                                           // 0x44fc632: ret
 ```
 
-### 3
+### 3)
 
 ```
     //op_r(cpu,"jmp","eax");                                            // 0x44fcac0: jmp     eax
