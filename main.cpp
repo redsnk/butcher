@@ -6,7 +6,7 @@
 #include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
 
-#define MY_VERSION  "v0.0.1"
+#define MY_VERSION  "v0.0.2"
 
 #define MAX_STR     (1024)
 
