@@ -170,7 +170,7 @@ python3 secret.py 10
 
 Let's continue with a more complicated example.
 
-Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** y **DecryptDecoded** at **044FCB37**.
+Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** and **DecryptDecoded** at **044FCB37**.
 
 ![Decrypt.](./tutorial/decrypt.png "Decrypt.")
 
