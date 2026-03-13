@@ -5,7 +5,7 @@
 
 class Lang_x64 : public Language {
     public:
-
+    /*
     const char *EQUAL = "";
     const char *NEQUAL = "";
     const char *GT = "";
@@ -101,6 +101,34 @@ class Lang_x64 : public Language {
     const char *E_S_GET_MEM = "";
     const char *E_LOAD_MEM = "";
     const char *E_SET_MEM = "";
+    */
+
+    virtual const char *OP_ALONE(void) = 0;
+    virtual const char *OP_SUBNAME(void) = 0;
+    virtual const char *OP_REG(void) = 0;
+    virtual const char *OP_IMM(void) = 0;
+    virtual const char *OP_MEM(void) = 0;
+    virtual const char *E_STACK_INIT(void) = 0;
+    virtual const char *E_IF_R_EQ_I(void) = 0;
+    virtual const char *E_ELIF_R_EQ_I(void) = 0;
+    virtual const char *E_ENDIF(void) = 0;
+    virtual const char *E_GET_MEM(void) = 0;
+    virtual const char *E_S_GET_MEM(void) = 0;
+    virtual const char *E_LOAD_MEM(void) = 0;
+    virtual const char *E_SET_MEM(void) = 0;
+    virtual const char *F_SET_ZF(void) = 0;
+    virtual const char *F_SET_SF(void) = 0;
+    virtual const char *F_SET_CF(void) = 0;
+    virtual const char *F_SET_OF(void) = 0;
+    virtual const char *F_GET_ZF(void) = 0;
+    virtual const char *F_GET_SF(void) = 0;
+    virtual const char *F_GET_CF(void) = 0;
+    virtual const char *F_GET_OF(void) = 0;
+    virtual const char *F_ADD_OF(void) = 0;
+    virtual const char *F_ADD_CF(void) = 0;
+    virtual const char *F_NUM_CF(void) = 0;
+    virtual const char *F_SUB_OF(void) = 0;
+    virtual const char *F_IDIV(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

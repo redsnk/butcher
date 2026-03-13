@@ -494,7 +494,7 @@ char out[1024];
     va_end(argptr);
     out[0] = 0;
     for (int n=0;n<indent;n++) {
-        strcat (out,lang_x64->INDENT);
+        strcat (out,lang_x64->INDENT());
     }
     strcat (out,buffer);
     char *p = out;
@@ -510,8 +510,8 @@ char out[1024];
         printf("%s\n", out);
     }
     else {
-        while (strlen(p) < lang_x64->COMM_SEP) strcat(p," ");
-        printf("%s%s 0x%llx:\t%s\t\t%s\n", out, lang_x64->COMM, insn->address, insn->mnemonic,insn->op_str);
+        while (strlen(p) < lang_x64->COMM_SEP()) strcat(p," ");
+        printf("%s%s 0x%llx:\t%s\t\t%s\n", out, lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
     }
 }
 
@@ -527,7 +527,7 @@ char *name;
         }
         else {
         */
-            printf(lang_x64->E_LABEL,addr);
+            printf(lang_x64->E_LABEL(),addr);
         //}
     }
 }
@@ -588,19 +588,19 @@ int bits;
                     free(reg0);
                 }
             }
-            PrintLine(insn,1,lang_x64->E_RETURN);
+            PrintLine(insn,1,lang_x64->E_RETURN());
             num++;
             break;
         case X86_INS_JMP:
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-                PrintLine(insn,1,lang_x64->E_GOTO,insn->detail->x86.operands[0].imm);
+                PrintLine(insn,1,lang_x64->E_GOTO(),insn->detail->x86.operands[0].imm);
                 num++;
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
-                        PrintLine(insn,1,lang_x64->E_JMP_FROM_IAT,lib,func);
+                        PrintLine(insn,1,lang_x64->E_JMP_FROM_IAT(),lib,func);
                         free(lib);
                         free(func);
                         num++;
@@ -611,7 +611,7 @@ int bits;
                         (insn->detail->x86.operands[0].mem.disp)) {
                     addr = insn->detail->x86.operands[0].mem.disp;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
-                        PrintLine(insn,1,lang_x64->E_JMP_FROM_IAT,lib,func);
+                        PrintLine(insn,1,lang_x64->E_JMP_FROM_IAT(),lib,func);
                         free(lib);
                         free(func);
                         num++;
@@ -628,10 +628,10 @@ int bits;
                         b = insn->detail->x86.addr_size;
                         if (arch->Get_Address_At(addr,&d,b*8)) {
                             if (arch->ValidMemory(d)) {
-                                PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I:lang_x64->E_ELIF_R_EQ_I,reg0,n);
+                                PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
                                 //PrintLine(insn,2,"case %i:",n);
-                                PrintLine(insn,2,lang_x64->E_GOTO,d);
-                                PrintLine(insn,1,lang_x64->E_ENDIF);
+                                PrintLine(insn,2,lang_x64->E_GOTO(),d);
+                                PrintLine(insn,1,lang_x64->E_ENDIF());
                             }
                             else {
                                 break;
@@ -675,7 +675,7 @@ int bits;
         case X86_INS_JE:
             // (ZF=1)
             reg0 = lang_x64->Translate(handle,"get_zf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -683,7 +683,7 @@ int bits;
             // (ZF=0)
             //PrintLine(insn,1,lang_x64->E_JNE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_zf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -691,7 +691,7 @@ int bits;
             // (CF=0 and ZF=0)
             //PrintLine(insn,1,lang_x64->E_JA,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"(!get_cf()) & (!get_zf());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -699,7 +699,7 @@ int bits;
             // (CF=0)
             //PrintLine(insn,1,lang_x64->E_JAE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_cf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -707,7 +707,7 @@ int bits;
             // (SF!=OF)
             //PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf() != get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -715,7 +715,7 @@ int bits;
             // (ZF=1 or SF!=OF)
             //PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_zf() | (get_sf() != get_of());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -723,7 +723,7 @@ int bits;
             // (ZF=0 and SF=OF)
             //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"(!get_zf()) & (get_sf() == get_of());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -731,7 +731,7 @@ int bits;
             // (SF=OF)
             //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf() == get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -739,7 +739,7 @@ int bits;
             // (OF=1)
             //PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -747,7 +747,7 @@ int bits;
             // (OF=0)
             //PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -755,14 +755,14 @@ int bits;
             // (SF=1)
             //PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
         case X86_INS_JNS:
             // (SF=0)
             reg0 = lang_x64->Translate(handle,"!get_sf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO,reg0,insn->detail->x86.operands[0].imm);
+            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
             free(reg0);
             num++;
             break;
@@ -921,9 +921,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s > %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 > op1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -934,9 +934,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s >= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"sop0 >= sop1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -947,9 +947,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s == %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 == op1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -960,9 +960,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s != %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 != op1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -973,9 +973,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s <= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 <= op1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -986,9 +986,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s < %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 < op1;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1116,9 +1116,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s != 0) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"(op0&op1) != 0;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1129,9 +1129,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s == 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(op0&op1) == 0;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1142,9 +1142,9 @@ int bits;
                         if (FlagsNotUsed(sc,num+1)) {
                             // "if (%s <= 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(sop0&sop1) <= 0;",insn,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO,reg0,next->detail->x86.operands[0].imm);
+                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1335,6 +1335,7 @@ int bits;
                 free(reg0);
             }
             break;
+        /*
         case X86_INS_MOVABS:
             // movabs		rdx, 0x5f3ae6d888f298a2
             reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
@@ -1342,6 +1343,7 @@ int bits;
             free(reg0);
             num++;
             break;
+        */
         case X86_INS_SETNE:
             //reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi;",insn,true);
             reg0 = lang_x64->Translate(handle,".if !get_zf() then op0 = 1 else op0 = 0 fi;",insn,true);
@@ -1377,6 +1379,8 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_MOVABS:
+            bits = 0;
         case X86_INS_MOVAPS:
         case X86_INS_MOVUPS:
         case X86_INS_MOVD:
@@ -1469,15 +1473,15 @@ int bits;
                 addr = insn->detail->x86.operands[0].imm;
                 name = c->GetFunctionName(addr);
                 if (name != NULL) {
-                    PrintLine(insn,1,lang_x64->E_FUNC_NAME,name);
+                    PrintLine(insn,1,lang_x64->E_FUNC_NAME(),name);
                     free(name);
                 }
                 else {
                     if (!Excluded(addr)) {
-                        PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                        PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
                     }
                     else {
-                        PrintLine(insn,0,lang_x64->E_SPACE);
+                        PrintLine(insn,0,lang_x64->E_SPACE());
                     }
                 }
                 num++;
@@ -1486,7 +1490,7 @@ int bits;
                 if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
-                        PrintLine(insn,1,lang_x64->E_CALL_FROM_IAT,lib,func);
+                        PrintLine(insn,1,lang_x64->E_CALL_FROM_IAT(),lib,func);
                         free(lib);
                         free(func);
                         num++;
@@ -1497,10 +1501,10 @@ int bits;
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
                         if (arch->ValidMemory(addr)) {
                             if (!Excluded(addr)) {
-                                PrintLine(insn,1,lang_x64->E_FUNC_ADDR,addr);
+                                PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
                             }
                             else {
-                                PrintLine(insn,0,lang_x64->E_SPACE);
+                                PrintLine(insn,0,lang_x64->E_SPACE());
                             }
                             num++;
                         }
@@ -1540,17 +1544,17 @@ cs_insn *insn;
         switch (insn->detail->x86.operands[n].type) {
             case X86_OP_REG:
                 strcat(subname,"r");
-                sprintf(buffer,lang_x64->OP_REG,reg_name(handle,insn->detail->x86.operands[n].reg));
+                sprintf(buffer,lang_x64->OP_REG(),reg_name(handle,insn->detail->x86.operands[n].reg));
                 strcat(params,buffer);
                 break;
             case X86_OP_IMM:
                 strcat(subname,"i");
-                sprintf(buffer,lang_x64->OP_IMM,insn->detail->x86.operands[n].imm);
+                sprintf(buffer,lang_x64->OP_IMM(),insn->detail->x86.operands[n].imm);
                 strcat(params,buffer);
                 break;
             case X86_OP_MEM:
                 strcat(subname,"m");
-                sprintf(buffer,lang_x64->OP_MEM,reg_name(handle,insn->detail->x86.operands[n].mem.base),
+                sprintf(buffer,lang_x64->OP_MEM(),reg_name(handle,insn->detail->x86.operands[n].mem.base),
                                                 reg_name(handle,insn->detail->x86.operands[n].mem.index),
                                                 insn->detail->x86.operands[n].mem.scale,
                                                 insn->detail->x86.operands[n].mem.disp);
@@ -1566,9 +1570,9 @@ cs_insn *insn;
         params[l-1] = 0;
     }
     if (insn->detail->x86.op_count) {
-        PrintLine(insn,1,lang_x64->OP_SUBNAME,subname,insn->mnemonic,params);
+        PrintLine(insn,1,lang_x64->OP_SUBNAME(),subname,insn->mnemonic,params);
     } else {
-        PrintLine(insn,1,lang_x64->OP_ALONE,insn->mnemonic);
+        PrintLine(insn,1,lang_x64->OP_ALONE(),insn->mnemonic);
     }
     return (num+1);
 }
@@ -1664,12 +1668,12 @@ int count,n;
         sections = arch->GetSections(&count);
         if (sections != NULL) {
             for (n=0;n<count;n++) {
-                PrintLine(NULL,1,lang_x64->E_LOAD_MEM,arch->GetFileName(),sections[n].d_Offset,sections[n].d_Size,sections[n].v_Address,sections[n].v_Size);
+                PrintLine(NULL,1,lang_x64->E_LOAD_MEM(),arch->GetFileName(),sections[n].d_Offset,sections[n].d_Size,sections[n].v_Address,sections[n].v_Size);
             }
             free(sections);
         }
     }
-    printf(lang_x64->E_STACK_INIT,lang_x64->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
+    printf(lang_x64->E_STACK_INIT(),lang_x64->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
                                 lang_x64->reg_name(handle,X86_REG_RBP),
                                 lang_x64->reg_name(handle,X86_REG_RSP));
     //printf(C_FOOTER_2,c->ep);

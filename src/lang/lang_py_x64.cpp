@@ -2,6 +2,7 @@
 
 Lang_Py_x64::Lang_Py_x64(int b) {
     bits = b;
+    /*
     COMM = "#";
     COMM_SEP = 70;
     INDENT = "    ";
@@ -103,6 +104,7 @@ Lang_Py_x64::Lang_Py_x64(int b) {
     E_S_GET_MEM =           "cpu.s_get_%s_ptr(%s)";
     E_LOAD_MEM =            "cpu.load_mem(\"%s\",0x%llx,0x%llx,0x%llx,0x%llx)";
     E_SET_MEM =             "cpu.set_%s_ptr(%s,%s)";
+    */
 }
 
 #define PY_HEADER "\
@@ -244,4 +246,256 @@ char *buffer;
         sprintf(buffer,"cpu.s_%s",cs_reg_name(handle,id_reg));
     }
     return (buffer);
+}
+
+const char *Lang_Py_x64::COMM(void) {
+    return ("");
+}
+
+int Lang_Py_x64::COMM_SEP(void) {
+    return (0);
+}
+
+const char *Lang_Py_x64::INDENT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::ENDS(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_LABEL(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_CALL_FROM_IAT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_FUNC_NAME(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_FUNC_ADDR(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_RETURN(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_GOTO(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_JMP_FROM_IAT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_ENDIF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_JCC_GOTO(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_SPACE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OP_ALONE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OP_SUBNAME(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OP_REG(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OP_IMM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OP_MEM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_STACK_INIT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_IF_R_EQ_I(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_ELIF_R_EQ_I(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_GET_MEM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_S_GET_MEM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_LOAD_MEM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_SET_MEM(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_SET_ZF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_SET_SF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_SET_CF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_SET_OF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_GET_ZF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_GET_SF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_GET_CF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_GET_OF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_ADD_OF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_ADD_CF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_NUM_CF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_SUB_OF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_IDIV(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::EQUAL(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::NEQUAL(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::GT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::LT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::GTE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::LTE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::ENDF(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::AND(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::OR(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::XOR(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::SHL(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::SHR(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_TRUE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_FALSE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_PUSH(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_POP(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_POW(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_IFTHENELSE(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_IFTHEN(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_NOT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_NEG(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::F_PSHUFD(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_NOT(void) {
+    return ("");
+}
+
+const char *Lang_Py_x64::E_LABEL_NAME(void) {
+    return ("");
 }

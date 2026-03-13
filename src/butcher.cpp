@@ -48,14 +48,14 @@ uint8_t *mem;
         c = new Code(address);
     }
     if (c->HasAddr(address,parent)) {
-        if (ltraces) printf("%s *** GetCode repeated 0x%llx, exit ...\n",lang->COMM,address);
+        if (ltraces) printf("%s *** GetCode repeated 0x%llx, exit ...\n",lang->COMM(),address);
         return (c);
     }
     c->NewSubCode(&sc);
     sc.name = name;
     sc.parent = parent;
     sc.first = address;
-    if (ltraces) printf("%s *** GetCode 0x%llx (id=%i,parent=%i)\n",lang->COMM,sc.first,sc.id,sc.parent);
+    if (ltraces) printf("%s *** GetCode 0x%llx (id=%i,parent=%i)\n",lang->COMM(),sc.first,sc.id,sc.parent);
     lexit = false;
     while (!lexit) {
         uint8_t *m = arch->GetMemory(sc.first,max_subcode,&read);
@@ -65,10 +65,10 @@ uint8_t *mem;
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
-                    if (ltraces) printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM, sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                    if (ltraces) printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM(), sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
                     if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
                         // New submem
-                        if (ltraces) printf("%s *** Add submem 0x%llx(%li)\n",lang->COMM,addr,count);
+                        if (ltraces) printf("%s *** Add submem 0x%llx(%li)\n",lang->COMM(),addr,count);
                         c->AddSubMem(addr,mem,count);
                         free(mem);
                     }
@@ -84,17 +84,17 @@ uint8_t *mem;
                             calls[ncalls].addr = addr;
                             calls[ncalls].name = NULL;
                             if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
-                                if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM,addr,calls[ncalls].name);
+                                if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM(),addr,calls[ncalls].name);
                             }
                             else {
-                                if (ltraces) printf("%s *** Add call 0x%llx\n",lang->COMM,addr);
+                                if (ltraces) printf("%s *** Add call 0x%llx\n",lang->COMM(),addr);
                             }
                             ncalls++;
                         }
                     }
                     else if (IsJcc(&sc.insn[n],&addr)) {
                         //printf("jcc 0x%llx\n",addr);
-                        if (ltraces) printf("%s *** Add jcc 0x%llx\n",lang->COMM,addr);
+                        if (ltraces) printf("%s *** Add jcc 0x%llx\n",lang->COMM(),addr);
                         jmps.insert(addr);
                         c->labels.insert(addr);
                     }
@@ -115,7 +115,7 @@ uint8_t *mem;
                     }
                     if (lend) {
                         // End subcode
-                        if (ltraces) printf("%s *** End of subcode 0x%llx\n",lang->COMM,sc.first);
+                        if (ltraces) printf("%s *** End of subcode 0x%llx\n",lang->COMM(),sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;
                         break;
@@ -132,7 +132,7 @@ uint8_t *mem;
                     max_subcode += STEP_MEM_GETCODE;
                 } else {
                     // Done
-                    if (ltraces) printf("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM,sc.first,sc.last-sc.first,sc.parent);
+                    if (ltraces) printf("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM(),sc.first,sc.last-sc.first,sc.parent);
                     c->AddSubcode(&sc);
                 }
             } else {

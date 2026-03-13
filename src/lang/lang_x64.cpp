@@ -65,7 +65,7 @@ char *str;
                 strcpy(buffer,str);
             }
             else {
-                sprintf(buffer,(sign)?E_S_GET_MEM:E_GET_MEM,ptr(op),str);
+                sprintf(buffer,(sign)?E_S_GET_MEM():E_GET_MEM(),ptr(op),str);
             }
             free(str);
             return (strdup(buffer));
@@ -217,43 +217,43 @@ int bits;
         return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_SP,X86_REG_ESP,X86_REG_RSP,false));
     }
     else if (!strcmp(name,"zf")) {
-        return (strdup(F_SET_ZF));
+        return (strdup(F_SET_ZF()));
     }
     else if (!strcmp(name,"sf")) {
-        return (strdup(F_SET_SF));
+        return (strdup(F_SET_SF()));
     }
     else if (!strcmp(name,"cf")) {
-        return (strdup(F_SET_CF));
+        return (strdup(F_SET_CF()));
     }
     else if (!strcmp(name,"of")) {
-        return (strdup(F_SET_OF));
+        return (strdup(F_SET_OF()));
     }
     else if (!strcmp(name,"get_zf")) {
-        return (strdup(F_GET_ZF));
+        return (strdup(F_GET_ZF()));
     }
     else if (!strcmp(name,"get_sf")) {
-        return (strdup(F_GET_SF));
+        return (strdup(F_GET_SF()));
     }
     else if (!strcmp(name,"get_cf")) {
-        return (strdup(F_GET_CF));
+        return (strdup(F_GET_CF()));
     }
     else if (!strcmp(name,"get_of")) {
-        return (strdup(F_GET_OF));
+        return (strdup(F_GET_OF()));
     }
     else if (!strcmp(name,"add_of")) {
-        return (strdup(F_ADD_OF));
+        return (strdup(F_ADD_OF()));
     }
     else if (!strcmp(name,"add_cf")) {
-        return (strdup(F_ADD_CF));
+        return (strdup(F_ADD_CF()));
     }
     else if (!strcmp(name,"num_cf")) {
-        return (strdup(F_NUM_CF));
+        return (strdup(F_NUM_CF()));
     }
     else if (!strcmp(name,"sub_of")) {
-        return (strdup(F_SUB_OF));
+        return (strdup(F_SUB_OF()));
     }
     else if (!strcmp(name,"idiv")) {
-        return (strdup(F_IDIV));
+        return (strdup(F_IDIV()));
     }
     else if (!strcmp(name,"bits")) {
         char *buffer = (char *) malloc(1024);
@@ -261,28 +261,28 @@ int bits;
         return (buffer);
     }
     else if (!strcmp(name,"true")) {
-        return (strdup(F_TRUE));
+        return (strdup(F_TRUE()));
     }
     else if (!strcmp(name,"false")) {
-        return (strdup(F_FALSE));
+        return (strdup(F_FALSE()));
     }
     else if (!strcmp(name,"push")) {
-        return (strdup(F_PUSH));
+        return (strdup(F_PUSH()));
     }
     else if (!strcmp(name,"pop")) {
-        return (strdup(F_POP));
+        return (strdup(F_POP()));
     }
     else if (!strcmp(name,"pow")) {
-        return (strdup(F_POW));
+        return (strdup(F_POW()));
     }
     else if (!strcmp(name,"not")) {
-        return (strdup(F_NOT));
+        return (strdup(F_NOT()));
     }
     else if (!strcmp(name,"neg")) {
-        return (strdup(F_NEG));
+        return (strdup(F_NEG()));
     }
     else if (!strcmp(name,"pshufd")) {
-        return (strdup(F_PSHUFD));
+        return (strdup(F_PSHUFD()));
     }
     return (strdup("<Translate_var error>"));
 }
@@ -321,7 +321,7 @@ int n;
         op = NULL;
         switch (e->items[n].id) {
             case _id_item::INDENT:
-                strcat (buffer,INDENT);
+                strcat (buffer,INDENT());
                 e->del_item(n);
                 n -= 1;
                 break;
@@ -349,27 +349,27 @@ int n;
             case _id_item::MOD:
                 if (op == NULL) op = "%%";
             case _id_item::SHL:
-                if (op == NULL) op = SHL;
+                if (op == NULL) op = SHL();
             case _id_item::SHR:
-                if (op == NULL) op = SHR;
+                if (op == NULL) op = SHR();
             case _id_item::EQUAL:
-                if (op == NULL) op = EQUAL;
+                if (op == NULL) op = EQUAL();
             case _id_item::NEQUAL:
-                if (op == NULL) op = NEQUAL;
+                if (op == NULL) op = NEQUAL();
             case _id_item::GT:
-                if (op == NULL) op = GT;
+                if (op == NULL) op = GT();
             case _id_item::LT:
-                if (op == NULL) op = LT;
+                if (op == NULL) op = LT();
             case _id_item::GTE:
-                if (op == NULL) op = GTE;
+                if (op == NULL) op = GTE();
             case _id_item::LTE:
-                if (op == NULL) op = LTE;
+                if (op == NULL) op = LTE();
             case _id_item::AND:
-                if (op == NULL) op = AND;
+                if (op == NULL) op = AND();
             case _id_item::OR:
-                if (op == NULL) op = OR;
+                if (op == NULL) op = OR();
             case _id_item::XOR:
-                if (op == NULL) op = XOR;
+                if (op == NULL) op = XOR();
             case _id_item::LIST:
                 if (op == NULL) op = ",";
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
@@ -393,7 +393,7 @@ int n;
                 }
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
                 if (lmem) {
-                    sprintf(tmp,E_SET_MEM,ptr(insn->detail->x86.operands[0]),it1,it2);
+                    sprintf(tmp,E_SET_MEM(),ptr(insn->detail->x86.operands[0]),it1,it2);
                 }
                 else {
                     sprintf(tmp,"%s = %s",it1,it2);
@@ -406,14 +406,14 @@ int n;
                 break;
             case _id_item::FUNC_VOID:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,false);
-                sprintf(tmp,"%s%s",it1,ENDF);
+                sprintf(tmp,"%s%s",it1,ENDF());
                 free(it1);
                 e->res_item(n,tmp);
                 break;
             case _id_item::FUNCTION:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,"%s%s%s",it1,it2,ENDF);
+                sprintf(tmp,"%s%s%s",it1,it2,ENDF());
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
@@ -423,7 +423,7 @@ int n;
             case _id_item::IFTHEN:
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,E_IFTHEN,it1,it2);
+                sprintf(tmp,E_IFTHEN(),it1,it2);
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
@@ -435,7 +435,7 @@ int n;
                 it1 = Translate_item(handle,insn,&e->items[n-3],false);
                 it2 = Translate_item(handle,insn,&e->items[n-2],false);
                 it3 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,E_IFTHENELSE,it1,it2,it3);
+                sprintf(tmp,E_IFTHENELSE(),it1,it2,it3);
                 free(it3);
                 free(it2);
                 free(it1);
@@ -454,7 +454,7 @@ int n;
                 break;
             case _id_item::NOT:
                 it1 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,"%s %s",E_NOT,it1);
+                sprintf(tmp,"%s %s",E_NOT(),it1);
                 free(it1);
                 e->res_item(n,tmp);
                 e->del_item(n-1);
@@ -473,7 +473,7 @@ int n;
                     e->del_item(n);
                     n -= 1;
                 }
-                if (ends) strcat(buffer,ENDS);
+                if (ends) strcat(buffer,ENDS());
                 break;
             default:
                 break;

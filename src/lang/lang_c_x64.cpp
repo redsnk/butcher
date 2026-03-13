@@ -1,6 +1,7 @@
 #include "lang_c_x64.hpp"
 
 Lang_C_x64::Lang_C_x64() {
+    /*
     COMM = "//";
     COMM_SEP = 70;
     INDENT = "    ";
@@ -102,6 +103,7 @@ Lang_C_x64::Lang_C_x64() {
     E_S_GET_MEM =           "s_get_%s_ptr(%s)";
     E_LOAD_MEM =            "load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);";
     E_SET_MEM =             "_set_%s_ptr(%s,%s)";
+    */
 }
 
 #define C_HEADER "\
@@ -227,5 +229,258 @@ char *buffer;
     }
     return (buffer);
 }
+
+const char *Lang_C_x64::COMM(void) {
+    return ("//");
+}
+
+int Lang_C_x64::COMM_SEP(void) {
+    return (70);
+}
+
+const char *Lang_C_x64::INDENT(void) {
+    return ("    ");
+}
+
+const char *Lang_C_x64::ENDS(void) {
+    return (";");
+}
+
+const char *Lang_C_x64::E_LABEL(void) {
+    return ("label_0x%llx:\n");
+}
+
+const char *Lang_C_x64::E_CALL_FROM_IAT(void) {
+    return ("call_from_iat(cpu,\"%s\",\"%s\");");
+}
+
+const char *Lang_C_x64::E_FUNC_NAME(void) {
+    return ("%s(cpu);");
+}
+
+const char *Lang_C_x64::E_FUNC_ADDR(void) {
+    return ("func_0x%llx(cpu);");
+}
+
+const char *Lang_C_x64::E_RETURN(void) {
+    return ("return;");
+}
+
+const char *Lang_C_x64::E_GOTO(void) {
+    return ("goto label_0x%llx;");
+}
+
+const char *Lang_C_x64::E_JMP_FROM_IAT(void) {
+    return ("jmp_from_iat(cpu,\"%s\",\"%s\");");
+}
+
+const char *Lang_C_x64::E_ENDIF(void) {
+    return ("}");
+}
+
+const char *Lang_C_x64::E_JCC_GOTO(void) {
+    return ("if (%s) goto label_0x%llx;");
+}
+
+const char *Lang_C_x64::E_SPACE(void) {
+    return ("");
+}
+
+const char *Lang_C_x64::OP_ALONE(void) {
+    return ("op(cpu,\"%s\");");
+}
+
+const char *Lang_C_x64::OP_SUBNAME(void) {
+    return ("op_%s(cpu,\"%s\",%s);");
+}
+
+const char *Lang_C_x64::OP_REG(void) {
+    return ("\"%s\",");
+}
+
+const char *Lang_C_x64::OP_IMM(void) {
+    return ("0x%llx,");
+}
+
+const char *Lang_C_x64::OP_MEM(void) {
+    return ("\"%s\",\"%s\",%i,%+lld,");
+}
+
+const char *Lang_C_x64::E_STACK_INIT(void) {
+    return ("    %s = 0x%llx;\n    %s = %s;\n");
+}
+
+const char *Lang_C_x64::E_IF_R_EQ_I(void) {
+    return ("if (%s == 0x%llx) {");
+}
+
+const char *Lang_C_x64::E_ELIF_R_EQ_I(void) {
+    return ("else if (%s == 0x%llx) {");
+}
+
+const char *Lang_C_x64::E_GET_MEM(void) {
+    return ("_get_%s_ptr(%s)");
+}
+
+const char *Lang_C_x64::E_S_GET_MEM(void) {
+    return ("s_get_%s_ptr(%s)");
+}
+
+const char *Lang_C_x64::E_LOAD_MEM(void) {
+    return ("load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);");
+}
+
+const char *Lang_C_x64::E_SET_MEM(void) {
+    return ("_set_%s_ptr(%s,%s)");
+}
+
+const char *Lang_C_x64::F_SET_ZF(void) {
+    return ("set_flag_z(cpu,");
+}
+
+const char *Lang_C_x64::F_SET_SF(void) {
+    return ("set_flag_s(cpu,");
+}
+
+const char *Lang_C_x64::F_SET_CF(void) {
+    return ("set_flag_c(cpu,");
+}
+
+const char *Lang_C_x64::F_SET_OF(void) {
+    return ("set_flag_o(cpu,");
+}
+
+const char *Lang_C_x64::F_GET_ZF(void) {
+    return ("flag_z(cpu");
+}
+
+const char *Lang_C_x64::F_GET_SF(void) {
+    return ("flag_s(cpu");
+}
+
+const char *Lang_C_x64::F_GET_CF(void) {
+    return ("flag_c(cpu");
+}
+
+const char *Lang_C_x64::F_GET_OF(void) {
+    return ("flag_o(cpu");
+}
+
+const char *Lang_C_x64::F_ADD_OF(void) {
+    return ("add_flag_o(cpu,");
+}
+
+const char *Lang_C_x64::F_ADD_CF(void) {
+    return ("add_flag_c(cpu,");
+}
+
+const char *Lang_C_x64::F_NUM_CF(void) {
+    return ("num_flag_c(cpu");
+}
+
+const char *Lang_C_x64::F_SUB_OF(void) {
+    return ("sub_flag_o(cpu,");
+}
+
+const char *Lang_C_x64::F_IDIV(void) {
+    return ("idiv(");
+}
+
+const char *Lang_C_x64::EQUAL(void) {
+    return ("==");
+}
+
+const char *Lang_C_x64::NEQUAL(void) {
+    return ("!=");
+}
+
+const char *Lang_C_x64::GT(void) {
+    return (">");
+}
+
+const char *Lang_C_x64::LT(void) {
+    return ("<");
+}
+
+const char *Lang_C_x64::GTE(void) {
+    return (">=");
+}
+
+const char *Lang_C_x64::LTE(void) {
+    return ("<=");
+}
+
+const char *Lang_C_x64::ENDF(void) {
+    return (")");
+}
+
+const char *Lang_C_x64::AND(void) {
+    return ("&");
+}
+
+const char *Lang_C_x64::OR(void) {
+    return ("|");
+}
+
+const char *Lang_C_x64::XOR(void) {
+    return ("^");
+}
+
+const char *Lang_C_x64::SHL(void) {
+    return ("<<");
+}
+
+const char *Lang_C_x64::SHR(void) {
+    return (">>");
+}
+
+const char *Lang_C_x64::F_TRUE(void) {
+    return ("1");
+}
+
+const char *Lang_C_x64::F_FALSE(void) {
+    return ("0");
+}
+
+const char *Lang_C_x64::F_PUSH(void) {
+    return ("push(cpu,");
+}
+
+const char *Lang_C_x64::F_POP(void) {
+    return ("pop(cpu,");
+}
+
+const char *Lang_C_x64::F_POW(void) {
+    return ("Pow(");
+}
+
+const char *Lang_C_x64::E_IFTHENELSE(void) {
+    return ("if (%s) { %s; } else  { %s; }");
+}
+
+const char *Lang_C_x64::E_IFTHEN(void) {
+    return ("if (%s) { %s; }");
+}
+
+const char *Lang_C_x64::F_NOT(void) {
+    return ("not(");
+}
+
+const char *Lang_C_x64::F_NEG(void) {
+    return ("neg(");
+}
+
+const char *Lang_C_x64::F_PSHUFD(void) {
+    return ("pshufd(");
+}
+
+const char *Lang_C_x64::E_NOT(void) {
+    return ("!");
+}
+
+const char *Lang_C_x64::E_LABEL_NAME(void) {
+    return ("label_%s:\n");
+}
+
 
 
