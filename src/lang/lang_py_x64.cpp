@@ -249,15 +249,15 @@ char *buffer;
 }
 
 const char *Lang_Py_x64::COMM(void) {
-    return ("");
+    return ("#");
 }
 
 int Lang_Py_x64::COMM_SEP(void) {
-    return (0);
+    return (70);
 }
 
 const char *Lang_Py_x64::INDENT(void) {
-    return ("");
+    return ("    ");
 }
 
 const char *Lang_Py_x64::ENDS(void) {
@@ -265,31 +265,31 @@ const char *Lang_Py_x64::ENDS(void) {
 }
 
 const char *Lang_Py_x64::E_LABEL(void) {
-    return ("");
+    return ("    label .label_0x%llx\n");
 }
 
 const char *Lang_Py_x64::E_CALL_FROM_IAT(void) {
-    return ("");
+    return ("cpu.call_from_iat(\"%s\",\"%s\")");
 }
 
 const char *Lang_Py_x64::E_FUNC_NAME(void) {
-    return ("");
+    return ("%s(cpu)");
 }
 
 const char *Lang_Py_x64::E_FUNC_ADDR(void) {
-    return ("");
+    return ("func_0x%llx(cpu)");
 }
 
 const char *Lang_Py_x64::E_RETURN(void) {
-    return ("");
+    return ("goto .label_return");
 }
 
 const char *Lang_Py_x64::E_GOTO(void) {
-    return ("");
+    return ("goto .label_0x%llx");
 }
 
 const char *Lang_Py_x64::E_JMP_FROM_IAT(void) {
-    return ("");
+    return ("cpu.jmp_from_iat(\"%s\",\"%s\");");
 }
 
 const char *Lang_Py_x64::E_ENDIF(void) {
@@ -297,7 +297,7 @@ const char *Lang_Py_x64::E_ENDIF(void) {
 }
 
 const char *Lang_Py_x64::E_JCC_GOTO(void) {
-    return ("");
+    return ("if %s:\n        goto .label_0x%llx");
 }
 
 const char *Lang_Py_x64::E_SPACE(void) {
@@ -305,197 +305,197 @@ const char *Lang_Py_x64::E_SPACE(void) {
 }
 
 const char *Lang_Py_x64::OP_ALONE(void) {
-    return ("");
+    return ("cpu.op(\"%s\")");
 }
 
 const char *Lang_Py_x64::OP_SUBNAME(void) {
-    return ("");
+    return ("cpu.op_%s(\"%s\",%s)");
 }
 
 const char *Lang_Py_x64::OP_REG(void) {
-    return ("");
+    return ("\"%s\",");
 }
 
 const char *Lang_Py_x64::OP_IMM(void) {
-    return ("");
+    return ("0x%llx,");
 }
 
 const char *Lang_Py_x64::OP_MEM(void) {
-    return ("");
+    return ("\"%s\",\"%s\",%i,%+lld,");
 }
 
 const char *Lang_Py_x64::E_STACK_INIT(void) {
-    return ("");
+    return ("    %s = 0x%llx\n    %s = %s\n");
 }
 
 const char *Lang_Py_x64::E_IF_R_EQ_I(void) {
-    return ("");
+    return ("if %s == 0x%llx:");
 }
 
 const char *Lang_Py_x64::E_ELIF_R_EQ_I(void) {
-    return ("");
+    return ("elif %s == 0x%llx:");
 }
 
 const char *Lang_Py_x64::E_GET_MEM(void) {
-    return ("");
+    return ("cpu.get_%s_ptr(%s)");
 }
 
 const char *Lang_Py_x64::E_S_GET_MEM(void) {
-    return ("");
+    return ("cpu.s_get_%s_ptr(%s)");
 }
 
 const char *Lang_Py_x64::E_LOAD_MEM(void) {
-    return ("");
+    return ("cpu.load_mem(\"%s\",0x%llx,0x%llx,0x%llx,0x%llx)");
 }
 
 const char *Lang_Py_x64::E_SET_MEM(void) {
-    return ("");
+    return ("cpu.set_%s_ptr(%s,%s)");
 }
 
 const char *Lang_Py_x64::F_SET_ZF(void) {
-    return ("");
+    return ("cpu.flag_z(");
 }
 
 const char *Lang_Py_x64::F_SET_SF(void) {
-    return ("");
+    return ("cpu.flag_s(");
 }
 
 const char *Lang_Py_x64::F_SET_CF(void) {
-    return ("");
+    return ("cpu.flag_c(");
 }
 
 const char *Lang_Py_x64::F_SET_OF(void) {
-    return ("");
+    return ("cpu.flag_o(");
 }
 
 const char *Lang_Py_x64::F_GET_ZF(void) {
-    return ("");
+    return ("cpu.get_flag_z(");
 }
 
 const char *Lang_Py_x64::F_GET_SF(void) {
-    return ("");
+    return ("cpu.get_flag_s(");
 }
 
 const char *Lang_Py_x64::F_GET_CF(void) {
-    return ("");
+    return ("cpu.get_flag_c(");
 }
 
 const char *Lang_Py_x64::F_GET_OF(void) {
-    return ("");
+    return ("cpu.get_flag_o(");
 }
 
 const char *Lang_Py_x64::F_ADD_OF(void) {
-    return ("");
+    return ("cpu.add_flag_o(");
 }
 
 const char *Lang_Py_x64::F_ADD_CF(void) {
-    return ("");
+    return ("cpu.add_flag_c(");
 }
 
 const char *Lang_Py_x64::F_NUM_CF(void) {
-    return ("");
+    return ("cpu.num_flag_c(");
 }
 
 const char *Lang_Py_x64::F_SUB_OF(void) {
-    return ("");
+    return ("cpu.sub_flag_o(");
 }
 
 const char *Lang_Py_x64::F_IDIV(void) {
-    return ("");
+    return ("cpu.idiv(");
 }
 
 const char *Lang_Py_x64::EQUAL(void) {
-    return ("");
+    return ("==");
 }
 
 const char *Lang_Py_x64::NEQUAL(void) {
-    return ("");
+    return ("!=");
 }
 
 const char *Lang_Py_x64::GT(void) {
-    return ("");
+    return (">");
 }
 
 const char *Lang_Py_x64::LT(void) {
-    return ("");
+    return ("<");
 }
 
 const char *Lang_Py_x64::GTE(void) {
-    return ("");
+    return (">=");
 }
 
 const char *Lang_Py_x64::LTE(void) {
-    return ("");
+    return ("<=");
 }
 
 const char *Lang_Py_x64::ENDF(void) {
-    return ("");
+    return (")");
 }
 
 const char *Lang_Py_x64::AND(void) {
-    return ("");
+    return ("&");
 }
 
 const char *Lang_Py_x64::OR(void) {
-    return ("");
+    return ("|");
 }
 
 const char *Lang_Py_x64::XOR(void) {
-    return ("");
+    return ("^");
 }
 
 const char *Lang_Py_x64::SHL(void) {
-    return ("");
+    return ("<<");
 }
 
 const char *Lang_Py_x64::SHR(void) {
-    return ("");
+    return (">>");
 }
 
 const char *Lang_Py_x64::F_TRUE(void) {
-    return ("");
+    return ("True");
 }
 
 const char *Lang_Py_x64::F_FALSE(void) {
-    return ("");
+    return ("False");
 }
 
 const char *Lang_Py_x64::F_PUSH(void) {
-    return ("");
+    return ("cpu.push(");
 }
 
 const char *Lang_Py_x64::F_POP(void) {
-    return ("");
+    return ("cpu.pop(");
 }
 
 const char *Lang_Py_x64::F_POW(void) {
-    return ("");
+    return ("cpu.pow(");
 }
 
 const char *Lang_Py_x64::E_IFTHENELSE(void) {
-    return ("");
+    return ("if %s:\n        %s\n    else:\n        %s");
 }
 
 const char *Lang_Py_x64::E_IFTHEN(void) {
-    return ("");
+    return ("if %s:\n        %s");
 }
 
 const char *Lang_Py_x64::F_NOT(void) {
-    return ("");
+    return ("cpu.f_not(");
 }
 
 const char *Lang_Py_x64::F_NEG(void) {
-    return ("");
+    return ("cpu.f_neg(");
 }
 
 const char *Lang_Py_x64::F_PSHUFD(void) {
-    return ("");
+    return ("cpu.pshufd(");
 }
 
 const char *Lang_Py_x64::E_NOT(void) {
-    return ("");
+    return ("not");
 }
 
 const char *Lang_Py_x64::E_LABEL_NAME(void) {
-    return ("");
+    return ("    label .label_%s\n");
 }
