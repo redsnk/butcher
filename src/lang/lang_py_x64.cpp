@@ -264,10 +264,6 @@ const char *Lang_Py_x64::ENDS(void) {
     return ("");
 }
 
-const char *Lang_Py_x64::E_LABEL(void) {
-    return ("    label .label_0x%llx\n");
-}
-
 const char *Lang_Py_x64::E_CALL_FROM_IAT(void) {
     return ("cpu.call_from_iat(\"%s\",\"%s\")");
 }
@@ -284,20 +280,12 @@ const char *Lang_Py_x64::E_RETURN(void) {
     return ("goto .label_return");
 }
 
-const char *Lang_Py_x64::E_GOTO(void) {
-    return ("goto .label_0x%llx");
-}
-
 const char *Lang_Py_x64::E_JMP_FROM_IAT(void) {
     return ("cpu.jmp_from_iat(\"%s\",\"%s\");");
 }
 
 const char *Lang_Py_x64::E_ENDIF(void) {
     return ("");
-}
-
-const char *Lang_Py_x64::E_JCC_GOTO(void) {
-    return ("if %s:\n        goto .label_0x%llx");
 }
 
 const char *Lang_Py_x64::E_SPACE(void) {
@@ -497,5 +485,21 @@ const char *Lang_Py_x64::E_NOT(void) {
 }
 
 const char *Lang_Py_x64::E_LABEL_NAME(void) {
-    return ("    label .label_%s\n");
+    return (".label_%s");
+}
+
+const char *Lang_Py_x64::E_LABEL_ADDR(void) {
+    return (".label_0x%llx");
+}
+
+const char *Lang_Py_x64::E_LABEL(void) {
+    return ("    label %s\n");
+}
+
+const char *Lang_Py_x64::E_GOTO(void) {
+    return ("goto %s");
+}
+
+const char *Lang_Py_x64::E_JCC_GOTO(void) {
+    return ("if %s:\n        goto %s");
 }

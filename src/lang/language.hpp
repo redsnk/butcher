@@ -49,6 +49,7 @@ class Language {
     virtual const char *F_PSHUFD(void) = 0;
     virtual const char *E_NOT(void) = 0;
     virtual const char *E_LABEL_NAME(void) = 0;
+    virtual const char *E_LABEL_ADDR(void) = 0;
     
     virtual const char *E_LABEL(void) = 0;
     virtual const char *E_CALL_FROM_IAT(void) = 0;

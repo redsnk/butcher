@@ -28,6 +28,9 @@ class Base_x64 : public Butcher {
 
         //using Butcher::Butcher;
         void PrintLine(cs_insn *insn,int indent,const char *format,...);
+        char *GetLabel(uint64_t addr);
+        char *GetGoto(uint64_t addr);
+        char *GetGotoJCC(uint64_t addr,char *cond);
         void PrintLabel(Code *c,uint64_t addr);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);

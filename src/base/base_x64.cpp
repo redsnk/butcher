@@ -515,6 +515,44 @@ char out[1024];
     }
 }
 
+char *Base_x64::GetLabel(uint64_t addr) {
+char *buffer;
+char *name;
+
+    buffer = (char *) malloc(256);
+    if (IsNamedFunction(addr,&name)) {
+        sprintf(buffer,lang_x64->E_LABEL_NAME(),name);
+        free(name);
+    }
+    else {
+        sprintf(buffer,lang_x64->E_LABEL_ADDR(),addr);
+    }
+    return(buffer);
+}
+
+char *Base_x64::GetGoto(uint64_t addr) {
+char *buffer;
+char *name;
+
+    buffer = (char *) malloc(256);
+    name = GetLabel(addr);
+    sprintf(buffer,lang_x64->E_GOTO(),name);
+    free(name);
+    return(buffer);
+}
+
+char *Base_x64::GetGotoJCC(uint64_t addr,char *cond) {
+char *buffer;
+char *name;
+
+    buffer = (char *) malloc(256);
+    name = GetLabel(addr);
+    sprintf(buffer,lang_x64->E_JCC_GOTO(),cond,name);
+    free(name);
+    return(buffer);
+}
+
+
 void Base_x64::PrintLabel(Code *c,uint64_t addr) {
 char *name;
 
@@ -527,8 +565,11 @@ char *name;
         }
         else {
         */
-            printf(lang_x64->E_LABEL(),addr);
+        //    printf(lang_x64->E_LABEL(),addr);
         //}
+        name = GetLabel(addr);
+        printf(lang_x64->E_LABEL(),name);
+        free (name);
     }
 }
 
@@ -593,7 +634,10 @@ int bits;
             break;
         case X86_INS_JMP:
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-                PrintLine(insn,1,lang_x64->E_GOTO(),insn->detail->x86.operands[0].imm);
+                reg0 = GetGoto(insn->detail->x86.operands[0].imm);
+                //PrintLine(insn,1,lang_x64->E_GOTO(),insn->detail->x86.operands[0].imm);
+                PrintLine(insn,1,reg0);
+                free(reg0);
                 num++;
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
@@ -629,8 +673,10 @@ int bits;
                         if (arch->Get_Address_At(addr,&d,b*8)) {
                             if (arch->ValidMemory(d)) {
                                 PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
-                                //PrintLine(insn,2,"case %i:",n);
-                                PrintLine(insn,2,lang_x64->E_GOTO(),d);
+                                //PrintLine(insn,2,lang_x64->E_GOTO(),d);
+                                reg1 = GetGoto(d);
+                                PrintLine(insn,2,reg1);
+                                free(reg1);
                                 PrintLine(insn,1,lang_x64->E_ENDIF());
                             }
                             else {
@@ -675,7 +721,10 @@ int bits;
         case X86_INS_JE:
             // (ZF=1)
             reg0 = lang_x64->Translate(handle,"get_zf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -683,7 +732,10 @@ int bits;
             // (ZF=0)
             //PrintLine(insn,1,lang_x64->E_JNE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_zf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -691,7 +743,10 @@ int bits;
             // (CF=0 and ZF=0)
             //PrintLine(insn,1,lang_x64->E_JA,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"(!get_cf()) & (!get_zf());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -699,7 +754,10 @@ int bits;
             // (CF=0)
             //PrintLine(insn,1,lang_x64->E_JAE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_cf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -707,7 +765,10 @@ int bits;
             // (SF!=OF)
             //PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf() != get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -715,7 +776,10 @@ int bits;
             // (ZF=1 or SF!=OF)
             //PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_zf() | (get_sf() != get_of());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -723,7 +787,10 @@ int bits;
             // (ZF=0 and SF=OF)
             //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"(!get_zf()) & (get_sf() == get_of());",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -731,7 +798,10 @@ int bits;
             // (SF=OF)
             //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf() == get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -739,7 +809,10 @@ int bits;
             // (OF=1)
             //PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -747,7 +820,10 @@ int bits;
             // (OF=0)
             //PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"!get_of();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -755,14 +831,20 @@ int bits;
             // (SF=1)
             //PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
             reg0 = lang_x64->Translate(handle,"get_sf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
         case X86_INS_JNS:
             // (SF=0)
             reg0 = lang_x64->Translate(handle,"!get_sf();",insn,false);
-            PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
             free(reg0);
             num++;
             break;
@@ -923,7 +1005,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"op0 > op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -936,7 +1021,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"sop0 >= sop1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -949,7 +1037,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"op0 == op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -962,7 +1053,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"op0 != op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -975,7 +1069,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"op0 <= op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -988,7 +1085,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"op0 < op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1118,7 +1218,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"(op0&op1) != 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1131,7 +1234,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"(op0&op1) == 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
@@ -1144,7 +1250,10 @@ int bits;
                             reg0 = lang_x64->Translate(handle,"(sop0&sop1) <= 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
                             PrintLabel(c,next->address);
-                            PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
+                            reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
+                            PrintLine(next,1,reg1);
+                            free(reg1);
                             free(reg0);
                             num += 2;
                             ldone = true;
