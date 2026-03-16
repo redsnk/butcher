@@ -535,3 +535,7 @@ const char *Lang_Py_x64::E_GOTO(void) {
 const char *Lang_Py_x64::E_JCC_GOTO(void) {
     return ("if %s:\n        goto %s");
 }
+
+const char *Lang_Py_x64::E_ANONC(void) {
+    return (ANON_CALL "(");
+}

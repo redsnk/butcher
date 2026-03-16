@@ -61,6 +61,7 @@ class Language {
     virtual const char *E_ENDIF(void) = 0;
     virtual const char *E_JCC_GOTO(void) = 0;
     virtual const char *E_SPACE(void) = 0;
+    virtual const char *E_ANONC(void) = 0; 
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintAnonCalls(Code *c) = 0;

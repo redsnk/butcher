@@ -284,6 +284,9 @@ int bits;
     else if (!strcmp(name,"pshufd")) {
         return (strdup(F_PSHUFD()));
     }
+    else if (!strcmp(name,"anon")) {
+        return (strdup(E_ANONC()));
+    }
     return (strdup("<Translate_var error>"));
 }
 

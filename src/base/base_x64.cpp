@@ -1625,6 +1625,16 @@ int bits;
                     }
                     */
                 }
+                else {
+                    reg0 = lang_x64->Translate(handle,".anon(op0);",insn,true);
+                    PrintLine(insn,0,reg0);
+                    free(reg0);
+                }
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".anon(op0);",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
             }
             break;
         default:

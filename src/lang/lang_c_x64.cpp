@@ -116,9 +116,11 @@ void func_0x%llx(struct _cpu *cpu);\n"
 #define C_FUNC_NAME "\
 void %s(struct _cpu *cpu);    // 0x%llx\n"
 
+#define ANON_CALL   "AnonCall"
 
 void Lang_C_x64::PrintHeader(Code *c) {
     printf(C_HEADER);
+    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr);\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (c->subcodes[n].name != NULL) {
@@ -130,8 +132,6 @@ void Lang_C_x64::PrintHeader(Code *c) {
         }
     } 
 }
-
-#define ANON_CALL   "AnonCall"
 
 void Lang_C_x64::PrintAnonCalls(Code *c) {
 int count = 0;
@@ -515,4 +515,8 @@ const char *Lang_C_x64::E_GOTO(void) {
 
 const char *Lang_C_x64::E_JCC_GOTO(void) {
     return ("if (%s) goto %s;");
+}
+
+const char *Lang_C_x64::E_ANONC(void) {
+    return (ANON_CALL "(cpu,");
 }
