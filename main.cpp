@@ -134,7 +134,7 @@ usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>
                     - c -> C\n\
                     - p -> Python\n\
 \n\
--m                  => Load memory from the file\n\
+-m                  => Load memory from the original file\n\
 -t                  => Enable traces\n\
 -a                  => Enable asm code\n\
 -e[addr,addr,...]   => Exclude addresses\n\

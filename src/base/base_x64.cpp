@@ -1746,34 +1746,28 @@ void Base_x64::PrintCode(Code *c) {
 struct _Section *sections;
 int count,n;
 
-    /*
-    printf(C_HEADER);
-    for (int n=0;n<c->subcod_count;n++) {
-        if (c->subcodes[n].parent == SUBCODE_TOP) {
-            if (c->subcodes[n].name != NULL) {
-                printf(C_FUNC_NAME,c->subcodes[n].name,c->subcodes[n].first);
-            }
-            else {
-                printf(C_FUNC_ADDR,c->subcodes[n].first);
-            }
-        }
-    }
-    */
+    // Add Stack memory
     c->AddSubMem(STACK_ADDR,NULL,STACK_SIZE);
+    // Header
     lang_x64->PrintHeader(c);
+    // Code
     printf("\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             PrintSubCode(c,n);
         }
     }
-    //printf(C_FOOTER_1);
+    // Anonymous Calls
+    lang_x64->PrintAnonCalls(c);
+    printf("\n");
+    // Main function
     lang_x64->PrintMainOpen(c);
+    // Load Submemories
     for (int n=0;n<c->submem_count;n++) {
-        //PrintSubMem(c,n);
         lang_x64->PrintSubMem(c,n);
     }
     if (loadm) {
+        //Load Memory form file
         sections = arch->GetSections(&count);
         if (sections != NULL) {
             for (n=0;n<count;n++) {

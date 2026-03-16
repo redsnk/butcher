@@ -131,6 +131,38 @@ void Lang_C_x64::PrintHeader(Code *c) {
     } 
 }
 
+#define ANON_CALL   "AnonCall"
+
+void Lang_C_x64::PrintAnonCalls(Code *c) {
+int count = 0;
+
+    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr) {\n");
+    for (int n=0;n<c->subcod_count;n++) {
+        if (c->subcodes[n].parent == SUBCODE_TOP) {
+            if (!count) {
+                printf("    if (addr == 0x%llx) {\n",c->subcodes[n].first);
+            }
+            else {
+                printf("    else if (addr == 0x%llx) {\n",c->subcodes[n].first);
+            }
+            if (c->subcodes[n].name != NULL) {
+                printf("        %s(cpu);\n",c->subcodes[n].name);
+            }
+            else {
+                printf("        func_0x%llx(cpu);\n",c->subcodes[n].first);
+            }
+            printf("    }\n");
+            count++;
+        }
+    }
+    if (count) {
+        printf("    else {\n");
+        printf("        panic(\"" ANON_CALL "\",\"\");\n");
+        printf("    }\n");
+    }
+    printf("}\n");
+}
+
 #define C_FOOTER_1 "\
 int main (int argc, char **argv) {\n\
 struct _cpu c,*cpu;\n\

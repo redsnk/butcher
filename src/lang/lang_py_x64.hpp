@@ -8,6 +8,7 @@ class Lang_Py_x64 : public Lang_x64 {
     int bits;
 
     void PrintHeader(Code *c);
+    void PrintAnonCalls(Code *c);
     void PrintMainOpen(Code *c);
     void PrintMainClose(Code *c);
     void PrintSubMem(Code *c,int num);

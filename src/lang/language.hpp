@@ -63,6 +63,7 @@ class Language {
     virtual const char *E_SPACE(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
+    virtual void PrintAnonCalls(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
     virtual void PrintMainClose(Code *c) = 0;
     virtual void PrintSubMem(Code *c,int num) = 0;

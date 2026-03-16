@@ -116,6 +116,38 @@ void Lang_Py_x64::PrintHeader(Code *c) {
     printf(PY_HEADER);
 }
 
+#define ANON_CALL   "AnonCall"
+
+void Lang_Py_x64::PrintAnonCalls(Code *c) {
+int count = 0;
+
+    printf("def " ANON_CALL "(cpu,addr):\n");
+    for (int n=0;n<c->subcod_count;n++) {
+        if (c->subcodes[n].parent == SUBCODE_TOP) {
+            if (!count) {
+                printf("    if addr == 0x%llx:\n",c->subcodes[n].first);
+            }
+            else {
+                printf("    elif addr == 0x%llx:\n",c->subcodes[n].first);
+            }
+            if (c->subcodes[n].name != NULL) {
+                printf("        %s(cpu)\n",c->subcodes[n].name);
+            }
+            else {
+                printf("        func_0x%llx(cpu)\n",c->subcodes[n].first);
+            }
+            //printf("    }\n");
+            count++;
+        }
+    }
+    if (count) {
+        printf("    else:\n");
+        printf("        cpu.panic(\"" ANON_CALL ": \"+hex(addr))\n");
+        //printf("    }\n");
+    }
+    //printf("}\n");
+}
+
 #define PY_FOOTER_1 "\
 def main():\n\
     cpu = _cpu()\n\

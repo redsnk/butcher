@@ -6,6 +6,7 @@
 class Lang_C_x64 : public Lang_x64 {
     public:
     void PrintHeader(Code *c);
+    void PrintAnonCalls(Code *c);
     void PrintMainOpen(Code *c);
     void PrintMainClose(Code *c);
     void PrintSubMem(Code *c,int num);
