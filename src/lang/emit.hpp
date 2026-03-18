@@ -37,7 +37,9 @@ enum _id_item {
     XOR,
     NOT,
     IFTHENELSE,
-    IFTHEN
+    IFTHEN,
+    PTR,
+    ASSIGN_EXPR
 }; 
 
 #define MAX_ITEM_NAME   (256)

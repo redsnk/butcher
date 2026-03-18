@@ -76,6 +76,7 @@
 expr: 
 | NAME '('')'           { emit->emit_item_name(FUNC_VOID,"FUNC_VOID",$1.c_str()); }
 | NAME '(' expr ')'     { emit->emit_item_name(FUNCTION,"FUNCTION",$1.c_str()); }
+| NAME '[' expr ']'     { emit->emit_item_name(PTR,"PTR",$1.c_str()); }
 | '(' expr ')'          { emit->emit_item(ENC,"ENC"); };
 | NOT expr              { emit->emit_item(NOT,"NOT"); };
 | expr LIST expr        { emit->emit_item(LIST,"LIST"); }
@@ -90,6 +91,7 @@ expr:
 | expr SHL expr         { emit->emit_item(SHL,"SHL"); }
 | expr SHR expr         { emit->emit_item(SHR,"SHR"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
+| expr '=' expr			{ emit->emit_item(ASSIGN_EXPR,"ASSIGN_EXPR"); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
 | expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }
 | expr LT expr          { emit->emit_item(LT,"LT"); }
