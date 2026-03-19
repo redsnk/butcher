@@ -615,6 +615,10 @@ int bits;
             PrintLine(insn,1,"");
             num++;
             break;
+        case X86_INS_WAIT:
+            PrintLine(insn,1,"");
+            num++;
+            break;
         case X86_INS_RET:
             // ret
             reg0 = lang_x64->Translate(handle,".pop(bits);",insn,true);
@@ -1275,70 +1279,6 @@ int bits;
                     free(reg0);
                 }
             }
-            /*
-            if ((num+1) < sc->count) {
-                cs_insn *next = &sc->insn[num+1];
-                switch (next->id) {
-                    case X86_INS_JNE:
-                        // (ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                                reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                                        // test		eax, eax
-                                        // jne		0x1800026ce
-                                        PrintLine(insn,0,lang_x64->E_SPACE);
-                                        PrintLine(next,1,lang_x64->E_JNE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
-                                        num += 2;
-
-                                    }
-                                }
-                                free(reg0);
-                            }
-                        }
-                        break;
-                    case X86_INS_JE:
-                        // (ZF=1)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                                reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                                        // test		eax, eax
-                                        // je		0x1800026ce
-                                        PrintLine(insn,0,lang_x64->E_SPACE);
-                                        PrintLine(next,1,lang_x64->E_JE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
-                                        num += 2;
-
-                                    }
-                                }
-                                free(reg0);
-                            }
-                        }
-                        break;
-                    case X86_INS_JLE:
-                        // (ZF=1 or SF!=OF).
-                        if (FlagsNotUsed(sc,num+1)) {
-                            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                                reg0 = lang_x64->s_reg_name(handle,insn->detail->x86.operands[0].reg);
-                                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                                    if (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) {
-                                        // test		eax, eax
-                                        // jle		0x1800026ce
-                                        PrintLine(insn,0,lang_x64->E_SPACE);
-                                        PrintLine(next,1,lang_x64->E_JLE_R_GOTO,reg0,next->detail->x86.operands[0].imm);
-                                        num += 2;
-
-                                    }
-                                }
-                                free(reg0);
-                            }
-                        }
-                        break;
-                }
-            }
-            */
             break;
         case X86_INS_AND:
             if (FlagsNotUsed(sc,num)) {
@@ -1367,6 +1307,19 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_SAR:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".sop0 = idiv(sop0,pow(2,op1));",insn,true);
+            }
+            else {
+                reg0 = NULL;
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;    
         case X86_INS_SHL:
             if (FlagsNotUsed(sc,num)) {
                 //reg0 = lang_x64->Translate(handle,".op0 = op0 * pow(2,op1);",insn,true);
@@ -1507,73 +1460,6 @@ int bits;
                 num++;
                 free(reg0);
             }
-            /*
-            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    reg1 = lang_x64->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    // mov		rsi, rcx
-                    PrintLine(insn,1,lang_x64->E_MOV_RR,reg0,reg1);
-                    free(reg1);
-                    num++;
-                }
-                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    // mov      dl, 0x01
-                    PrintLine(insn,1,lang_x64->E_MOV_RI,reg0,insn->detail->x86.operands[1].imm);
-                    num++;
-                }
-                else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
-                    if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
-                        // mov rax, qword ptr [**rip** + 0x1dc97]
-                        addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
-                        PrintLine(insn,1,lang_x64->E_MOV_RP,reg0,lang_x64->ptr(insn->detail->x86.operands[0]),addr);
-                        num++;
-                    }
-                    else {
-                        // mov	rbx, qword ptr [r14 + 8]
-                        mstr = lang_x64->mem_str(handle,insn->detail->x86.operands[1]);
-                        PrintLine(insn,1,lang_x64->E_MOV_RM,reg0,lang_x64->ptr(insn->detail->x86.operands[0]),mstr);
-                        free(mstr);
-                        num++;
-                    }
-                }
-                free(reg0);
-            }
-            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-                if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                    reg1 = lang_x64->reg_name(handle,insn->detail->x86.operands[1].reg);
-                    if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
-                        // mov		qword ptr [rip + 0x1d8f1], rax
-                        addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
-                        PrintLine(insn,1,lang_x64->E_MOV_PR,lang_x64->ptr(insn->detail->x86.operands[0]),addr,reg1);
-                        num++;
-                    }
-                    else {
-                        // mov		qword ptr [rsp + 0x1b0], rdi
-                        mstr = lang_x64->mem_str(handle,insn->detail->x86.operands[0]);
-                        PrintLine(insn,1,lang_x64->E_MOV_MR,lang_x64->ptr(insn->detail->x86.operands[0]),mstr,reg1);
-                        free(mstr);
-                        num++;
-                    }
-                    free(reg1);
-                }
-                else if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
-                    if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
-                        //  mov		dword ptr [rip + 0x1d725], 0xc0000409
-                        uint64_t addr = insn->address + insn->size + insn->detail->x86.operands[0].mem.disp;
-                        PrintLine(insn,1,lang_x64->E_MOV_PI,lang_x64->ptr(insn->detail->x86.operands[0]),addr,insn->detail->x86.operands[1].imm);
-                        num++;
-                    }
-                    else {
-                        // mov		dword ptr [rbp + 0x58], 0x6c6c642e
-                        mstr = lang_x64->mem_str(handle,insn->detail->x86.operands[0]);
-                        PrintLine(insn,1,lang_x64->E_MOV_MI,lang_x64->ptr(insn->detail->x86.operands[0]),mstr,insn->detail->x86.operands[1].imm);
-                        free(mstr);
-                        num++;
-                    }
-                }
-            }
-            */
             break;
         case X86_INS_CALL:
             //uint64_t addr = 0;

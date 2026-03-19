@@ -89,6 +89,15 @@ union _eflags {
   	uint32_t r32;
 };
 
+struct _freg {
+	uint64_t r;
+};
+
+struct _fpu {
+	struct _freg r[8];
+	int top;
+};
+
 struct _mem {
 	uint64_t addr;
 	uint64_t size;
@@ -100,6 +109,7 @@ struct _cpu {
 	union _xmm xmm0,xmm1,xmm2,xmm3,xmm4,xmm5,xmm6,xmm7;
 	union _eflags eflags;
 	struct _mem *mems;
+	struct _fpu fpu;
 	int mem_count;
 };
 

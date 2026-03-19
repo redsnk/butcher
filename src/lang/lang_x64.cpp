@@ -177,10 +177,13 @@ int bits;
             return (get_op_str(handle,insn->detail->x86.operands[2],bits,true));
         }
     }
+    else if (!strcmp(name,"mem0")) {
+        return(mem_str(handle,insn->detail->x86.operands[0]));
+    }
     else if (!strcmp(name,"mem1")) {
         return(mem_str(handle,insn->detail->x86.operands[1]));
     }
-    else if (!strcmp(name,"sax")) {
+    else if (!strcmp(name,"rax")) {
         //return(Translate_reg(insn,"_al","_ax","_eax","_rax"));
         return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,false));
     }
@@ -215,6 +218,10 @@ int bits;
     else if (!strcmp(name,"rsp")) {
         //return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
         return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_SP,X86_REG_ESP,X86_REG_RSP,false));
+    }
+    else if (!strcmp(name,"rbp")) {
+        //return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
+        return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_BP,X86_REG_EBP,X86_REG_RBP,false));
     }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF()));

@@ -41,9 +41,11 @@ uint64_t addr,read,*addr_list;
 int max_subcode = INIT_MEM_GETCODE;
 uint8_t *mem;
 
+    /*
     if ((address == 0x18000af00) && (parent == SUBCODE_TOP)) {
-        //printf("// test\n");
+        printf("// test\n");
     }
+    */
     if (c == NULL) {
         c = new Code(address);
     }
