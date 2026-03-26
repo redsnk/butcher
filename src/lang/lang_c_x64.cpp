@@ -157,7 +157,9 @@ int count = 0;
     }
     if (count) {
         printf("    else {\n");
-        printf("        panic(\"" ANON_CALL "\",\"\");\n");
+        printf("        char buffer[256];");
+        printf("        sprintf(buffer,\"0x%llx\",addr);");
+        printf("        panic(\"" ANON_CALL "\",buffer);\n");
         printf("    }\n");
     }
     printf("}\n");
@@ -244,7 +246,14 @@ char *buffer;
         strcpy(buffer,"");
     }
     else {
-        sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
+        switch (id_reg) {
+            case X86_REG_ST0:
+                sprintf(buffer,"_st0");
+                break;
+            default:
+                sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
+                break;
+        }
     }
     return (buffer);
 }
@@ -519,4 +528,12 @@ const char *Lang_C_x64::E_JCC_GOTO(void) {
 
 const char *Lang_C_x64::E_ANONC(void) {
     return (ANON_CALL "(cpu,");
+}
+
+const char *Lang_C_x64::F_PUSHFPU(void) {
+    return ("pushfpu(cpu,");
+}
+
+const char *Lang_C_x64::F_POPFPU(void) {
+    return ("popfpu(cpu");
 }

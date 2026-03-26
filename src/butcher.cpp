@@ -29,6 +29,15 @@ int Butcher::IsNamedFunction (uint64_t addr, char **func) {
     return (false);
 }
 
+Code *Butcher::Include(Code *c) {
+std::set<uint64_t>::iterator itr;
+  
+  for (itr = in.begin();itr != in.end(); itr++) {
+    c = GetCode(c,*itr,NULL,SUBCODE_TOP);
+  }
+  return (c);
+}
+
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
@@ -178,6 +187,7 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             IsSymbolObject(0x11f5f8,func);
             */
             Code *c = GetCode(NULL,address,NULL,SUBCODE_TOP);
+            c = Include(c);
             //c->Print();
             PrintCode(c);
             delete c;

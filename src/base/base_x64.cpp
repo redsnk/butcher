@@ -598,7 +598,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x40c5cd) {
+    if (insn->address == 0x45a23e7) {
         // test
         bits = 0;
     }
@@ -1520,6 +1520,41 @@ int bits;
             }
             else {
                 reg0 = lang_x64->Translate(handle,".anon(op0);",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
+        case X86_INS_FILD:
+        case X86_INS_FLD:
+            reg0 = lang_x64->Translate(handle,".pushfpu(op0);",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FSTP:
+            reg0 = lang_x64->Translate(handle,".op0 = popfpu();",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FLDZ:
+            reg0 = lang_x64->Translate(handle,".pushfpu(0);",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FADD:
+            if (insn->detail->x86.op_count == 1) {
+                reg0 = lang_x64->Translate(handle,".st0 = st0 + op0;",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
+        case X86_INS_FDIV:
+            if (insn->detail->x86.op_count == 1) {
+                reg0 = lang_x64->Translate(handle,".st0 = st0 / op0;",insn,true);
                 PrintLine(insn,0,reg0);
                 free(reg0);
                 num++;

@@ -83,6 +83,8 @@ class Lang_C_x64 : public Lang_x64 {
     const char *E_LABEL_NAME(void);
     const char *E_LABEL_ADDR(void);
     const char *E_ANONC(void);
+    const char *F_PUSHFPU(void);
+    const char *F_POPFPU(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);

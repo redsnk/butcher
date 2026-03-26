@@ -3,6 +3,7 @@
 void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
+	cpu->fpu.top = 0;
 }
 
 void end(struct _cpu *cpu) {
@@ -270,6 +271,13 @@ uint64_t value;
 	return (value);
 }
 
+uint64_t xword_ptr(struct _cpu *cpu,uint64_t addr) {
+uint64_t value;
+
+	get_mem (cpu,addr,10,(uint8_t *)&value);
+	return (value);
+}
+
 __uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr) {
 __uint128_t value;
 
@@ -298,6 +306,10 @@ void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value) {
 
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 	set_mem (cpu,addr,8,(uint8_t *)&value);
+}
+
+void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
+	set_mem (cpu,addr,10,(uint8_t *)&value);
 }
 
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
@@ -638,6 +650,21 @@ uint8_t c;
 	c = (op2 & 0b11000000) >> 6;
 	r |= (__uint128_t)((op1 >> (32*c)) & 0xffffffff) << 96;
 	return (r);
+}
+
+void pushfpu(struct _cpu *cpu,uint64_t v) {
+	cpu->fpu.top--;
+	if (cpu->fpu.top < 0) cpu->fpu.top = 7;
+	cpu->fpu.r[cpu->fpu.top].r = v;
+}
+
+uint64_t popfpu(struct _cpu *cpu) {
+uint64_t v;
+
+	v = cpu->fpu.r[cpu->fpu.top].r;
+	cpu->fpu.r[cpu->fpu.top].r = 0;
+	cpu->fpu.top++;
+	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
 }
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func) {

@@ -262,7 +262,14 @@ char *buffer;
         strcpy(buffer,"");
     }
     else {
-        sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
+        switch (id_reg) {
+            case X86_REG_ST0:
+                sprintf(buffer,"cpu._st0");
+                break;
+            default:
+                sprintf(buffer,"cpu._%s",cs_reg_name(handle,id_reg));
+                break;
+        }
     }
     return (buffer);
 }
@@ -538,4 +545,12 @@ const char *Lang_Py_x64::E_JCC_GOTO(void) {
 
 const char *Lang_Py_x64::E_ANONC(void) {
     return (ANON_CALL "(");
+}
+
+const char *Lang_Py_x64::F_PUSHFPU(void) {
+    return ("cpu.pushfpu(");
+}
+
+const char *Lang_Py_x64::F_POPFPU(void) {
+    return ("cpu.popfpu(");
 }

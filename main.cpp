@@ -6,7 +6,7 @@
 #include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
 
-#define MY_VERSION  "v0.0.2"
+#define MY_VERSION  "v0.0.3"
 
 #define MAX_STR     (1024)
 
@@ -14,6 +14,7 @@ int opt_t = false;
 int opt_a = false;
 int opt_m = false;
 enum Languages opt_l = C;
+std::set<uint64_t> include;
 std::set<uint64_t> exclude;
 std::map<uint64_t, std::string> named;
 
@@ -27,6 +28,28 @@ uint64_t n;
     return (atol(num));
 }
 
+void parse_list(char *list,std::set<uint64_t> *s) {
+char *t;
+char  *p,*i;
+
+    t = strdup(list);
+    i = p = t;
+    while (*i) {
+        p = strchr(i,',');
+        if (p != NULL) {
+            *p = 0;
+            s->insert(string_to_num(i));
+            i = p+1;
+        }
+        else {
+            s->insert(string_to_num(i));
+            break;
+        }
+    }
+    free(t);
+}
+
+/*
 void parse_ex(char *list) {
 char *t;
 char  *p,*i;
@@ -47,6 +70,7 @@ char  *p,*i;
     }
     free(t);
 }
+*/
 
 #define MAX_BUFFER  (1024)
 
@@ -116,6 +140,7 @@ Archive *a;
     b->ltraces = opt_t;
     b->lasm = opt_a;
     b->loadm = opt_m;
+    b->in = include;
     b->ex = exclude;
     //b->named.insert({ 0x0040B440,"UStrClr" });
     b->named = named;
@@ -137,6 +162,7 @@ usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>
 -m                  => Load memory from the original file\n\
 -t                  => Enable traces\n\
 -a                  => Enable asm code\n\
+-i[addr,addr,...]   => Include addresses\n\
 -e[addr,addr,...]   => Exclude addresses\n\
 -n[file]            => Add named functions from <file>\n\
 \n";
@@ -146,7 +172,7 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"mtal:e:n:")) != -1) {
+    while ((p = getopt(argc,argv,"mtal:i:e:n:")) != -1) {
         switch (p) {
                 case 't':
                     opt_t = true;
@@ -167,8 +193,11 @@ uint64_t addr;
                             break;
                     }
                     break;
+                case 'i':
+                    parse_list(optarg,&include);
+                    break;
                 case 'e':
-                    parse_ex(optarg);
+                    parse_list(optarg,&exclude);
                     break;
                 case 'n':
                     parse_named(optarg);

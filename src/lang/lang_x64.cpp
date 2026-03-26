@@ -12,6 +12,8 @@ const char *Lang_x64::ptr(cs_x86_op op) {
             return("dword");
         case 8:
             return("qword");
+        case 10:
+            return("xword");
         case 16:
             return("dqword");
     }
@@ -293,6 +295,18 @@ int bits;
     }
     else if (!strcmp(name,"anon")) {
         return (strdup(E_ANONC()));
+    }
+    else if (!strcmp(name,"pushfpu")) {
+        return (strdup(F_PUSHFPU()));
+    }
+    else if (!strcmp(name,"popfpu")) {
+        return (strdup(F_POPFPU()));
+    }
+    else if (!strcmp(name,"st0")) {
+        return (reg_name(handle,X86_REG_ST0));
+    }
+    else if (!strcmp(name,"st1")) {
+        return (reg_name(handle,X86_REG_ST1));
     }
     return (strdup("<Translate_var error>"));
 }
