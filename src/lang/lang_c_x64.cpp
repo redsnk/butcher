@@ -157,8 +157,8 @@ int count = 0;
     }
     if (count) {
         printf("    else {\n");
-        printf("        char buffer[256];");
-        printf("        sprintf(buffer,\"0x%llx\",addr);");
+        printf("        char buffer[256];\n");
+        printf("        sprintf(buffer,\"0x%%llx\",addr);\n");
         printf("        panic(\"" ANON_CALL "\",buffer);\n");
         printf("    }\n");
     }
