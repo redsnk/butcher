@@ -41,7 +41,7 @@ std::set<uint64_t>::iterator itr;
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
-int n,nn,count;
+int n,nn,count,anon;
 //std::set<uint64_t> calls;
 struct _call *calls;
 int ncalls = 0;
@@ -111,7 +111,10 @@ uint8_t *mem;
                         c->AddLabel(&sc,addr);
                     }
                     //else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
-                    else if(IsJmp(sc.insn,n,&addr_list,&count)) {
+                    else if(IsJmp(sc.insn,n,&addr_list,&count,&anon)) {
+                        if (anon) {
+                            c->SetAnonJmp(&sc);
+                        }
                         for (nn=0;nn<count;nn++) {
                             if (addr_list[nn] != UNDEF_ADDR_JMP) {
                                 jmps.insert(addr_list[nn]);

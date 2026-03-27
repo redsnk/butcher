@@ -15,6 +15,7 @@ void Code::NewSubCode (struct _subcode *sc) {
     sc->name = NULL;
     sc->labels = NULL;
     sc->l_count = 0;
+    sc->anonjmp = false;
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
@@ -139,6 +140,13 @@ struct _subcode *p;
         }
     }
     return (false);
+}
+
+void Code::SetAnonJmp (struct _subcode *sc) {
+struct _subcode *p;
+
+    p = GetParent(sc);
+    p->anonjmp = true;
 }
 
 char *Code::GetFunctionName (uint64_t addr) {

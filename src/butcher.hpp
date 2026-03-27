@@ -33,7 +33,7 @@ class Butcher {
         virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
         virtual int IsRet(cs_insn *insn) = 0;
         virtual int IsCall(cs_insn *insn, uint64_t *addr) = 0;
-        virtual int IsJmp(cs_insn *insn, int n, uint64_t *addr[],int *count) = 0;
+        virtual int IsJmp(cs_insn *insn, int n, uint64_t *addr[],int *count,int *anon) = 0;
         virtual int IsJcc(cs_insn *insn, uint64_t *addr) = 0;
         virtual int IsInt(cs_insn *insn, uint64_t *num) = 0;
         virtual int IsEnd(cs_insn *insn, int n, int count) = 0;

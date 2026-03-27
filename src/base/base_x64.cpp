@@ -343,7 +343,7 @@ char *lib,*func;
 
 #define MAX_JMPS      (1024*10)
 
-int Base_x64::IsJmp(cs_insn *in, int num, uint64_t *addr[],int *count) {
+int Base_x64::IsJmp(cs_insn *in, int num, uint64_t *addr[],int *count, int *anon) {
 int n,b,c;
 uint8_t *mem;
 uint64_t read,a,d;
@@ -351,6 +351,7 @@ cs_insn *insn;
 
     insn = &in[num];
     c = 0;
+    *anon = false;
     if (insn->id == X86_INS_JMP) {
         if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
             *addr = (uint64_t *) malloc(sizeof(uint64_t));
@@ -402,6 +403,7 @@ cs_insn *insn;
                         if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
                             // push <addr>
                             if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
+                                *anon = true;
                                 (*addr)[c++] = in[n].detail->x86.operands[0].imm;
                                 break;
                             }
@@ -726,6 +728,14 @@ int bits;
                     //PrintLine(insn,1,lang_x64->E_ENDIF);
                     num++;
                 }
+            }
+            else if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                reg0 = lang_x64->Translate(handle,".anon = op0;",insn,true);
+                if (reg0 != NULL) {
+                    PrintLine(insn,0,reg0);
+                    free(reg0);
+                    num++;
+                }   
             }
             break;
         case X86_INS_JE:
@@ -1684,9 +1694,10 @@ cs_insn *insn;
 void Base_x64::PrintSubCode(Code *c,int num) {
 struct _subcode *sc;
 int id;
+char *name;
 
     id = c->subcodes[num].id;
-    char *name = c->GetFunctionName(c->subcodes[num].first);
+    name = c->GetFunctionName(c->subcodes[num].first);
     if (name != NULL) {
         //printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
         lang_x64->PrintFuncHeaderName(c,num,name);
@@ -1695,6 +1706,9 @@ int id;
     else {
         //printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
         lang_x64->PrintFuncHeaderAddr(c,num);
+    }
+    if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
+        printf("uint64_t anon;\n\n");
     }
     for (int m=0;m<c->subcod_count;m++) {
         sc = &c->subcodes[m];
@@ -1717,6 +1731,20 @@ int id;
         }
     }
     //printf(C_FUNC_FOOTER);
+    // Anon jmps
+    if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
+        lang_x64->PrintSubCodeSep();
+        printf(lang_x64->E_LABEL_ANON());
+        for (int n=0;n<c->subcodes[num].l_count;n++) {
+            uint64_t addr = c->subcodes[num].labels[n];
+            name = GetLabel(addr);
+            printf("    if (anon == 0x%llx) {\n",addr);
+            printf("        goto %s;\n",name);
+            printf("    }\n");
+            free(name);
+        }
+
+    }
     lang_x64->PrintFuncFooter(c,num);
 }
 

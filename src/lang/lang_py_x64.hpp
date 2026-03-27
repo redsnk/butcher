@@ -22,6 +22,7 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *INDENT(void);
     const char *ENDS(void);
     const char *E_LABEL(void);
+    const char *E_LABEL_ANON(void);
     const char *E_CALL_FROM_IAT(void);
     const char *E_FUNC_NAME(void);
     const char *E_FUNC_ADDR(void);

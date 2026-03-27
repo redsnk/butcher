@@ -525,6 +525,10 @@ const char *Lang_C_x64::E_LABEL(void) {
     return ("%s:\n");
 }
 
+const char *Lang_C_x64::E_LABEL_ANON(void) {
+    return ("label_Anon:\n");
+}
+
 const char *Lang_C_x64::E_GOTO(void) {
     return ("goto %s;");
 }

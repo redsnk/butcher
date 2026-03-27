@@ -24,6 +24,7 @@ struct _subcode {
     //std::set<uint64_t> labels;
     uint64_t *labels;
     size_t l_count;
+    int anonjmp;
 };
 
 struct _submem {
@@ -61,6 +62,7 @@ class Code {
         struct _subcode *GetParent(struct _subcode *sc);
         void AddLabel (struct _subcode *sc,uint64_t addr);
         int ExistLabel (struct _subcode *sc,uint64_t addr);
+        void SetAnonJmp (struct _subcode *sc);
         char *GetFunctionName (uint64_t addr);
 };
 

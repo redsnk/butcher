@@ -535,6 +535,10 @@ const char *Lang_Py_x64::E_LABEL(void) {
     return ("    label %s\n");
 }
 
+const char *Lang_Py_x64::E_LABEL_ANON(void) {
+    return ("    label .label_Anon\n");
+}
+
 const char *Lang_Py_x64::E_GOTO(void) {
     return ("goto %s");
 }

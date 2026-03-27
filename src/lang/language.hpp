@@ -52,6 +52,7 @@ class Language {
     virtual const char *E_LABEL_ADDR(void) = 0;
     
     virtual const char *E_LABEL(void) = 0;
+    virtual const char *E_LABEL_ANON(void) = 0;
     virtual const char *E_CALL_FROM_IAT(void) = 0;
     virtual const char *E_FUNC_NAME(void) = 0;
     virtual const char *E_FUNC_ADDR(void) = 0;

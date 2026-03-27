@@ -20,7 +20,7 @@ class Base_x64 : public Butcher {
         int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count);
         int IsRet(cs_insn *insn);
         int IsCall(cs_insn *insn, uint64_t *addr);
-        int IsJmp(cs_insn *insn, int n,uint64_t *addr[],int *count);
+        int IsJmp(cs_insn *insn, int n,uint64_t *addr[],int *count,int *anon);
         int IsJcc(cs_insn *insn, uint64_t *addr);
         int IsInt(cs_insn *insn, uint64_t *num);
         int IsEnd(cs_insn *insn, int n, int count);
@@ -31,7 +31,6 @@ class Base_x64 : public Butcher {
         char *GetLabel(uint64_t addr);
         char *GetGoto(uint64_t addr);
         char *GetGotoJCC(uint64_t addr,char *cond);
-        //void PrintLabel(Code *c,uint64_t addr);
         void PrintLabel(Code *c,struct _subcode *sc,uint64_t addr);
         int PrintInst(Code *c,struct _subcode *sc,int num);
         int PrintExtra(Code *c,struct _subcode *sc,int num);
