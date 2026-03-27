@@ -1437,6 +1437,22 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_SETL:
+            reg0 = lang_x64->Translate(handle,".if get_sf() != get_of() then op0 = 1 else op0 = 0 fi;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETAE:
+            reg0 = lang_x64->Translate(handle,".if !get_cf() then op0 = 1 else op0 = 0 fi;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_XCHG:
             reg0 = lang_x64->Translate(handle,".push(bits,op0);:.op0 = op1;:.op1 = pop(bits);",insn,true);
             //reg0 = lang_x64->Translate(handle,".tmp0 = op0;:.op0 = op1;:.op1 = tmp0;",insn,true);
@@ -1455,7 +1471,6 @@ int bits;
             }
             break;
         case X86_INS_MOVABS:
-            bits = 0;
         case X86_INS_MOVAPS:
         case X86_INS_MOVUPS:
         case X86_INS_MOVD:
@@ -1541,6 +1556,18 @@ int bits;
         case X86_INS_FILD:
         case X86_INS_FLD:
             reg0 = lang_x64->Translate(handle,".pushfpu(op0);",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FIST:
+            reg0 = lang_x64->Translate(handle,".sop0 = s_st0;",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FISTP:
+            reg0 = lang_x64->Translate(handle,".sop0 = popfpu();",insn,true);
             PrintLine(insn,0,reg0);
             free(reg0);
             num++;

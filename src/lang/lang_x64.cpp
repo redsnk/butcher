@@ -415,10 +415,10 @@ int n;
             case _id_item::ASSIGN:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,true);
                 lmem = false;
-                if (!strcmp(e->items[n].item.name,"op0")) {
+                if (!strcmp(e->items[n].item.name,"op0") || !strcmp(e->items[n].item.name,"sop0")) {
                     lmem = (insn->detail->x86.operands[0].type ==X86_OP_MEM);
                 }
-                else if (!strcmp(e->items[n].item.name,"op1")) {
+                else if (!strcmp(e->items[n].item.name,"op1") || !strcmp(e->items[n].item.name,"sop1")) {
                     lmem = (insn->detail->x86.operands[1].type ==X86_OP_MEM);
                 }
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
