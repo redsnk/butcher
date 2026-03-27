@@ -21,6 +21,9 @@ struct _subcode {
     uint64_t last;
     cs_insn *insn;
     size_t count;
+    //std::set<uint64_t> labels;
+    uint64_t *labels;
+    size_t l_count;
 };
 
 struct _submem {
@@ -46,8 +49,7 @@ class Code {
         struct _submem *submems;
         int submem_count;
         uint64_t ep;
-        //std::list<uint64_t> labels;
-        std::set<uint64_t> labels;
+        //std::set<uint64_t> labels;
 
         Code(uint64_t addr);
         ~Code();
@@ -56,6 +58,9 @@ class Code {
         void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
         int HasAddr (uint64_t addr,int parent);
         void Print (void);
+        struct _subcode *GetParent(struct _subcode *sc);
+        void AddLabel (struct _subcode *sc,uint64_t addr);
+        int ExistLabel (struct _subcode *sc,uint64_t addr);
         char *GetFunctionName (uint64_t addr);
 };
 

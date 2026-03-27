@@ -13,6 +13,8 @@ Code::Code(uint64_t a) {
 void Code::NewSubCode (struct _subcode *sc) {
     sc->id = next_id++;
     sc->name = NULL;
+    sc->labels = NULL;
+    sc->l_count = 0;
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
@@ -38,8 +40,6 @@ void Code::AddSubcode (struct _subcode *sc) {
     } else {
         subcodes = (struct _subcode *) realloc(subcodes, sizeof(struct _subcode)*(subcod_count+1));
     }
-    //sc->id = next_id++;
-    //sc->parent = parent;
     subcodes[subcod_count++] = *sc;
 }
 
@@ -102,6 +102,45 @@ int n,i;
     }
 }
 
+struct _subcode *Code::GetParent(struct _subcode *sc) {
+int n;
+
+    if (sc->parent != SUBCODE_TOP) {
+        for (n=0;n<subcod_count;n++) {
+            if (subcodes[n].id == sc->parent) {
+                return (&subcodes[n]);
+            }
+        }
+    }
+    return (sc);
+}
+
+void Code::AddLabel (struct _subcode *sc,uint64_t addr) {
+struct _subcode *p;
+
+    p = GetParent(sc);
+    if (!p->l_count) {
+        p->labels = (uint64_t *) malloc(sizeof(uint64_t));
+    }
+    else {
+        p->labels = (uint64_t *) realloc(p->labels,sizeof(uint64_t)*(p->l_count+1));
+    }
+    p->labels[p->l_count++] = addr;
+}
+
+int Code::ExistLabel (struct _subcode *sc,uint64_t addr) {
+int n;
+struct _subcode *p;
+
+    p = GetParent(sc);
+    for (n=0;n<p->l_count;n++) {
+        if (p->labels[n] == addr) {
+            return (true);
+        }
+    }
+    return (false);
+}
+
 char *Code::GetFunctionName (uint64_t addr) {
 int n;
 
@@ -121,6 +160,9 @@ int n;
             cs_free(subcodes[n].insn, subcodes[n].count);
             if (subcodes[n].name != NULL) {
                 free(subcodes[n].name);
+            }
+            if (subcodes[n].labels != NULL) {
+                free(subcodes[n].labels);
             }
         }
         free(subcodes);

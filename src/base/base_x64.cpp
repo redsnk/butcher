@@ -553,10 +553,16 @@ char *name;
 }
 
 
-void Base_x64::PrintLabel(Code *c,uint64_t addr) {
+//void Base_x64::PrintLabel(Code *c,uint64_t addr) {
+void Base_x64::PrintLabel(Code *c,struct _subcode *sc,uint64_t addr) {
 char *name;
+//struct _subcode *p; 
 
-    if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
+    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
+    //p = c->GetParent(sc);
+    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
+    //if (std::find(p->labels.begin(), p->labels.end(), addr) != p->labels.end()) {
+    if (c->ExistLabel(sc,addr)) {
         // TODO: NamedFunction
         /*
         if (IsNamedFunction(addr,&name)) {
@@ -1013,7 +1019,7 @@ int bits;
                             // "if (%s > %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 > op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1029,7 +1035,7 @@ int bits;
                             // "if (%s >= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"sop0 >= sop1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1045,7 +1051,7 @@ int bits;
                             // "if (%s == %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 == op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1061,7 +1067,7 @@ int bits;
                             // "if (%s != %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 != op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1077,7 +1083,7 @@ int bits;
                             // "if (%s <= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 <= op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1093,7 +1099,7 @@ int bits;
                             // "if (%s < %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 < op1;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1226,7 +1232,7 @@ int bits;
                             // "if (%s != 0) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"(op0&op1) != 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1242,7 +1248,7 @@ int bits;
                             // "if (%s == 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(op0&op1) == 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1258,7 +1264,7 @@ int bits;
                             // "if (%s <= 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(sop0&sop1) <= 0;",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
-                            PrintLabel(c,next->address);
+                            PrintLabel(c,sc,next->address);
                             //PrintLine(next,1,lang_x64->E_JCC_GOTO(),reg0,next->detail->x86.operands[0].imm);
                             reg1 = GetGotoJCC(next->detail->x86.operands[0].imm,reg0);
                             PrintLine(next,1,reg1);
@@ -1705,7 +1711,7 @@ int id;
                     printf(lang_x64->E_LABEL,sc->insn[n].address);
                 }
                 */
-                PrintLabel(c,sc->insn[n].address);
+                PrintLabel(c,sc,sc->insn[n].address);
                 n = PrintInst(c,sc,n);
             }
         }

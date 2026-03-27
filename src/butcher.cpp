@@ -107,14 +107,16 @@ uint8_t *mem;
                         //printf("jcc 0x%llx\n",addr);
                         if (ltraces) printf("%s *** Add jcc 0x%llx\n",lang->COMM(),addr);
                         jmps.insert(addr);
-                        c->labels.insert(addr);
+                        //c->labels.insert(addr);
+                        c->AddLabel(&sc,addr);
                     }
                     //else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
                     else if(IsJmp(sc.insn,n,&addr_list,&count)) {
                         for (nn=0;nn<count;nn++) {
                             if (addr_list[nn] != UNDEF_ADDR_JMP) {
                                 jmps.insert(addr_list[nn]);
-                                c->labels.insert(addr_list[nn]);
+                                //c->labels.insert(addr_list[nn]);
+                                c->AddLabel(&sc,addr_list[nn]);
                             }
                         }
                         free (addr_list);
