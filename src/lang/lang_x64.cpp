@@ -261,7 +261,7 @@ int bits;
     else if (!strcmp(name,"sub_of")) {
         return (strdup(F_SUB_OF()));
     }
-    else if (!strcmp(name,"idiv")) {
+    else if (!strcmp(name,"sdiv")) {
         return (strdup(F_IDIV()));
     }
     else if (!strcmp(name,"bits")) {
@@ -307,6 +307,12 @@ int bits;
     }
     else if (!strcmp(name,"st1")) {
         return (reg_name(handle,X86_REG_ST1));
+    }
+    else if (!strcmp(name,"s_st0")) {
+        return (s_reg_name(handle,X86_REG_ST0));
+    }
+    else if (!strcmp(name,"s_st1")) {
+        return (s_reg_name(handle,X86_REG_ST1));
     }
     return (strdup("<Translate_var error>"));
 }

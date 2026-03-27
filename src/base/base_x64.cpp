@@ -882,7 +882,12 @@ int bits;
                 num++;
             }
             */
-            reg0 = lang_x64->Translate(handle,".op0 = pop(bits);",insn,true);
+            if (IsFSGS(insn)) {
+                reg0 = lang_x64->Translate(handle,".pop(bits);",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".op0 = pop(bits);",insn,true);
+            }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
@@ -1309,10 +1314,10 @@ int bits;
             break;
         case X86_INS_SAR:
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".sop0 = idiv(sop0,pow(2,op1));",insn,true);
+                reg0 = lang_x64->Translate(handle,".sop0 = sdiv(sop0,pow(2,op1));",insn,true);
             }
             else {
-                reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,".sop0 = sdiv(sop0,pow(2,op1));",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -1362,8 +1367,16 @@ int bits;
                     break;
             }
             break;
+        case X86_INS_DIV:
+            reg0 = lang_x64->Translate(handle,".rdx = rax % op0;:.rax = rax / op0;",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_IDIV:
-            reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = idiv(s_rax,sop0);",insn,true);
+            reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = sdiv(s_rax,sop0);",insn,true);
             //reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0;",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -1552,9 +1565,25 @@ int bits;
                 num++;
             }
             break;
+        case X86_INS_FSUB:
+            if (insn->detail->x86.op_count == 1) {
+                reg0 = lang_x64->Translate(handle,".st0 = st0 - op0;",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
         case X86_INS_FDIV:
             if (insn->detail->x86.op_count == 1) {
                 reg0 = lang_x64->Translate(handle,".st0 = st0 / op0;",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
+        case X86_INS_FMUL:
+            if (insn->detail->x86.op_count == 1) {
+                reg0 = lang_x64->Translate(handle,".st0 = st0 * op0;",insn,true);
                 PrintLine(insn,0,reg0);
                 free(reg0);
                 num++;

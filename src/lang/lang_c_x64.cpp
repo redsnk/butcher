@@ -266,7 +266,14 @@ char *buffer;
         strcpy(buffer,"");
     }
     else {
-        sprintf(buffer,"s_%s",cs_reg_name(handle,id_reg));
+        switch (id_reg) {
+            case X86_REG_ST0:
+                sprintf(buffer,"s_st0");
+                break;
+            default:
+                sprintf(buffer,"s_%s",cs_reg_name(handle,id_reg));
+                break;
+        }
     }
     return (buffer);
 }
