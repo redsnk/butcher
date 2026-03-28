@@ -39,7 +39,9 @@ enum _id_item {
     IFTHENELSE,
     IFTHEN,
     PTR,
-    ASSIGN_EXPR
+    ASSIGN_EXPR,
+    GOTOLABEL,
+    GOTOEXPR
 }; 
 
 #define MAX_ITEM_NAME   (256)

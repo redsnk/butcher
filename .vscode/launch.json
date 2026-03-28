@@ -14,7 +14,7 @@
             //"args": ["-lc","-t","-a","-m","-e0x40b830","/home/alex/src/butcher/samples/libffi-6.dll","0x044FCB68"],
             //"args": ["-lc","-t","-a","-m","/home/alex/src/butcher/samples/libffi-6.dll","0x044FCAF8"],
             //"args": ["-lc","-t","-a","-m","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x044FC7AC"],
-            "args": ["-lc","-t","-a","-m","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x045A35E4"],
+            "args": ["-lc","-t","-a","-m","-e0x045A2CA0","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x045A35E4"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

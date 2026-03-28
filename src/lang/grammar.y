@@ -44,7 +44,7 @@
 
 %precedence			LF
 %precedence         END
-%left				IF THEN ELSE FI
+%left				IF THEN ELSE FI GOTO
 %precedence         '='
 %left				LIST
 %left               NOT EQUAL NEQUAL LT GT LTE GTE
@@ -98,13 +98,15 @@ expr:
 | expr GT expr          { emit->emit_item(GT,"GT"); }
 | expr LTE expr         { emit->emit_item(LTE,"LTE"); }
 | expr GTE expr         { emit->emit_item(GTE,"GTE"); }
+| NAME GOTO             { emit->emit_item_name(GOTOLABEL,"GOTOLABEL",$1.c_str()); }
+| GOTO expr             { emit->emit_item(GOTOEXPR,"GOTOEXPR"); }
 | NAME					{ emit->emit_item_name(NAME,"NAME",$1.c_str()); }
 | INT					{ emit->emit_item_number(NUMBER,"NUMBER",$1); }
 | END					{ emit->emit_item(END,"END"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
 | IF expr THEN expr ELSE expr FI { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
-| IF expr THEN expr FI    { emit->emit_item(IFTHEN,"IFTHEN"); }
+| IF expr THEN expr FI  { emit->emit_item(IFTHEN,"IFTHEN"); }
 ;
 
 stmt_list: expr

@@ -293,8 +293,14 @@ int bits;
     else if (!strcmp(name,"pshufd")) {
         return (strdup(F_PSHUFD()));
     }
-    else if (!strcmp(name,"anon")) {
+    else if (!strcmp(name,"anoncall")) {
         return (strdup(E_ANONC()));
+    }
+    else if (!strcmp(name,"anonjmp")) {
+        return (strdup("anon"));
+    }
+    else if (!strcmp(name,"anonlabel")) {
+        return (strdup("label_Anon"));
     }
     else if (!strcmp(name,"pushfpu")) {
         return (strdup(F_PUSHFPU()));
@@ -485,6 +491,14 @@ int n;
             case _id_item::NOT:
                 it1 = Translate_item(handle,insn,&e->items[n-1],false);
                 sprintf(tmp,"%s %s",E_NOT(),it1);
+                free(it1);
+                e->res_item(n,tmp);
+                e->del_item(n-1);
+                n -= 1;
+                break;
+            case _id_item::GOTOEXPR:
+                it1 = Translate_item(handle,insn,&e->items[n-1],false);
+                sprintf(tmp,"goto %s",it1);
                 free(it1);
                 e->res_item(n,tmp);
                 e->del_item(n-1);

@@ -391,6 +391,7 @@ cs_insn *insn;
         }
         else {
             // Undefined jmp X86_OP_REG
+            *anon = true;
             *addr = (uint64_t *) malloc(sizeof(uint64_t));
             if ((num>0) && (in[num-1].id == X86_INS_POP) && (in[num-1].detail->x86.operands[0].type == X86_OP_REG) &&
                 (in[num-1].detail->x86.operands[0].reg == insn->detail->x86.operands[0].reg)) {
@@ -403,7 +404,6 @@ cs_insn *insn;
                         if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
                             // push <addr>
                             if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
-                                *anon = true;
                                 (*addr)[c++] = in[n].detail->x86.operands[0].imm;
                                 break;
                             }
@@ -730,7 +730,7 @@ int bits;
                 }
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                reg0 = lang_x64->Translate(handle,".anon = op0;",insn,true);
+                reg0 = lang_x64->Translate(handle,".anonjmp = op0;:.goto anonlabel;",insn,true);
                 if (reg0 != NULL) {
                     PrintLine(insn,0,reg0);
                     free(reg0);
@@ -1556,14 +1556,14 @@ int bits;
                     */
                 }
                 else {
-                    reg0 = lang_x64->Translate(handle,".anon(op0);",insn,true);
+                    reg0 = lang_x64->Translate(handle,".anoncall(op0);",insn,true);
                     PrintLine(insn,0,reg0);
                     free(reg0);
                     num++;
                 }
             }
             else {
-                reg0 = lang_x64->Translate(handle,".anon(op0);",insn,true);
+                reg0 = lang_x64->Translate(handle,".anoncall(op0);",insn,true);
                 PrintLine(insn,0,reg0);
                 free(reg0);
                 num++;
