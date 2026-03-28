@@ -45,8 +45,8 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "&"         return Parser::token::B_AND;
 "|"         return Parser::token::B_OR;
 "^"         return Parser::token::B_XOR;
+";"         return Parser::token::JOIN;
 " "         /* ignore space */
-";"         /* ignore*/
 .           return yytext[0];
  
 %%

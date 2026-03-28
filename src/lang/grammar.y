@@ -43,7 +43,7 @@
 %nterm <double>     fexp
 
 %precedence			LF
-%precedence         END
+%precedence         END JOIN
 %left				IF THEN ELSE FI GOTO
 %precedence         '='
 %left				LIST
@@ -80,6 +80,7 @@ expr:
 | '(' expr ')'          { emit->emit_item(ENC,"ENC"); };
 | NOT expr              { emit->emit_item(NOT,"NOT"); };
 | expr LIST expr        { emit->emit_item(LIST,"LIST"); }
+| expr JOIN expr        { emit->emit_item(JOIN,"JOIN"); }
 | expr '+' expr			{ emit->emit_item(ADD,"ADD"); }
 | expr '-' expr			{ emit->emit_item(SUB,"SUB"); }
 | expr B_AND expr       { emit->emit_item(AND,"AND"); }

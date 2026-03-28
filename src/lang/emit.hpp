@@ -41,7 +41,8 @@ enum _id_item {
     PTR,
     ASSIGN_EXPR,
     GOTOLABEL,
-    GOTOEXPR
+    GOTOEXPR,
+    JOIN
 }; 
 
 #define MAX_ITEM_NAME   (256)

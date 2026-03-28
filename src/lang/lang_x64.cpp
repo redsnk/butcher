@@ -415,6 +415,8 @@ int n;
                 if (op == NULL) op = XOR();
             case _id_item::LIST:
                 if (op == NULL) op = ",";
+            case _id_item::JOIN:
+                if (op == NULL) op = ";";
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
                 sprintf(tmp,"%s%s%s",it1,op,it2);

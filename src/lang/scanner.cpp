@@ -350,8 +350,8 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[59] =
     {   0,
-        0,    0,   33,   31,   32,   29,   12,   13,   11,   26,
-        9,   24,   23,   10,    7,   25,   30,   18,   31,   19,
+        0,    0,   33,   31,   32,   30,   12,   13,   11,   26,
+        9,   24,   23,   10,    7,   25,   29,   18,   31,   19,
         6,   28,    6,    6,    6,    6,    6,   27,   31,   15,
         8,    8,    7,    0,   16,   20,   14,   21,   17,    6,
         6,    4,    6,    1,    6,   22,    0,    0,    8,    6,
@@ -928,12 +928,12 @@ return Parser::token::B_XOR;
 case 29:
 YY_RULE_SETUP
 #line 48 "lexer.l"
-/* ignore space */
+return Parser::token::JOIN;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 49 "lexer.l"
-/* ignore*/
+/* ignore space */
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
