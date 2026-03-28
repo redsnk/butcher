@@ -1,6 +1,6 @@
 #include "lang_x64.hpp"
 
-#define MAX_STR_OP     (1024)
+#define MAX_STR_OP     (1024*5)
 
 const char *Lang_x64::ptr(cs_x86_op op) {
     switch (op.size) {
@@ -357,14 +357,21 @@ int n;
         op = NULL;
         switch (e->items[n].id) {
             case _id_item::INDENT:
+                /*
                 strcat (buffer,INDENT());
                 e->del_item(n);
                 n -= 1;
+                */
+                e->res_item(n,(char *)INDENT());
                 break;
             case _id_item::LF:
+                /*
                 strcat (buffer,"\n");
                 e->del_item(n);
                 n -= 1;
+                */
+                sprintf(tmp,"%s\n",(char *)ENDS());
+                e->res_item(n,tmp);
                 break;
             case _id_item::ENC:
                 it1 = Translate_item(handle,insn,&e->items[n-1],false);
@@ -504,6 +511,7 @@ int n;
                 e->del_item(n-1);
                 n -= 1;
                 break;
+            /*
             case _id_item::END:
                 if ((n > 0) && (e->items[n-1].id == RESULT)) {
                     it1 = Translate_item(handle,insn,&e->items[n-1],false);
@@ -519,11 +527,21 @@ int n;
                 }
                 if (ends) strcat(buffer,ENDS());
                 break;
+            */
             default:
                 break;
         }
         n++;
     }
+    // print stack
+    for (n=0;n<e->count;n++) {
+        if (e->items[n].id == RESULT) {
+            it1 = Translate_item(handle,insn,&e->items[n],false);
+            strcat (buffer,it1);
+            free(it1);
+        }
+    }
+    if (ends) strcat(buffer,ENDS());
     free(e);
     return (buffer);
 }

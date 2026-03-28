@@ -38,7 +38,7 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 ">"         return Parser::token::GT;
 "<="        return Parser::token::LTE;
 ">="        return Parser::token::GTE;
-";"         return Parser::token::END;
+"º"         return Parser::token::END;
 "."         return Parser::token::INDENT;
 ","			return Parser::token::LIST;
 ":"         return Parser::token::LF;
@@ -46,6 +46,7 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "|"         return Parser::token::B_OR;
 "^"         return Parser::token::B_XOR;
 " "         /* ignore space */
+";"         /* ignore*/
 .           return yytext[0];
  
 %%

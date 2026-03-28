@@ -4,3 +4,4 @@
 patch test.c getmem.patch
 patch test.c freemem.patch
 patch test.c realloc.patch
+patch test.c localtime.patch

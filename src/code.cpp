@@ -120,13 +120,15 @@ void Code::AddLabel (struct _subcode *sc,uint64_t addr) {
 struct _subcode *p;
 
     p = GetParent(sc);
-    if (!p->l_count) {
-        p->labels = (uint64_t *) malloc(sizeof(uint64_t));
+    if (!ExistLabel(p,addr)) {
+        if (!p->l_count) {
+            p->labels = (uint64_t *) malloc(sizeof(uint64_t));
+        }
+        else {
+            p->labels = (uint64_t *) realloc(p->labels,sizeof(uint64_t)*(p->l_count+1));
+        }
+        p->labels[p->l_count++] = addr;
     }
-    else {
-        p->labels = (uint64_t *) realloc(p->labels,sizeof(uint64_t)*(p->l_count+1));
-    }
-    p->labels[p->l_count++] = addr;
 }
 
 int Code::ExistLabel (struct _subcode *sc,uint64_t addr) {

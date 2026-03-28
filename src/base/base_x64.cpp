@@ -606,7 +606,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x45a23e7) {
+    if (insn->address == 0x45a365f) {
         // test
         bits = 0;
     }
@@ -913,10 +913,16 @@ int bits;
         case X86_INS_ADD:
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn,true);
+                //reg0 = lang_x64->Translate(handle,".op0 = op0 + op1;",insn,true);
+                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+                //reg0 = lang_x64->Translate(handle,".add_cf(bits,op0,op1);:.add_of(bits,sop0,sop1);:.op0 = op0 + op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+                reg0 = lang_x64->Translate(handle,  ".add_cf(bits,op0,op1);:"
+                                                    ".add_of(bits,sop0,sop1);:"
+                                                    ".op0 = op0 + op1;:"
+                                                    ".zf(op0 == 0);:"
+                                                    ".sf(sop0 < 0);",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
@@ -939,6 +945,7 @@ int bits;
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 + op1 + num_cf();",insn,true);
+                //reg0 = lang_x64->Translate(handle,".if get_cf() then op0 = op0 + op1 + 1 else op0 = op0 + op1 fi;",insn,true);
                 PrintLine(insn,0,reg0);
                 num++;
                 free(reg0);
@@ -969,21 +976,23 @@ int bits;
             }
             break;
         case X86_INS_SUB:
-            /*
-            if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                if (FlagsNotUsed(sc,num)) {
-                    reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-                    reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
-                    PrintLine(insn,1,lang_x64->E_SUB_RR,reg0,reg0,reg1);
-                    num++;
-                    free(reg1);
-                    free(reg0);
-                }
-            }
-            */
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,".op0 = op0 - op1;",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SBB:
+            // The OF, SF, ZF, AF, CF, and PF flags
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,".op0 = op0 - (op1 + num_cf());",insn,true);
             }
             else {
                 reg0 = lang_x64->Translate(handle,".cf(op1 > op0);:.sub_of(bits,sop0,sop1);:.op0 = op0 - op1;:.zf(op0 == 0);:.sf(sop0 < 0);",insn,true);
@@ -1629,6 +1638,18 @@ int bits;
                 reg0 = lang_x64->Translate(handle,".st0 = st0 * op0;",insn,true);
                 PrintLine(insn,0,reg0);
                 free(reg0);
+                num++;
+            }
+            break;
+        case X86_INS_FNSTCW:
+            reg0 = lang_x64->Translate(handle,".op0 = 0;",insn,true);
+            PrintLine(insn,0,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FLDCW:
+            if (insn->detail->x86.op_count == 1) {
+                PrintLine(insn,0,"");
                 num++;
             }
             break;
