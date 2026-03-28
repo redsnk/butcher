@@ -953,6 +953,22 @@ int bits;
                                                     "else "
                                                         "op0 = op0 + op1 "
                                                     "fi",insn,true);
+            }
+            else {
+                //reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  ".if get_cf() then "
+                                                        "add_cf(bits,op0,op1+1);"
+                                                        "add_of(bits,sop0,sop1+1);"
+                                                        "op0 = op0 + (op1 + 1) "
+                                                    "else "
+                                                        "add_cf(bits,op0,op1);"
+                                                        "add_of(bits,sop0,sop1);"
+                                                        "op0 = op0 + op1 "
+                                                    "fi:"
+                                                    ".zf(op0 == 0):"
+                                                    ".sf(sop0 < 0)",insn,true);
+            }
+            if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);
                 num++;
                 free(reg0);
@@ -1018,9 +1034,11 @@ int bits;
                 //reg0 = NULL;
                 reg0 = lang_x64->Translate(handle,  ".if get_cf() then "
                                                         "cf((op1+1) > op0);"
+                                                        "sub_of(bits,sop0,sop1+1);"
                                                         "op0 = op0 - (op1 + 1) "
                                                     "else "
                                                         "cf(op1 > op0);"
+                                                        "sub_of(bits,sop0,sop1);"
                                                         "op0 = op0 - op1 "
                                                     "fi:"
                                                     ".zf(op0 == 0):"
