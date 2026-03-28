@@ -419,9 +419,11 @@ const char *Lang_Py_x64::F_ADD_CF(void) {
     return ("cpu.add_flag_c(");
 }
 
+/*
 const char *Lang_Py_x64::F_NUM_CF(void) {
     return ("cpu.num_flag_c(");
 }
+*/
 
 const char *Lang_Py_x64::F_SUB_OF(void) {
     return ("cpu.sub_flag_o(");

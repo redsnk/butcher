@@ -947,8 +947,12 @@ int bits;
         case X86_INS_ADC:
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 + op1 + num_cf()",insn,true);
-                //reg0 = lang_x64->Translate(handle,".if get_cf() then op0 = op0 + op1 + 1 else op0 = op0 + op1 fi",insn,true);
+                //reg0 = lang_x64->Translate(handle,".op0 = op0 + op1 + num_cf()",insn,true);
+                reg0 = lang_x64->Translate(handle,  ".if get_cf() then "
+                                                        "op0 = op0 + op1 + 1 "
+                                                    "else "
+                                                        "op0 = op0 + op1 "
+                                                    "fi",insn,true);
                 PrintLine(insn,0,reg0);
                 num++;
                 free(reg0);
@@ -1003,10 +1007,24 @@ int bits;
         case X86_INS_SBB:
             // The OF, SF, ZF, AF, CF, and PF flags
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = op0 - (op1 + num_cf())",insn,true);
+                //reg0 = lang_x64->Translate(handle,".op0 = op0 - (op1 + num_cf())",insn,true);
+                reg0 = lang_x64->Translate(handle,  ".if get_cf() then "
+                                                        "op0 = op0 - (op1 + 1) "
+                                                    "else "
+                                                        "op0 = op0 + op1 "
+                                                    "fi",insn,true);
             }
             else {
-                reg0 = NULL;
+                //reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  ".if get_cf() then "
+                                                        "cf((op1+1) > op0);"
+                                                        "op0 = op0 - (op1 + 1) "
+                                                    "else "
+                                                        "cf(op1 > op0);"
+                                                        "op0 = op0 - op1 "
+                                                    "fi:"
+                                                    ".zf(op0 == 0):"
+                                                    ".sf(sop0 < 0)",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,0,reg0);

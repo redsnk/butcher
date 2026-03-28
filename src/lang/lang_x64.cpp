@@ -255,9 +255,11 @@ int bits;
     else if (!strcmp(name,"add_cf")) {
         return (strdup(F_ADD_CF()));
     }
+    /*
     else if (!strcmp(name,"num_cf")) {
         return (strdup(F_NUM_CF()));
     }
+    */
     else if (!strcmp(name,"sub_of")) {
         return (strdup(F_SUB_OF()));
     }

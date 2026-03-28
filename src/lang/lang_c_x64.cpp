@@ -410,9 +410,11 @@ const char *Lang_C_x64::F_ADD_CF(void) {
     return ("add_flag_c(cpu,");
 }
 
+/*
 const char *Lang_C_x64::F_NUM_CF(void) {
     return ("num_flag_c(cpu");
 }
+*/
 
 const char *Lang_C_x64::F_SUB_OF(void) {
     return ("sub_flag_o(cpu,");

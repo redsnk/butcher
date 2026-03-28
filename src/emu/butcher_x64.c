@@ -360,9 +360,11 @@ int flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF);
 }
 
+/*
 uint64_t num_flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF?1:0);
 }
+*/
 
 int flag_o(struct _cpu *cpu) {
 	return(cpu->eflags.OF);

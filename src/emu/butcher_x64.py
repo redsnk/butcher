@@ -397,12 +397,12 @@ class _cpu:
     
     def get_flag_c(self):
         return self.eflags.CF
-
+    '''
     def num_flag_c(self):
         if self.eflags.CF:
             return 1
         return 0
-    
+    '''
     def flag_o(self,b):
         self.eflags.OF = b
 
