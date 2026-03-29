@@ -230,6 +230,16 @@ void Lang_C_x64::PrintFuncHeaderAddr(Code *c,int num) {
 }\n\
 \n"
 
+void Lang_C_x64::PrintAnonJmpVar(void) {
+    printf("uint64_t anon;\n\n");
+}
+
+void Lang_C_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
+    printf("    if (anon == 0x%llx) {\n",addr);
+    printf("        goto %s;\n",name);
+    printf("    }\n"); 
+}
+
 void Lang_C_x64::PrintFuncFooter(Code *c,int num) {
     printf(C_FUNC_FOOTER);
 }
@@ -549,4 +559,12 @@ const char *Lang_C_x64::F_PUSHFPU(void) {
 
 const char *Lang_C_x64::F_POPFPU(void) {
     return ("popfpu(cpu");
+}
+
+const char *Lang_C_x64::E_ANONJ(void) {
+    return ("anon");
+}
+
+const char *Lang_C_x64::E_LABEL_ANONJ(void) {
+    return ("label_Anon");
 }

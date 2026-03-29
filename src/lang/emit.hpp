@@ -45,7 +45,7 @@ enum _id_item {
     JOIN
 }; 
 
-#define MAX_ITEM_NAME   (256)
+#define MAX_ITEM_NAME   (1024*5)
 
 union _v_item {
     uint64_t num;

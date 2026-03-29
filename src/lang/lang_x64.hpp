@@ -131,6 +131,8 @@ class Lang_x64 : public Language {
     virtual const char *F_IDIV(void) = 0;
     virtual const char *F_PUSHFPU(void) = 0;
     virtual const char *F_POPFPU(void) = 0;
+    virtual const char *E_ANONJ(void) = 0;
+    virtual const char *E_LABEL_ANONJ(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
@@ -138,6 +140,8 @@ class Lang_x64 : public Language {
     virtual void PrintSubMem(Code *c,int num) = 0;
     virtual void PrintFuncHeaderName(Code *c,int num,char *name) = 0;
     virtual void PrintFuncHeaderAddr(Code *c,int num) = 0;
+    virtual void PrintAnonJmpVar(void) = 0;
+    virtual void PrintAnonJmpCall(uint64_t addr,char *name) = 0;
     virtual void PrintFuncFooter(Code *c,int num) = 0;
     virtual void PrintSubCodeSep(void) = 0;
     //virtual char *mem_str(csh handle,cs_x86_op op) = 0;

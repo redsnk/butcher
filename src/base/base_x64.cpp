@@ -606,9 +606,9 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x45a365f) {
+    if (insn->address == 0x42eba4) {
         // test
-        bits = 0;
+        n = 0;
     }
     if ((sc->parent == SUBCODE_TOP) && !num) {
         // First instruction, push rip/eip
@@ -1805,7 +1805,8 @@ char *name;
         lang_x64->PrintFuncHeaderAddr(c,num);
     }
     if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
-        printf("uint64_t anon;\n\n");
+        //printf("uint64_t anon;\n\n");
+        lang_x64->PrintAnonJmpVar();
     }
     for (int m=0;m<c->subcod_count;m++) {
         sc = &c->subcodes[m];
@@ -1835,9 +1836,12 @@ char *name;
         for (int n=0;n<c->subcodes[num].l_count;n++) {
             uint64_t addr = c->subcodes[num].labels[n];
             name = GetLabel(addr);
+            lang_x64->PrintAnonJmpCall(addr,name);
+            /*
             printf("    if (anon == 0x%llx) {\n",addr);
             printf("        goto %s;\n",name);
             printf("    }\n");
+            */
             free(name);
         }
 

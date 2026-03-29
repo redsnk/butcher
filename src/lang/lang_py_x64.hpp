@@ -14,6 +14,8 @@ class Lang_Py_x64 : public Lang_x64 {
     void PrintSubMem(Code *c,int num);
     void PrintFuncHeaderName(Code *c,int num,char *name);
     void PrintFuncHeaderAddr(Code *c,int num);
+    void PrintAnonJmpVar(void);
+    void PrintAnonJmpCall(uint64_t addr,char *name);
     void PrintFuncFooter(Code *c,int num);
     void PrintSubCodeSep(void);
 
@@ -88,6 +90,8 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *E_ANONC(void);
     const char *F_PUSHFPU(void);
     const char *F_POPFPU(void);
+    const char *E_ANONJ(void);
+    const char *E_LABEL_ANONJ(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);

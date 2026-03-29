@@ -221,6 +221,15 @@ void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
     return\n\
 \n"
 
+void Lang_Py_x64::PrintAnonJmpVar(void) {
+    // None
+}
+
+void Lang_Py_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
+    printf("    if anon == 0x%llx:\n",addr);
+    printf("        goto %s\n",name);
+}
+
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
     printf(PY_FUNC_FOOTER);
 }
@@ -559,4 +568,12 @@ const char *Lang_Py_x64::F_PUSHFPU(void) {
 
 const char *Lang_Py_x64::F_POPFPU(void) {
     return ("cpu.popfpu(");
+}
+
+const char *Lang_Py_x64::E_ANONJ(void) {
+    return ("anon");
+}
+
+const char *Lang_Py_x64::E_LABEL_ANONJ(void) {
+    return (".label_Anon");
 }

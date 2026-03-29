@@ -299,10 +299,12 @@ int bits;
         return (strdup(E_ANONC()));
     }
     else if (!strcmp(name,"anonjmp")) {
-        return (strdup("anon"));
+        //return (strdup("anon"));
+        return (strdup(E_ANONJ()));
     }
     else if (!strcmp(name,"anonlabel")) {
-        return (strdup("label_Anon"));
+        //return (strdup("label_Anon"));
+        return (strdup(E_LABEL_ANONJ()));
     }
     else if (!strcmp(name,"pushfpu")) {
         return (strdup(F_PUSHFPU()));
