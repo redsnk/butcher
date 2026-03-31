@@ -340,6 +340,9 @@ int bits;
     else if (!strcmp(name,"s_st1")) {
         return (s_reg_name(handle,X86_REG_ST1));
     }
+    else if (!strcmp(name,"break")) {
+        return (strdup(E_BREAK()));
+    }
     return (strdup("<Translate_var error>"));
 }
 
@@ -517,6 +520,17 @@ int n;
                 n -= 2;
                 */       
                 break;
+            case _id_item::WHILE:
+                it1 = Translate_item(handle,insn,&e->items[n-2],false);
+                it2 = Translate_item(handle,insn,&e->items[n-1],false);
+                sprintf(tmp,E_WHILE(),it1,it2);
+                free(it2);
+                free(it1);
+                e->res_item(n,tmp);
+                e->del_item(n-2);
+                e->del_item(n-2);
+                n -= 2;
+                break;
             case _id_item::NOT:
                 it1 = Translate_item(handle,insn,&e->items[n-1],false);
                 sprintf(tmp,"%s %s",E_NOT(),it1);
@@ -532,6 +546,9 @@ int n;
                 e->res_item(n,tmp);
                 e->del_item(n-1);
                 n -= 1;
+                break;
+            case _id_item::BREAK:
+                e->res_item(n,(char *)E_BREAK());
                 break;
             /*
             case _id_item::END:

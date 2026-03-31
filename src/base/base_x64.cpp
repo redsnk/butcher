@@ -1640,6 +1640,20 @@ int bits;
                 num++;
             }
             break;
+        case X86_INS_SCASB:
+        case X86_INS_SCASW:
+        case X86_INS_SCASD:
+        case X86_INS_SCASQ:
+            if (insn->detail->x86.prefix[0]== X86_PREFIX_REPNE) {
+                reg0 = lang_x64->Translate(handle,  ".while rcx != 0 do "
+                                                        "rcx = rcx - 1;"
+                                                        "if get_zf() then break fi "
+                                                    "endw",insn,true);
+                PrintLine(insn,0,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
         case X86_INS_FILD:
         case X86_INS_FLD:
             reg0 = lang_x64->Translate(handle,".pushfpu(op0)",insn,true);

@@ -568,3 +568,11 @@ const char *Lang_C_x64::E_ANONJ(void) {
 const char *Lang_C_x64::E_LABEL_ANONJ(void) {
     return ("label_Anon");
 }
+
+const char *Lang_C_x64::E_WHILE(void) {
+    return ("while (%s) {\n        %s;\n    }");
+}
+
+const char *Lang_C_x64::E_BREAK(void) {
+    return ("break");
+}

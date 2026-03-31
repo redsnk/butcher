@@ -90,6 +90,8 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_POPFPU(void);
     const char *E_ANONJ(void);
     const char *E_LABEL_ANONJ(void);
+    const char *E_WHILE(void);
+    const char *E_BREAK(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);
