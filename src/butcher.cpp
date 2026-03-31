@@ -31,9 +31,12 @@ int Butcher::IsNamedFunction (uint64_t addr, char **func) {
 
 Code *Butcher::Include(Code *c) {
 std::set<uint64_t>::iterator itr;
-  
+char *func;
+
   for (itr = in.begin();itr != in.end(); itr++) {
-    c = GetCode(c,*itr,NULL,SUBCODE_TOP);
+    func = NULL;
+    IsNamedFunction(*itr,&func);
+    c = GetCode(c,*itr,func,SUBCODE_TOP);
   }
   return (c);
 }

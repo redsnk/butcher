@@ -606,7 +606,7 @@ int bits;
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x42eba4) {
+    if (insn->address == 0x4d9803) {
         // test
         n = 0;
     }
@@ -1198,37 +1198,23 @@ int bits;
                     free(reg0);
                 }
             }
-            /*
-            if ((num+1) < sc->count) {
-                cs_insn *next = &sc->insn[num+1];
-                switch (next->id) {
-                    case X86_INS_JA:
-                        // (CF=0 and ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,false);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,false);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
-                            PrintLine(next,1,lang_x64->E_JA_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
-                            free(reg0);
-                            free(reg1);
-                            num += 2;
-                        }
-                        break;
-                    case X86_INS_JGE:
-                        // (SF=OF)
-                        if (FlagsNotUsed(sc,num+1)) {
-                            reg0 = lang_x64->get_op_str(handle,insn->detail->x86.operands[0],bits,true);
-                            reg1 = lang_x64->get_op_str(handle,insn->detail->x86.operands[1],bits,true);
-                            PrintLine(insn,0,lang_x64->E_SPACE);
-                            PrintLine(next,1,lang_x64->E_JGE_RR_GOTO,reg0,reg1,next->detail->x86.operands[0].imm);
-                            free(reg0);
-                            free(reg1);
-                            num += 2;
-                        }
-                        break;
-                }
+            break;
+        case X86_INS_CMPXCHG:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,  ".if rax == op1 then "
+                                                        "op0 = op1 "
+                                                    "else "
+                                                        "rax = op0 "
+                                                    "fi",insn,true);
             }
-            */
+            else {
+                reg0 = NULL;
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,0,reg0);
+                num++;
+                free(reg0);
+            }
             break;
         case X86_INS_OR:
             if (FlagsNotUsed(sc,num)) {

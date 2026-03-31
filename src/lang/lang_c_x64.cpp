@@ -503,11 +503,11 @@ const char *Lang_C_x64::F_POW(void) {
 }
 
 const char *Lang_C_x64::E_IFTHENELSE(void) {
-    return ("if (%s) { %s; } else  { %s; }");
+    return ("if (%s) {\n        %s;\n    }\n    else {\n        %s;\n    }");
 }
 
 const char *Lang_C_x64::E_IFTHEN(void) {
-    return ("if (%s) { %s; }");
+    return ("if (%s) {\n        %s;\n    }");
 }
 
 const char *Lang_C_x64::F_NOT(void) {

@@ -74,15 +74,16 @@ char *str;
         case X86_OP_IMM:
             switch (bits) {
                 case 8:
-                    sprintf(buffer,"0x%"PRIx8,(int8_t)op.imm);
+                    sprintf(buffer,"0x%"PRIx8,(uint8_t)op.imm);
                     break;
                 case 16:
-                    sprintf(buffer,"0x%"PRIx16,(int16_t)op.imm);
+                    sprintf(buffer,"0x%"PRIx16,(uint16_t)op.imm);
                     break;
                 case 32:
-                    sprintf(buffer,"0x%"PRIx32,(int32_t)op.imm);
+                    sprintf(buffer,"0x%"PRIx32,(uint32_t)op.imm);
                     break;
                 case 64:
+                case 128:
                     sprintf(buffer,"0x%"PRIx64,op.imm);
                     break;
             }
@@ -115,7 +116,15 @@ char *Lang_x64::Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,
 */
 
 char *Lang_x64::Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign) {
-    switch (insn->detail->x86.addr_size*8) {
+int bits;
+
+    if (insn->detail->x86.op_count == 0) {
+        bits = insn->detail->x86.addr_size*8;
+    }
+    else {
+        bits = insn->detail->x86.operands[0].size*8;
+    }
+    switch (bits) {
         case 8:
             return (sign?s_reg_name(handle,reg8):reg_name(handle,reg8));
         case 16:
@@ -132,6 +141,7 @@ int bits;
 
     bits = insn->detail->x86.addr_size * 8;
     if (!strcmp(name,"op0")) {
+        bits = insn->detail->x86.operands[0].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[0],bits,false));
         }
@@ -140,6 +150,7 @@ int bits;
         }
     }
     else if (!strcmp(name,"op1")) {
+        bits = insn->detail->x86.operands[1].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[1],bits,false));
         }
@@ -148,6 +159,7 @@ int bits;
         }
     }
     else if (!strcmp(name,"op2")) {
+        bits = insn->detail->x86.operands[2].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[2],bits,false));
         }
@@ -156,6 +168,7 @@ int bits;
         }
     }
     else if (!strcmp(name,"sop0")) {
+        bits = insn->detail->x86.operands[0].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[0],bits,true));
         }
@@ -164,6 +177,7 @@ int bits;
         }
     }
     else if (!strcmp(name,"sop1")) {
+        bits = insn->detail->x86.operands[1].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[1],bits,true));
         }
@@ -172,6 +186,7 @@ int bits;
         }
     }
     else if (!strcmp(name,"sop2")) {
+        bits = insn->detail->x86.operands[2].size*8;
         if (lset) {
             return (set_op_str(handle,insn->detail->x86.operands[2],bits,true));
         }
@@ -267,8 +282,9 @@ int bits;
         return (strdup(F_IDIV()));
     }
     else if (!strcmp(name,"bits")) {
-        char *buffer = (char *) malloc(1024);
-        sprintf(buffer,"%i",insn->detail->x86.addr_size*8);
+        char *buffer = (char *) malloc(32);
+        //sprintf(buffer,"%i",insn->detail->x86.addr_size*8);
+        sprintf(buffer,"%i",bits);
         return (buffer);
     }
     else if (!strcmp(name,"true")) {
