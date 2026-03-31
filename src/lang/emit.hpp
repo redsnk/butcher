@@ -42,7 +42,10 @@ enum _id_item {
     ASSIGN_EXPR,
     GOTOLABEL,
     GOTOEXPR,
-    JOIN
+    JOIN,
+    WHILE,
+    ENDW,
+    BREAK
 }; 
 
 #define MAX_ITEM_NAME   (1024*5)

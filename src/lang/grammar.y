@@ -45,6 +45,7 @@
 %precedence			LF
 %precedence         END JOIN
 %left				IF THEN ELSE FI GOTO
+%left               WHILE DO ENDW BREAK
 %precedence         '='
 %left				LIST
 %left               NOT EQUAL NEQUAL LT GT LTE GTE
@@ -106,8 +107,10 @@ expr:
 | END					{ emit->emit_item(END,"END"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
+| BREAK                 { emit->emit_item(BREAK,"BREAK"); }
 | IF expr THEN expr ELSE expr FI { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
 | IF expr THEN expr FI  { emit->emit_item(IFTHEN,"IFTHEN"); }
+| WHILE expr DO expr ENDW { emit->emit_item(WHILE,"WHILE"); }
 ;
 
 stmt_list: expr
