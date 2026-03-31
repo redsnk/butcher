@@ -1201,7 +1201,7 @@ int bits;
             break;
         case X86_INS_CMPXCHG:
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,  ".if rax == op1 then "
+                reg0 = lang_x64->Translate(handle,  ".if rax == op0 then "
                                                         "op0 = op1 "
                                                     "else "
                                                         "rax = op0 "
