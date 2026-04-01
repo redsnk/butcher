@@ -503,11 +503,11 @@ const char *Lang_C_x64::F_POW(void) {
 }
 
 const char *Lang_C_x64::E_IFTHENELSE(void) {
-    return ("if (%s) {\n        %s;\n    }\n    else {\n        %s;\n    }");
+    return ("if(%s) {\n%s;\n}\nelse {\n%s;\n}");
 }
 
 const char *Lang_C_x64::E_IFTHEN(void) {
-    return ("if (%s) {\n        %s;\n    }");
+    return ("if(%s) {\n%s;\n}");
 }
 
 const char *Lang_C_x64::F_NOT(void) {
@@ -570,7 +570,7 @@ const char *Lang_C_x64::E_LABEL_ANONJ(void) {
 }
 
 const char *Lang_C_x64::E_WHILE(void) {
-    return ("while (%s) {\n        %s;\n    }");
+    return ("while(%s) {\n%s;\n}");
 }
 
 const char *Lang_C_x64::E_BREAK(void) {

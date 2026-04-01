@@ -1,7 +1,5 @@
 #include "lang_x64.hpp"
 
-#define MAX_STR_OP     (1024*5)
-
 const char *Lang_x64::ptr(cs_x86_op op) {
     switch (op.size) {
         case 1:
@@ -99,21 +97,6 @@ char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int bits,int sign) {
 char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
     return(op_str(handle,op,bits,sign,true));
 }
-
-/*
-char *Lang_x64::Translate_reg (cs_insn *insn,const char *reg8,const char *reg16,const char *reg32,const char *reg64) {
-    switch (insn->detail->x86.addr_size*8) {
-        case 8:
-            return (strdup(reg8));
-        case 16:
-            return (strdup(reg16));
-        case 32:
-            return (strdup(reg32));
-        case 64:
-            return (strdup(reg64));
-    }
-}
-*/
 
 char *Lang_x64::Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign) {
 int bits;
@@ -366,7 +349,7 @@ char *buffer;
 
 char *Lang_x64::Translate (csh handle,char *s, cs_insn *insn,int ends) {
 Emit *e;
-char *buffer,*it1,*it2,*it3;
+char *buffer,*it1,*it2,*it3,*it4,*it5;
 const char *op;
 int lmem;
 char tmp[MAX_STR_OP];
@@ -380,19 +363,9 @@ int n;
         op = NULL;
         switch (e->items[n].id) {
             case _id_item::INDENT:
-                /*
-                strcat (buffer,INDENT());
-                e->del_item(n);
-                n -= 1;
-                */
                 e->res_item(n,(char *)INDENT());
                 break;
             case _id_item::LF:
-                /*
-                strcat (buffer,"\n");
-                e->del_item(n);
-                n -= 1;
-                */
                 sprintf(tmp,"%s\n",(char *)ENDS());
                 e->res_item(n,tmp);
                 break;
@@ -438,11 +411,20 @@ int n;
                 if (op == NULL) op = XOR();
             case _id_item::LIST:
                 if (op == NULL) op = ",";
-            case _id_item::JOIN:
-                if (op == NULL) op = ";";
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
                 sprintf(tmp,"%s%s%s",it1,op,it2);
+                free(it2);
+                free(it1);
+                e->res_item(n,tmp);
+                e->del_item(n-2);
+                e->del_item(n-2);
+                n -= 2;
+                break;
+            case _id_item::JOIN:
+                it1 = Translate_item(handle,insn,&e->items[n-2],false);
+                it2 = Translate_item(handle,insn,&e->items[n-1],false);
+                sprintf(tmp,"%s%s\n%s",it1,ENDS(),it2);
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
@@ -491,7 +473,10 @@ int n;
             case _id_item::IFTHEN:
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,E_IFTHEN(),it1,it2);
+                //sprintf(tmp,E_IFTHEN(),it1,it2);
+                it3 = Indent(it2);
+                sprintf(tmp,E_IFTHEN(),it1,it3);
+                free(it3);
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
@@ -503,7 +488,11 @@ int n;
                 it1 = Translate_item(handle,insn,&e->items[n-3],false);
                 it2 = Translate_item(handle,insn,&e->items[n-2],false);
                 it3 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,E_IFTHENELSE(),it1,it2,it3);
+                it4 = Indent(it2);
+                it5 = Indent(it3);
+                sprintf(tmp,E_IFTHENELSE(),it1,it4,it5);
+                free(it5);
+                free(it4);
                 free(it3);
                 free(it2);
                 free(it1);
@@ -513,17 +502,14 @@ int n;
                 e->del_item(n-3);
                 e->del_item(n-3);
                 n -= 3;
-                
-                /*
-                e->del_item(n-3);
-                e->del_item(n-3);
-                n -= 2;
-                */       
                 break;
             case _id_item::WHILE:
                 it1 = Translate_item(handle,insn,&e->items[n-2],false);
                 it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,E_WHILE(),it1,it2);
+                //sprintf(tmp,E_WHILE(),it1,it2);
+                it3 = Indent(it2);
+                sprintf(tmp,E_WHILE(),it1,it3);
+                free(it3);
                 free(it2);
                 free(it1);
                 e->res_item(n,tmp);
@@ -550,23 +536,6 @@ int n;
             case _id_item::BREAK:
                 e->res_item(n,(char *)E_BREAK());
                 break;
-            /*
-            case _id_item::END:
-                if ((n > 0) && (e->items[n-1].id == RESULT)) {
-                    it1 = Translate_item(handle,insn,&e->items[n-1],false);
-                    strcat (buffer,it1);
-                    free(it1);
-                    e->del_item(n-1);
-                    e->del_item(n-1);
-                    n -= 2;
-                }
-                else {
-                    e->del_item(n);
-                    n -= 1;
-                }
-                if (ends) strcat(buffer,ENDS());
-                break;
-            */
             default:
                 break;
         }

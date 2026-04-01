@@ -511,11 +511,11 @@ const char *Lang_Py_x64::F_POW(void) {
 }
 
 const char *Lang_Py_x64::E_IFTHENELSE(void) {
-    return ("if %s:\n        %s\n    else:\n        %s");
+    return ("if %s:\n%s\nelse:\n%s");
 }
 
 const char *Lang_Py_x64::E_IFTHEN(void) {
-    return ("if %s:\n        %s");
+    return ("if %s:\n%s");
 }
 
 const char *Lang_Py_x64::F_NOT(void) {
@@ -555,7 +555,7 @@ const char *Lang_Py_x64::E_GOTO(void) {
 }
 
 const char *Lang_Py_x64::E_JCC_GOTO(void) {
-    return ("if %s:\n        goto %s");
+    return ("if %s: goto %s");
 }
 
 const char *Lang_Py_x64::E_ANONC(void) {

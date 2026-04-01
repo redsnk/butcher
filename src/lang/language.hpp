@@ -11,6 +11,8 @@ enum Languages {
   PYTHON,
 };
 
+#define MAX_STR_OP     (1024*5)
+
 class Language {
     public:
     /*
@@ -78,6 +80,7 @@ class Language {
 
     virtual char *Translate (csh handle,char *s, cs_insn *insn,int ends) = 0;
 
+    char *Indent(char *str);
     Emit *Parse(char *str);
 };
 
