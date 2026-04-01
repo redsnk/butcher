@@ -1242,7 +1242,7 @@ int bits;
         case X86_INS_XOR:
             if ((insn->detail->x86.operands[0].type == X86_OP_REG) && (insn->detail->x86.operands[1].type == X86_OP_REG) &&
                 (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg) && FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,".op0 = 0",insn,true);
+                reg0 = lang_x64->Translate(handle,"op0 = 0",insn,true);
             }
             else if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,"op0 = op0 ^ op1",insn,true);
