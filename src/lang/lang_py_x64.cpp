@@ -420,6 +420,10 @@ const char *Lang_Py_x64::F_GET_OF(void) {
     return ("cpu.get_flag_o(");
 }
 
+const char *Lang_Py_x64::F_GET_DF(void) {
+    return ("cpu.get_flag_d(");
+}
+
 const char *Lang_Py_x64::F_ADD_OF(void) {
     return ("cpu.add_flag_o(");
 }

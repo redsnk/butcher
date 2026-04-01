@@ -101,12 +101,15 @@ char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
 char *Lang_x64::Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign) {
 int bits;
 
+    /*
     if (insn->detail->x86.op_count == 0) {
         bits = insn->detail->x86.addr_size*8;
     }
     else {
         bits = insn->detail->x86.operands[0].size*8;
     }
+    */
+    bits = insn->detail->x86.addr_size*8;
     switch (bits) {
         case 8:
             return (sign?s_reg_name(handle,reg8):reg_name(handle,reg8));
@@ -122,7 +125,7 @@ int bits;
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name,int lset) {
 int bits;
 
-    bits = insn->detail->x86.addr_size * 8;
+    //bits = insn->detail->x86.addr_size * 8;
     if (!strcmp(name,"op0")) {
         bits = insn->detail->x86.operands[0].size*8;
         if (lset) {
@@ -199,6 +202,12 @@ int bits;
         //return(Translate_reg(insn,"_dl","_dx","_edx","_rdx"));
         return(Translate_reg(handle,insn,X86_REG_DL,X86_REG_DX,X86_REG_EDX,X86_REG_RDX,false));
     }
+    else if (!strcmp(name,"rdi")) {
+        return(Translate_reg(handle,insn,X86_REG_DIL,X86_REG_DI,X86_REG_EDI,X86_REG_RDI,false));
+    }
+    else if (!strcmp(name,"rsi")) {
+        return(Translate_reg(handle,insn,X86_REG_SIL,X86_REG_SI,X86_REG_ESI,X86_REG_RSI,false));
+    }
     else if (!strcmp(name,"s_rax")) {
         //return(Translate_reg(insn,"s_al","s_ax","s_eax","s_rax"));
         return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,true));
@@ -247,6 +256,9 @@ int bits;
     else if (!strcmp(name,"get_of")) {
         return (strdup(F_GET_OF()));
     }
+    else if (!strcmp(name,"get_df")) {
+        return (strdup(F_GET_DF()));
+    }
     else if (!strcmp(name,"add_of")) {
         return (strdup(F_ADD_OF()));
     }
@@ -266,8 +278,22 @@ int bits;
     }
     else if (!strcmp(name,"bits")) {
         char *buffer = (char *) malloc(32);
-        //sprintf(buffer,"%i",insn->detail->x86.addr_size*8);
-        sprintf(buffer,"%i",bits);
+        sprintf(buffer,"%i",insn->detail->x86.addr_size * 8);
+        return (buffer);
+    }
+    else if (!strcmp(name,"bits0")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"%i",insn->detail->x86.operands[0].size*8);
+        return (buffer);
+    }
+    else if (!strcmp(name,"bytes")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"%i",insn->detail->x86.addr_size);
+        return (buffer);
+    }
+    else if (!strcmp(name,"bytes0")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"%i",insn->detail->x86.operands[0].size);
         return (buffer);
     }
     else if (!strcmp(name,"true")) {

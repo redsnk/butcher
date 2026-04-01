@@ -412,6 +412,10 @@ const char *Lang_C_x64::F_GET_OF(void) {
     return ("flag_o(cpu");
 }
 
+const char *Lang_C_x64::F_GET_DF(void) {
+    return ("flag_d(cpu");
+}
+
 const char *Lang_C_x64::F_ADD_OF(void) {
     return ("add_flag_o(cpu,");
 }

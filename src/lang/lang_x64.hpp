@@ -124,6 +124,7 @@ class Lang_x64 : public Language {
     virtual const char *F_GET_SF(void) = 0;
     virtual const char *F_GET_CF(void) = 0;
     virtual const char *F_GET_OF(void) = 0;
+    virtual const char *F_GET_DF(void) = 0;
     virtual const char *F_ADD_OF(void) = 0;
     virtual const char *F_ADD_CF(void) = 0;
     //virtual const char *F_NUM_CF(void) = 0;

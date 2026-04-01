@@ -54,6 +54,7 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_GET_SF(void);
     const char *F_GET_CF(void);
     const char *F_GET_OF(void);
+    const char *F_GET_DF(void);
     const char *F_ADD_OF(void);
     const char *F_ADD_CF(void);
     //onst char *F_NUM_CF(void);

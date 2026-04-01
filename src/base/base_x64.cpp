@@ -1634,6 +1634,8 @@ int bits;
         case X86_INS_SCASQ:
             if (insn->detail->x86.prefix[0]== X86_PREFIX_REPNE) {
                 reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
+                                                        "zf(op0 == op1);"
+                                                        "if get_df() then rdi = rdi - bytes0 else rdi = rdi + bytes0 fi;"
                                                         "rcx = rcx - 1;"
                                                         "if get_zf() then break fi "
                                                     "endw",insn,true);

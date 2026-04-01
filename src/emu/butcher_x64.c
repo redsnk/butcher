@@ -374,6 +374,10 @@ int flag_s(struct _cpu *cpu) {
 	return(cpu->eflags.SF);
 }
 
+int flag_d(struct _cpu *cpu) {
+	return(cpu->eflags.DF);
+}
+
 void set_flag_z(struct _cpu *cpu,int value) {
 	cpu->eflags.ZF = value;
 }
@@ -388,6 +392,10 @@ void set_flag_c(struct _cpu *cpu,int value) {
 
 void set_flag_o(struct _cpu *cpu,int value) {
 	cpu->eflags.OF = value;
+}
+
+void set_flag_d(struct _cpu *cpu,int value) {
+	cpu->eflags.DF = value;
 }
 
 #define SIGN(a)	(a<0)
