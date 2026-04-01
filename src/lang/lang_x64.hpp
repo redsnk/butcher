@@ -134,6 +134,7 @@ class Lang_x64 : public Language {
     virtual const char *F_POPFPU(void) = 0;
     virtual const char *E_ANONJ(void) = 0;
     virtual const char *E_LABEL_ANONJ(void) = 0;
+    virtual const char *E_TMP(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

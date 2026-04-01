@@ -1528,9 +1528,14 @@ int bits;
             }
             break;
         case X86_INS_XCHG:
+            /*
             reg0 = lang_x64->Translate(handle,  "push(bits,op0);"
                                                 "op0 = op1;"
                                                 "op1 = pop(bits)",insn,true);
+            */
+            reg0 = lang_x64->Translate(handle,  "tmp = op0;"
+                                                "op0 = op1;"
+                                                "op1 = tmp",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1643,6 +1648,26 @@ int bits;
                 free(reg0);
                 num++;
             }
+            break;
+        case X86_INS_MOVSB:
+        case X86_INS_MOVSW:
+        case X86_INS_MOVSD:
+        case X86_INS_MOVSQ:
+            if (insn->detail->x86.prefix[0]== X86_PREFIX_REP) {
+                reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
+                                                        "op0 = op1;"
+                                                        "if get_df() then "
+                                                            "rdi = rdi - bytes0; rsi = rsi - bytes0 "
+                                                        "else "
+                                                            "rdi = rdi + bytes0; rsi = rsi + bytes0 "
+                                                        "fi;"
+                                                        "rcx = rcx - 1"
+                                                    "endw",insn,true);
+                PrintLine(insn,1,reg0);
+                free(reg0);
+                num++;
+            }
+            break;
             break;
         case X86_INS_FILD:
         case X86_INS_FLD:

@@ -352,6 +352,9 @@ int bits;
     else if (!strcmp(name,"break")) {
         return (strdup(E_BREAK()));
     }
+    else if (!strcmp(name,"tmp")) {
+        return (strdup(E_TMP()));
+    }
     return (strdup("<Translate_var error>"));
 }
 

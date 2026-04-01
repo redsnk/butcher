@@ -589,3 +589,7 @@ const char *Lang_Py_x64::E_WHILE(void) {
 const char *Lang_Py_x64::E_BREAK(void) {
     return ("break");
 }
+
+const char *Lang_Py_x64::E_TMP(void) {
+    return ("cpu.tmp");
+}

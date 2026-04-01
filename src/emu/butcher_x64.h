@@ -111,6 +111,7 @@ struct _cpu {
 	struct _mem *mems;
 	struct _fpu fpu;
 	int mem_count;
+	uint64_t tmp;
 };
 
 // 64
@@ -265,6 +266,8 @@ struct _cpu {
 #define _xmm5	(cpu->xmm5.r128)
 #define _xmm6	(cpu->xmm6.r128)
 #define _xmm7	(cpu->xmm7.r128)
+
+#define _tmp 	(cpu->tmp)
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)

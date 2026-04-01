@@ -1,6 +1,9 @@
 #!/bin/bash
 
-../../../build/Butcher -lc -a -i"0x409404,0x68e348" -n"/home/alex/src/butcher/samples/libffi-6.txt" -m "/home/alex/src/butcher/samples/libffi-6.dll" "0x044FCAF8" > test.c
+../../../build/Butcher -lc -a -i"0x409404,0x68e348,0x409950,0x68d9f4,0x68da74" -n"/home/alex/src/butcher/samples/libffi-6.txt" -m "/home/alex/src/butcher/samples/libffi-6.dll" "0x044FCAF8" > test.c
 patch test.c getmem.patch
 patch test.c freemem.patch
 patch test.c realloc.patch
+patch test.c test3.2.patch
+patch test.c getcpinfo.patch
+

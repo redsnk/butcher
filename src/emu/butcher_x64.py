@@ -123,6 +123,8 @@ class _cpu:
 
     mems = []
 
+    tmp = 0
+
     def panic(self,text):
         for line in traceback.format_stack():
             print(line.strip())
