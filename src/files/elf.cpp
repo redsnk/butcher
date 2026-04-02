@@ -1,6 +1,7 @@
 // https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779
 // https://web.mit.edu/freebsd/head/sys/sys/elf32.h
 // https://web.mit.edu/freebsd/head/sys/sys/elf64.h
+// readelf
 
 #include "elf.hpp"
 

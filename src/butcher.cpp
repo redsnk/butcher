@@ -118,7 +118,7 @@ char *lib,*func;
                     }
                     else if (IsJmpIAT(&sc.insn[n],&lib,&func)) {
                         char *tmp = (char *)malloc(1024);
-                        sprintf(tmp,"%s_%s",lib,func);
+                        sprintf(tmp,"__%s_%s",lib,func);
                         char *p  = tmp;
                         do {
                             p=strchr(p,'.');
