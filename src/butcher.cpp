@@ -26,6 +26,9 @@ int Butcher::IsNamedFunction (uint64_t addr, char **func) {
         *func = strdup(named.at(addr).c_str());
         return (true);
     }
+    else if (arch->IsSymbolFunction(addr,func)) {
+        return (true);
+    }
     return (false);
 }
 
@@ -52,6 +55,7 @@ std::set<uint64_t> jmps;
 uint64_t addr,read,*addr_list;
 int max_subcode = INIT_MEM_GETCODE;
 uint8_t *mem;
+char *lib,*func;
 
     /*
     if (address == 0x410b88) {
@@ -93,7 +97,7 @@ uint8_t *mem;
                     }
                     if (IsCall(&sc.insn[n],&addr)) {
                         if (!Excluded(addr)) {
-                            // New subcode 
+                            // New Function 
                             if (!ncalls) {
                                 calls = (struct _call *) malloc(sizeof(struct _call));
                             }
@@ -102,7 +106,8 @@ uint8_t *mem;
                             }
                             calls[ncalls].addr = addr;
                             calls[ncalls].name = NULL;
-                            if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                            //if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                            if (IsNamedFunction(addr,&calls[ncalls].name)) {
                                 if (ltraces) printf("%s *** Add call 0x%llx(%s)\n",lang->COMM(),addr,calls[ncalls].name);
                             }
                             else {
@@ -111,34 +116,53 @@ uint8_t *mem;
                             ncalls++;
                         }
                     }
+                    else if (IsJmpIAT(&sc.insn[n],&lib,&func)) {
+                        char *tmp = (char *)malloc(1024);
+                        sprintf(tmp,"%s_%s",lib,func);
+                        char *p  = tmp;
+                        do {
+                            p=strchr(p,'.');
+                            if (p != NULL) {
+                                *p = '_';
+                            }
+                        }
+                        while (p != NULL);
+                        while (c->ExistFunctionName(tmp)) {
+                            strcat(tmp,"_x");
+                        }
+                        c->RenameFunction(&sc,tmp,false);
+                        free(tmp);
+                        free(lib);
+                        free(func);
+                        lend = true;
+                    }
                     else if (IsJcc(&sc.insn[n],&addr)) {
-                        //printf("jcc 0x%llx\n",addr);
+                        // New conditional goto
                         if (ltraces) printf("%s *** Add jcc 0x%llx\n",lang->COMM(),addr);
                         jmps.insert(addr);
-                        //c->labels.insert(addr);
                         c->AddLabel(&sc,addr);
                     }
                     //else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
                     else if(IsJmp(sc.insn,n,&addr_list,&count,&anon)) {
                         if (anon) {
+                            // Funtion has indirect jmps
                             c->SetAnonJmp(&sc);
                         }
                         for (nn=0;nn<count;nn++) {
                             if (addr_list[nn] != UNDEF_ADDR_JMP) {
+                                // New defined goto
                                 jmps.insert(addr_list[nn]);
-                                //c->labels.insert(addr_list[nn]);
                                 c->AddLabel(&sc,addr_list[nn]);
                             }
                         }
                         free (addr_list);
                         lend = true;
                     }
-                    //else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count) || IsJmpIAT(&sc.insn[n]) ) {
                     else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
                         lend = true;
                     }
                     if (lend) {
-                        // End subcode
+                        // End Funtion
                         if (ltraces) printf("%s *** End of subcode 0x%llx\n",lang->COMM(),sc.first);
                         sc.last = sc.insn[n].address;
                         lexit = true;

@@ -354,8 +354,11 @@ cs_insn *insn;
     *anon = false;
     if (insn->id == X86_INS_JMP) {
         if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-            *addr = (uint64_t *) malloc(sizeof(uint64_t));
-            (*addr)[c++] = insn->detail->x86.operands[0].imm;
+            d = insn->detail->x86.operands[0].imm;
+            if (arch->ValidMemory(d)) {
+                *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                (*addr)[c++] = d;
+            }
         }
         else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
             if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
@@ -438,6 +441,28 @@ int Base_x64::IsJcc(cs_insn *insn, uint64_t *addr) {
         if (insn->detail->x86.op_count == 1) {
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 *addr = insn->detail->x86.operands[0].imm;
+                return (true);
+            }
+        }
+    }
+    return (false);
+}
+
+int Base_x64::IsJmpIAT(cs_insn *insn,char **lib,char **func) {
+uint64_t addr;
+
+    if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+        if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+            addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+            if (arch->IsImportFunction(addr,lib,func)) {
+                return (true);
+            }    
+        }
+        else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
+                (insn->detail->x86.operands[0].mem.disp)) {
+            addr = insn->detail->x86.operands[0].mem.disp;
+            if (arch->IsImportFunction(addr,lib,func)) {
                 return (true);
             }
         }
@@ -661,6 +686,7 @@ int bits;
                 num++;
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                /*
                 if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
@@ -680,6 +706,13 @@ int bits;
                         free(func);
                         num++;
                     }
+                }
+                */
+                if (IsJmpIAT(insn,&lib,&func)) {
+                    PrintLine(insn,1,lang_x64->E_JMP_FROM_IAT(),lib,func);
+                    free(lib);
+                    free(func);
+                    num++;
                 }
                 else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
@@ -706,31 +739,6 @@ int bits;
                         else {
                             break;
                         }
-                        /*
-                        mem = arch->GetMemory(addr,b,&read);
-                        if ((mem != NULL) && (read == b)) {
-                            if (b == 4) {
-                                addr = memto32(mem);
-                            }
-                            else if (b == 8) {
-                                addr = memto64(mem);
-                            }
-                            free(mem);
-                            if (arch->ValidMemory(addr)) {
-                                // Valid
-                                PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I:lang_x64->E_ELIF_R_EQ_I,reg0,n);
-                                //PrintLine(insn,2,"case %i:",n);
-                                PrintLine(insn,2,lang_x64->E_GOTO,addr);
-                                PrintLine(insn,1,lang_x64->E_ENDIF);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        else {
-                            break;
-                        }
-                        */
                     }
                     free(reg0);
                     //PrintLine(insn,1,lang_x64->E_ENDIF);

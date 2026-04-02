@@ -64,6 +64,8 @@ class Code {
         int ExistLabel (struct _subcode *sc,uint64_t addr);
         void SetAnonJmp (struct _subcode *sc);
         char *GetFunctionName (uint64_t addr);
+        int ExistFunctionName (char *name);
+        void RenameFunction (struct _subcode *sc,char *name,int del);
 };
 
 #endif // _CODE_H

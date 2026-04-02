@@ -22,6 +22,7 @@ class Base_x64 : public Butcher {
         int IsCall(cs_insn *insn, uint64_t *addr);
         int IsJmp(cs_insn *insn, int n,uint64_t *addr[],int *count,int *anon);
         int IsJcc(cs_insn *insn, uint64_t *addr);
+        int IsJmpIAT(cs_insn *insn, char **lib, char **func);
         int IsInt(cs_insn *insn, uint64_t *num);
         int IsEnd(cs_insn *insn, int n, int count);
         //int IsJmpIAT(cs_insn *insn);

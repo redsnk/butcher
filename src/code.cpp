@@ -162,6 +162,32 @@ int n;
     return (NULL);
 }
 
+void Code::RenameFunction (struct _subcode *sc,char *name,int del) {
+struct _subcode *p;
+
+    p = GetParent(sc);
+    if (del && (p->name != NULL)) {
+        free (p->name);
+        p->name = NULL;
+    }
+    if (p->name == NULL) {
+        p->name = strdup(name);
+    }
+}
+
+int Code::ExistFunctionName (char *name) {
+int n;
+
+    for (n=0;n<subcod_count;n++) {
+        if ((subcodes[n].parent == SUBCODE_TOP) && (subcodes[n].name != NULL)) {
+            if (strcmp(subcodes[n].name,name) == 0) {
+                return (true);
+            }
+        }
+    }
+    return (false);
+}
+
 Code::~Code() {
 int n;
 
