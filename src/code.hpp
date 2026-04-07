@@ -13,6 +13,10 @@
 
 #define SUBCODE_TOP     0
 
+#define REG_NONE        0
+#define REG_USED        1
+#define REG_UPDATED     2
+
 struct _subcode {
     int id;
     char *name;
@@ -25,6 +29,8 @@ struct _subcode {
     uint64_t *labels;
     size_t l_count;
     int anonjmp;
+    int ret_bytes;
+    int regs[X86_REG_ENDING];
 };
 
 struct _submem {
@@ -63,6 +69,7 @@ class Code {
         void AddLabel (struct _subcode *sc,uint64_t addr);
         int ExistLabel (struct _subcode *sc,uint64_t addr);
         void SetAnonJmp (struct _subcode *sc);
+        void SetRetBytes (struct _subcode *sc,int bytes);
         char *GetFunctionName (uint64_t addr);
         int ExistFunctionName (char *name);
         void RenameFunction (struct _subcode *sc,char *name,int del);

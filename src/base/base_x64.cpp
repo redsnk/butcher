@@ -259,7 +259,13 @@ cs_err Base_x64::Cs_open(void) {
     return(cs_open(CS_ARCH_X86, arch->Is32()?CS_MODE_32:CS_MODE_64, &handle));
 }
 
-int Base_x64::IsRet(cs_insn *insn) {
+int Base_x64::IsRet(cs_insn *insn,int *bytes) {
+    *bytes = 0;
+    if (insn->id == X86_INS_RET) {
+        if (insn->detail->x86.op_count == 1) {
+            *bytes = insn->detail->x86.operands[0].imm;
+        }
+    }
     return(IsGroup(insn,X86_GRP_RET));
 }
 
@@ -1578,7 +1584,11 @@ int bits;
             }
             break;
         case X86_INS_CALL:
-            //uint64_t addr = 0;
+            /*
+            reg0 = lang_x64->Translate(handle,"push(bits,next_addr)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            */
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
                 addr = insn->detail->x86.operands[0].imm;
@@ -1598,6 +1608,7 @@ int bits;
                 num++;
             } 
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                // Memory
                 if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
                     addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
                     if (arch->IsImportFunction(addr,&lib,&func)) {
@@ -1635,11 +1646,17 @@ int bits;
                 }
             }
             else {
+                // Register
                 reg0 = lang_x64->Translate(handle,"anoncall(op0)",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
             }
+            /*
+            reg0 = lang_x64->Translate(handle,"pop(bits)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            */
             break;
         case X86_INS_SCASB:
         case X86_INS_SCASW:
@@ -1831,6 +1848,11 @@ char *name;
         //printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
         lang_x64->PrintFuncHeaderAddr(c,num);
     }
+    for (int n=0;n<X86_REG_ENDING;n++) {
+        if (c->subcodes[num].regs[n] == REG_USED) {
+            printf("%s %s\n",lang_x64->COMM(),cs_reg_name(handle,n));
+        }
+    }
     if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
         //printf("uint64_t anon;\n\n");
         lang_x64->PrintAnonJmpVar();
@@ -1876,22 +1898,6 @@ char *name;
     lang_x64->PrintFuncFooter(c,num);
 }
 
-/*
-void Base_x64::PrintSubMem(Code *c,int num) {
-struct _submem *sm;
-char sub[128];
-
-    sm = &c->submems[num];
-    char *buffer = (char *) malloc((sm->size*4)+128);
-    buffer[0] = 0;
-    for (int n=0;n<sm->size;n++) {
-        sprintf(sub,"\\x%02x",sm->mem[n]);
-        strcat(buffer,sub);
-    }
-    printf("    add_mem (&cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
-    free(buffer);
-}
-*/
 
 void Base_x64::PrintCode(Code *c) {
 struct _Section *sections;
@@ -1932,6 +1938,78 @@ int count,n;
                                 lang_x64->reg_name(handle,X86_REG_RSP));
     //printf(C_FOOTER_2,c->ep);
     lang_x64->PrintMainClose(c);
+}
+
+void Base_x64::AnalyzeSubCode(Code *c,int num) {
+int n;
+struct _subcode *sc,*p; 
+cs_insn *insn;
+
+    sc = &c->subcodes[num];
+    p = c->GetParent(sc);
+    for (n=0;n<sc->count;) {
+        insn = &sc->insn[n];
+        printf("%s 0x%llx:\t%s\t\t%s\n", lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
+        switch (sc->insn[n].id) {
+            case X86_INS_MOV:
+            case X86_INS_POP:
+            case X86_INS_ADD:
+            case X86_INS_ADC:
+            case X86_INS_SUB:
+            case X86_INS_SBB:
+            case X86_INS_XOR:
+            case X86_INS_AND:
+            case X86_INS_OR:
+                if (insn->detail->x86.op_count > 1) {
+                    if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                        if (p->regs[insn->detail->x86.operands[1].reg] != REG_UPDATED) {
+                            p->regs[insn->detail->x86.operands[1].reg] = REG_USED;
+                        }
+                    }
+                    else if (insn->detail->x86.operands[1].type == X86_OP_REG) {
+                        if (insn->detail->x86.operands[1].mem.base != X86_REG_INVALID) {
+                            if (p->regs[insn->detail->x86.operands[1].mem.base] != REG_UPDATED) {
+                                p->regs[insn->detail->x86.operands[1].mem.base] = REG_USED;
+                            }
+                        }
+                        if (insn->detail->x86.operands[1].mem.index != X86_REG_INVALID) {
+                            if (p->regs[insn->detail->x86.operands[1].mem.index] != REG_UPDATED) {
+                                p->regs[insn->detail->x86.operands[1].mem.index] = REG_USED;
+                            }
+                        }
+                    }
+                }
+                if (insn->detail->x86.op_count > 0) {
+                    if (insn->detail->x86.operands[0].type == X86_OP_REG) {
+                        if (p->regs[insn->detail->x86.operands[0].reg] != REG_USED) {
+                            p->regs[insn->detail->x86.operands[0].reg] = REG_UPDATED;
+                        }
+                    }
+                }
+                break;
+        }
+        n++;
+    }
+    if (sc->parent == SUBCODE_TOP) {
+        for (n=0;n<c->subcod_count;n++) {
+            if ((c->subcodes[n].parent != SUBCODE_TOP) && (c->subcodes[n].parent == sc->id)) {
+                AnalyzeSubCode(c,n);
+            }
+        }
+    }
+}
+
+void Base_x64::AnalyzeCode(Code *c) {
+int n,m;
+
+    for (n=0;n<c->subcod_count;n++) {
+        if (c->subcodes[n].parent == SUBCODE_TOP) {
+            for (m=0;m<X86_REG_ENDING;m++) {
+                c->subcodes[n].regs[m] = REG_NONE;
+            }
+            AnalyzeSubCode(c,n);
+        }
+    }
 }
 
 Base_x64::Base_x64(Archive *a,Language *l) : Butcher(a,l) {

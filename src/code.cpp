@@ -151,6 +151,13 @@ struct _subcode *p;
     p->anonjmp = true;
 }
 
+void Code::SetRetBytes (struct _subcode *sc,int bytes) {
+struct _subcode *p;
+
+    p = GetParent(sc);
+    p->ret_bytes= bytes;
+}
+
 char *Code::GetFunctionName (uint64_t addr) {
 int n;
 

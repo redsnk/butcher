@@ -31,7 +31,7 @@ class Butcher {
 
         virtual cs_err Cs_open(void) = 0;
         virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
-        virtual int IsRet(cs_insn *insn) = 0;
+        virtual int IsRet(cs_insn *insn,int *bytes) = 0;
         virtual int IsCall(cs_insn *insn, uint64_t *addr) = 0;
         virtual int IsJmp(cs_insn *insn, int n, uint64_t *addr[],int *count,int *anon) = 0;
         virtual int IsJcc(cs_insn *insn, uint64_t *addr) = 0;
@@ -39,6 +39,7 @@ class Butcher {
         virtual int IsInt(cs_insn *insn, uint64_t *num) = 0;
         virtual int IsEnd(cs_insn *insn, int n, int count) = 0;
         //virtual int IsJmpIAT(cs_insn *insn) = 0;
+        virtual void AnalyzeCode(Code *c) = 0;
         virtual void PrintCode(Code *c) = 0;
         //
         Butcher(Archive *a,Language *l);

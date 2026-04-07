@@ -355,6 +355,16 @@ int bits;
     else if (!strcmp(name,"tmp")) {
         return (strdup(E_TMP()));
     }
+    else if (!strcmp(name,"addr")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"0x%llx",insn->address);
+        return (buffer);
+    }
+    else if (!strcmp(name,"next_addr")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"0x%llx",insn->address+insn->size);
+        return (buffer);
+    }
     return (strdup("<Translate_var error>"));
 }
 

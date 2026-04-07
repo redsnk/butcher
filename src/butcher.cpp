@@ -47,7 +47,7 @@ char *func;
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
-int n,nn,count,anon;
+int n,nn,count,anon,bytes;
 //std::set<uint64_t> calls;
 struct _call *calls;
 int ncalls = 0;
@@ -158,7 +158,11 @@ char *lib,*func;
                         free (addr_list);
                         lend = true;
                     }
-                    else if (IsRet(&sc.insn[n]) || IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
+                    else if (IsRet(&sc.insn[n],&bytes)) {
+                        c->SetRetBytes(&sc,bytes);
+                        lend = true;
+                    }
+                    else if (IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
                         lend = true;
                     }
                     if (lend) {
@@ -226,6 +230,7 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             Code *c = GetCode(NULL,address,NULL,SUBCODE_TOP);
             c = Include(c);
             //c->Print();
+            AnalyzeCode(c);
             PrintCode(c);
             delete c;
         }
