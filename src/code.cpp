@@ -16,6 +16,7 @@ void Code::NewSubCode (struct _subcode *sc) {
     sc->labels = NULL;
     sc->l_count = 0;
     sc->anonjmp = false;
+    sc->ret_bytes =0;
 }
 
 void Code::AddSubcode (struct _subcode *sc) {

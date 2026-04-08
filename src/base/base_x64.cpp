@@ -1848,11 +1848,31 @@ char *name;
         //printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
         lang_x64->PrintFuncHeaderAddr(c,num);
     }
+    int inputs = 0;
+    printf("%s inputs:\n",lang_x64->COMM());
+    // Call registers
     for (int n=0;n<X86_REG_ENDING;n++) {
-        if (c->subcodes[num].regs[n] == REG_USED) {
-            printf("%s %s\n",lang_x64->COMM(),cs_reg_name(handle,n));
-        }
+        //if ((n != X86_REG_ESP) && (n != X86_REG_RSP)) {
+            if (c->subcodes[num].regs[n] == REG_USED) {
+                printf("%s %s\n",lang_x64->COMM(),lang_x64->reg_name(handle,n));
+                inputs++;
+            }
+        //}
     }
+    // Call Stack
+    if (c->subcodes[num].ret_bytes) {
+        int b = (arch->Is32()?4:8);
+        char *sp = lang_x64->reg_name(handle,(arch->Is32()?X86_REG_EBP:X86_REG_RBP));
+        for (int n=0;n<(c->subcodes[num].ret_bytes/b);n++) {
+            printf("%s [%s+%li]\n",lang_x64->COMM(),sp,(n+1)*b);
+            inputs++;
+        }
+        free(sp);
+    }
+    if (inputs == 0) {
+       printf("%s none.\n",lang_x64->COMM());
+    }
+    // Anno jmp var
     if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
         //printf("uint64_t anon;\n\n");
         lang_x64->PrintAnonJmpVar();
@@ -1940,53 +1960,111 @@ int count,n;
     lang_x64->PrintMainClose(c);
 }
 
+#define SETAN1(R)   if (((reg == X86_REG_##R##L) || (reg == X86_REG_##R##H)) && (p->regs[X86_REG_E##R##X] != REG_NONE)) return;\
+                    if ((reg == X86_REG_E##R##X) && (p->regs[X86_REG_R##R##X] != REG_NONE)) return;
+
+void Base_x64::SetAnalyzed(struct _subcode *p,int reg,int value) {
+    //if (((reg == X86_REG_AL) || (reg == X86_REG_AH)) && (p->regs[X86_REG_EAX] != REG_NONE)) return;
+    SETAN1(A);
+    SETAN1(B);
+    SETAN1(C);
+    SETAN1(D);
+    if ((reg != X86_REG_ESP) && (reg != X86_REG_RSP)) {
+        if (p->regs[reg] == REG_NONE) {
+            p->regs[reg] = value;
+        }
+    }
+}
+
+void Base_x64::AnalyzeUsed(struct _subcode *p,cs_insn *insn,int op) {
+    if (insn->detail->x86.op_count >= (op+1)) {
+        if (insn->detail->x86.operands[op].type == X86_OP_REG) {
+            SetAnalyzed(p,insn->detail->x86.operands[op].reg,REG_USED);
+            /*
+            if (p->regs[insn->detail->x86.operands[op].reg] == REG_NONE) {
+                //p->regs[insn->detail->x86.operands[op].reg] = REG_USED;
+            }
+            */
+        }
+        else if (insn->detail->x86.operands[op].type == X86_OP_MEM) {
+            if (insn->detail->x86.operands[op].mem.base != X86_REG_INVALID) {
+                /*
+                if (p->regs[insn->detail->x86.operands[op].mem.base] == REG_NONE) {
+                    p->regs[insn->detail->x86.operands[op].mem.base] = REG_USED;
+                }
+                */
+                SetAnalyzed(p,insn->detail->x86.operands[op].mem.base,REG_USED);
+            }
+            if (insn->detail->x86.operands[op].mem.index != X86_REG_INVALID) {
+                /*/
+                if (p->regs[insn->detail->x86.operands[op].mem.index] == REG_NONE) {
+                    p->regs[insn->detail->x86.operands[op].mem.index] = REG_USED;
+                }
+                */
+                SetAnalyzed(p,insn->detail->x86.operands[op].mem.index,REG_USED);
+            }
+        }
+    }
+}
+
+void Base_x64::AnalyzeUpdated(struct _subcode *p,cs_insn *insn,int op) {
+    if (insn->detail->x86.op_count >= (op+1)) {
+        if (insn->detail->x86.operands[op].type == X86_OP_REG) {
+            /*
+            if (p->regs[insn->detail->x86.operands[op].reg] == REG_NONE) {
+                p->regs[insn->detail->x86.operands[op].reg] = REG_UPDATED;
+            }
+            */
+            SetAnalyzed(p,insn->detail->x86.operands[op].reg,REG_UPDATED);
+        }
+    }
+}
+
 void Base_x64::AnalyzeSubCode(Code *c,int num) {
 int n;
 struct _subcode *sc,*p; 
 cs_insn *insn;
 
     sc = &c->subcodes[num];
+    if (sc->first == 0x4131e4) {
+        n = 0;  // Test
+    }
     p = c->GetParent(sc);
     for (n=0;n<sc->count;) {
         insn = &sc->insn[n];
-        printf("%s 0x%llx:\t%s\t\t%s\n", lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
+        //printf("%s 0x%llx:\t%s\t\t%s\n", lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
         switch (sc->insn[n].id) {
             case X86_INS_MOV:
             case X86_INS_POP:
+                AnalyzeUsed(p,insn,1);
+                AnalyzeUpdated(p,insn,0);
+                break;
             case X86_INS_ADD:
             case X86_INS_ADC:
             case X86_INS_SUB:
             case X86_INS_SBB:
-            case X86_INS_XOR:
             case X86_INS_AND:
             case X86_INS_OR:
-                if (insn->detail->x86.op_count > 1) {
-                    if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                        if (p->regs[insn->detail->x86.operands[1].reg] != REG_UPDATED) {
-                            p->regs[insn->detail->x86.operands[1].reg] = REG_USED;
-                        }
-                    }
-                    else if (insn->detail->x86.operands[1].type == X86_OP_REG) {
-                        if (insn->detail->x86.operands[1].mem.base != X86_REG_INVALID) {
-                            if (p->regs[insn->detail->x86.operands[1].mem.base] != REG_UPDATED) {
-                                p->regs[insn->detail->x86.operands[1].mem.base] = REG_USED;
-                            }
-                        }
-                        if (insn->detail->x86.operands[1].mem.index != X86_REG_INVALID) {
-                            if (p->regs[insn->detail->x86.operands[1].mem.index] != REG_UPDATED) {
-                                p->regs[insn->detail->x86.operands[1].mem.index] = REG_USED;
-                            }
-                        }
-                    }
+            case X86_INS_TEST:
+            case X86_INS_CMP:
+                AnalyzeUsed(p,insn,1);
+                AnalyzeUsed(p,insn,0);
+                break;
+            case X86_INS_XOR:
+                if ((insn->detail->x86.operands[0].type == X86_OP_REG) 
+                        && (insn->detail->x86.operands[1].type == X86_OP_REG) 
+                        && (insn->detail->x86.operands[0].reg == insn->detail->x86.operands[1].reg)) {
+                    AnalyzeUpdated(p,insn,0);
                 }
-                if (insn->detail->x86.op_count > 0) {
-                    if (insn->detail->x86.operands[0].type == X86_OP_REG) {
-                        if (p->regs[insn->detail->x86.operands[0].reg] != REG_USED) {
-                            p->regs[insn->detail->x86.operands[0].reg] = REG_UPDATED;
-                        }
-                    }
+                else {
+                    AnalyzeUsed(p,insn,1);
+                    AnalyzeUsed(p,insn,0);
                 }
                 break;
+        }
+        if (insn->address == sc->last) {
+            // last instruction
+            break;
         }
         n++;
     }

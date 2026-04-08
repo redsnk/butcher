@@ -40,6 +40,9 @@ class Base_x64 : public Butcher {
         void PrintSubCode(Code *c,int num);
         void AnalyzeCode(Code *c);
         void AnalyzeSubCode(Code *c,int num);
+        void AnalyzeUsed(struct _subcode *p,cs_insn *insn,int op);
+        void AnalyzeUpdated(struct _subcode *p,cs_insn *insn,int op);
+        void SetAnalyzed(struct _subcode *p,int reg,int value);
 
         Base_x64(Archive *a,Language *l);
 };
