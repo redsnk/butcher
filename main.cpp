@@ -83,14 +83,16 @@ char *p;
     if (f != NULL) {
         while (fgets(buffer,MAX_BUFFER-1,f) != NULL) {
             while ((p=strchr(buffer,'\n'))!= NULL) *p = 0;
-            p = strchr(buffer,',');
-            if (p != NULL) {
-                *p = 0;
-                //printf("named: '%s'\n",p+1);
-                named.insert({ string_to_num(buffer),p+1 });
-            }
-            else {
-                printf("Error: named format '%s'.\n",p+1);
+            if (strlen(buffer)) {
+                p = strchr(buffer,',');
+                if (p != NULL) {
+                    *p = 0;
+                    //printf("named: '%s'\n",p+1);
+                    named.insert({ string_to_num(buffer),p+1 });
+                }
+                else {
+                    printf("Error: named format.\n");
+                }
             }
         }
         fclose(f);

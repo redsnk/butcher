@@ -1425,10 +1425,20 @@ int bits;
                 free(reg0);
             }
             break;
+        case X86_INS_MUL:
+            // TODO: ax = al * mem
+            reg0 = lang_x64->Translate(handle,"rax = rax * op0; rdx = 0",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_IMUL:
+            // TODO: ax = al * mem
             switch (insn->detail->x86.op_count) {
                 case 1:
-                    reg0 = lang_x64->Translate(handle,"s_rax = s_rax * sop0",insn,true);
+                    reg0 = lang_x64->Translate(handle,"s_rax = s_rax * sop0; rdx = 0",insn,true);
                     if (reg0 != NULL) {
                         PrintLine(insn,1,reg0);
                         num++;
@@ -2035,6 +2045,7 @@ cs_insn *insn;
         //printf("%s 0x%llx:\t%s\t\t%s\n", lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
         switch (sc->insn[n].id) {
             case X86_INS_MOV:
+            case X86_INS_MOVZX:
             case X86_INS_POP:
                 AnalyzeUsed(p,insn,1);
                 AnalyzeUpdated(p,insn,0);
