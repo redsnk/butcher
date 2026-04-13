@@ -321,7 +321,7 @@ class _cpu:
             n += 1
 
     def get_unicode_ptr(self,addr):
-        n = 0;
+        n = 0
         str = ""
         while True:
             c = self.get_byte_ptr(addr)
@@ -486,8 +486,10 @@ class _cpu:
         return r
 
     def pshufd(self,op1,op2):
-        l = c_uint64(0).value
-        h = c_uint64(0).value
+        #l = c_uint64(0).value
+        #h = c_uint64(0).value
+        l = 0
+        h = 0
         c = op2 & 0b00000011
         if c < 2:
             d =  (op1[0] >> (32*c)) & 0xffffffff

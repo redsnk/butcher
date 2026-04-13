@@ -1427,7 +1427,11 @@ int bits;
             break;
         case X86_INS_MUL:
             // TODO: ax = al * mem
-            reg0 = lang_x64->Translate(handle,"rax = rax * op0; rdx = 0",insn,true);
+            //reg0 = lang_x64->Translate(handle,"rax = rax * op0; rdx = 0",insn,true);
+            reg0 = lang_x64->Translate(handle,  "tmp = rax;"
+                                                "tmp = tmp * op0;"
+                                                "rax = tmp & mask(bits0);"
+                                                "rdx = (tmp >> bits0) & mask(bits0)",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1438,7 +1442,11 @@ int bits;
             // TODO: ax = al * mem
             switch (insn->detail->x86.op_count) {
                 case 1:
-                    reg0 = lang_x64->Translate(handle,"s_rax = s_rax * sop0; rdx = 0",insn,true);
+                    //reg0 = lang_x64->Translate(handle,"s_rax = s_rax * sop0; rdx = 0",insn,true);
+                    reg0 = lang_x64->Translate(handle,  "tmp = s_rax;"
+                                                        "tmp = tmp * sop0;"
+                                                        "rax = tmp & mask(bits0);"
+                                                        "rdx = (tmp >> bits0) & mask(bits0)",insn,true);
                     if (reg0 != NULL) {
                         PrintLine(insn,1,reg0);
                         num++;
@@ -1858,29 +1866,31 @@ char *name;
         //printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
         lang_x64->PrintFuncHeaderAddr(c,num);
     }
-    int inputs = 0;
-    printf("%s inputs:\n",lang_x64->COMM());
-    // Call registers
-    for (int n=0;n<X86_REG_ENDING;n++) {
-        //if ((n != X86_REG_ESP) && (n != X86_REG_RSP)) {
-            if (c->subcodes[num].regs[n] == REG_USED) {
-                printf("%s %s\n",lang_x64->COMM(),lang_x64->reg_name(handle,n));
+    if (lstack) {
+        int inputs = 0;
+        printf("%s inputs:\n",lang_x64->COMM());
+        // Call registers
+        for (int n=0;n<X86_REG_ENDING;n++) {
+            //if ((n != X86_REG_ESP) && (n != X86_REG_RSP)) {
+                if (c->subcodes[num].regs[n] == REG_USED) {
+                    printf("%s %s\n",lang_x64->COMM(),lang_x64->reg_name(handle,n));
+                    inputs++;
+                }
+            //}
+        }
+        // Call Stack
+        if (c->subcodes[num].ret_bytes) {
+            int b = (arch->Is32()?4:8);
+            char *sp = lang_x64->reg_name(handle,(arch->Is32()?X86_REG_EBP:X86_REG_RBP));
+            for (int n=0;n<(c->subcodes[num].ret_bytes/b);n++) {
+                printf("%s [%s+%li]\n",lang_x64->COMM(),sp,(n+1)*b);
                 inputs++;
             }
-        //}
-    }
-    // Call Stack
-    if (c->subcodes[num].ret_bytes) {
-        int b = (arch->Is32()?4:8);
-        char *sp = lang_x64->reg_name(handle,(arch->Is32()?X86_REG_EBP:X86_REG_RBP));
-        for (int n=0;n<(c->subcodes[num].ret_bytes/b);n++) {
-            printf("%s [%s+%li]\n",lang_x64->COMM(),sp,(n+1)*b);
-            inputs++;
+            free(sp);
         }
-        free(sp);
-    }
-    if (inputs == 0) {
-       printf("%s none.\n",lang_x64->COMM());
+        if (inputs == 0) {
+        printf("%s none.\n",lang_x64->COMM());
+        }
     }
     // Anno jmp var
     if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {

@@ -286,12 +286,22 @@ int bits;
         sprintf(buffer,"%i",insn->detail->x86.operands[0].size*8);
         return (buffer);
     }
+    else if (!strcmp(name,"bits1")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"%i",insn->detail->x86.operands[1].size*8);
+        return (buffer);
+    }
     else if (!strcmp(name,"bytes")) {
         char *buffer = (char *) malloc(32);
         sprintf(buffer,"%i",insn->detail->x86.addr_size);
         return (buffer);
     }
     else if (!strcmp(name,"bytes0")) {
+        char *buffer = (char *) malloc(32);
+        sprintf(buffer,"%i",insn->detail->x86.operands[0].size);
+        return (buffer);
+    }
+    else if (!strcmp(name,"bytes1")) {
         char *buffer = (char *) malloc(32);
         sprintf(buffer,"%i",insn->detail->x86.operands[0].size);
         return (buffer);
@@ -364,6 +374,9 @@ int bits;
         char *buffer = (char *) malloc(32);
         sprintf(buffer,"0x%llx",insn->address+insn->size);
         return (buffer);
+    }
+    else if (!strcmp(name,"mask")) {
+        return (strdup(F_MASK()));
     }
     return (strdup("<Translate_var error>"));
 }

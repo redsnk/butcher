@@ -244,6 +244,7 @@ Butcher::Butcher(Archive *a,Language *l) {
     ltraces = false;
     lasm = false;
     loadm = false;
+    lstack = false;
 }
 
 Butcher::~Butcher() {

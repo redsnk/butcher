@@ -584,3 +584,7 @@ const char *Lang_C_x64::E_BREAK(void) {
 const char *Lang_C_x64::E_TMP(void) {
     return ("_tmp");
 }
+
+const char *Lang_C_x64::F_MASK(void) {
+    return ("mask(");
+}

@@ -25,6 +25,7 @@ class Butcher {
         int ltraces;
         int lasm;
         int loadm;
+        int lstack;
         std::set<uint64_t> in;
         std::set<uint64_t> ex;
         std::map<uint64_t, std::string> named;

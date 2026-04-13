@@ -111,7 +111,7 @@ struct _cpu {
 	struct _mem *mems;
 	struct _fpu fpu;
 	int mem_count;
-	uint64_t tmp;
+	__int128_t tmp;
 };
 
 // 64
@@ -355,6 +355,7 @@ uint64_t idiv(uint64_t a,uint64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
 void pushfpu(struct _cpu *cpu,uint64_t v);
 uint64_t popfpu(struct _cpu *cpu);
+uint64_t mask(int bits);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);

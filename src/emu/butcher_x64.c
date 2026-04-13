@@ -677,6 +677,14 @@ uint64_t v;
 	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
 }
 
+uint64_t mask(int bits) {
+__uint128_t v;
+
+	v = (((__uint128_t)1) << bits);
+	v = v - 1;
+	return (v);
+}
+
 void call_from_iat (struct _cpu *cpu,char *lib,char *func) {
 	panic("call_from_iat not implemented",func);
 }

@@ -593,3 +593,7 @@ const char *Lang_Py_x64::E_BREAK(void) {
 const char *Lang_Py_x64::E_TMP(void) {
     return ("cpu.tmp");
 }
+
+const char *Lang_Py_x64::F_MASK(void) {
+    return ("cpu.mask(");
+}
