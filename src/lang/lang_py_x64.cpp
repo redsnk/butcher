@@ -165,16 +165,31 @@ void Lang_Py_x64::PrintMainOpen(Code *c) {
 }
 
 #define PY_FOOTER_2 "\
-    # Insert code here ...\n\
-    func_0x%llx(cpu)\n\
+    # Insert code here ...\n"
+
+#define PY_FOOTER_F "\
+    func_0x%llx(cpu)\n"
+
+#define PY_FOOTER_N "\
+    %s(cpu)\n"
+
+#define PY_FOOTER_3 "\
     # Insert code here ...\n\
 \n\
 if __name__==\"__main__\":\n\
     main()\n\
 \n"
 
-void Lang_Py_x64::PrintMainClose(Code *c) {
-    printf(PY_FOOTER_2,c->ep);
+void Lang_Py_x64::PrintMainClose(Code *c,char *name) {
+    //printf(PY_FOOTER_2,c->ep);
+    printf(PY_FOOTER_2);
+    if (name != NULL) {
+        printf(PY_FOOTER_N,name);
+    }
+    else {
+        printf(PY_FOOTER_F,c->ep);
+    }
+    printf(PY_FOOTER_3);
 }
 
 void Lang_Py_x64::PrintSubMem(Code *c,int num) {

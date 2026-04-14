@@ -10,7 +10,7 @@ class Lang_Py_x64 : public Lang_x64 {
     void PrintHeader(Code *c);
     void PrintAnonCalls(Code *c);
     void PrintMainOpen(Code *c);
-    void PrintMainClose(Code *c);
+    void PrintMainClose(Code *c,char *name);
     void PrintSubMem(Code *c,int num);
     void PrintFuncHeaderName(Code *c,int num,char *name);
     void PrintFuncHeaderAddr(Code *c,int num);

@@ -72,7 +72,7 @@ class Language {
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintAnonCalls(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
-    virtual void PrintMainClose(Code *c) = 0;
+    virtual void PrintMainClose(Code *c,char *name) = 0;
     virtual void PrintSubMem(Code *c,int num) = 0;
     virtual void PrintFuncHeaderName(Code *c,int num,char *name) = 0;
     virtual void PrintFuncHeaderAddr(Code *c,int num) = 0;

@@ -29,6 +29,7 @@ int Butcher::IsNamedFunction (uint64_t addr, char **func) {
     else if (arch->IsSymbolFunction(addr,func)) {
         return (true);
     }
+    *func = NULL;
     return (false);
 }
 
@@ -217,6 +218,8 @@ char *lib,*func;
 }
 
 void Butcher::Cut(char *file_name,uint64_t address) {
+char *name;
+
     if (arch->OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
@@ -227,7 +230,8 @@ void Butcher::Cut(char *file_name,uint64_t address) {
             IsSymbolFunction(0xbf890,func);
             IsSymbolObject(0x11f5f8,func);
             */
-            Code *c = GetCode(NULL,address,NULL,SUBCODE_TOP);
+            IsNamedFunction(address,&name);
+            Code *c = GetCode(NULL,address,name,SUBCODE_TOP);
             c = Include(c);
             //c->Print();
             AnalyzeCode(c);

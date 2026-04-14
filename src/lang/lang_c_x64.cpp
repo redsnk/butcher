@@ -178,16 +178,30 @@ void Lang_C_x64::PrintMainOpen(Code *c) {
 }
 
 #define C_FOOTER_2 "\
-    /* Insert code here ... */\n\
-    func_0x%llx(cpu);\n\
+    /* Insert code here ... */\n"
+
+#define C_FOOTER_F "\
+    func_0x%llx(cpu);\n"
+
+#define C_FOOTER_N "\
+    %s(cpu);\n"
+
+#define C_FOOTER_3 "\
     /* Insert code here ... */\n\
     end(cpu);\n\
     return (0);\n\
 }\n\
 \n"
 
-void Lang_C_x64::PrintMainClose(Code *c) {
-    printf(C_FOOTER_2,c->ep);
+void Lang_C_x64::PrintMainClose(Code *c,char *name) {
+    printf(C_FOOTER_2);
+    if (name != NULL) {
+        printf(C_FOOTER_N,name);
+    }
+    else {
+        printf(C_FOOTER_F,c->ep);
+    }
+    printf(C_FOOTER_3);
 }
 
 void Lang_C_x64::PrintSubMem(Code *c,int num) {

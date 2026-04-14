@@ -1942,6 +1942,7 @@ char *name;
 void Base_x64::PrintCode(Code *c) {
 struct _Section *sections;
 int count,n;
+char *name;
 
     // Add Stack memory
     c->AddSubMem(STACK_ADDR,NULL,STACK_SIZE);
@@ -1977,7 +1978,9 @@ int count,n;
                                 lang_x64->reg_name(handle,X86_REG_RBP),
                                 lang_x64->reg_name(handle,X86_REG_RSP));
     //printf(C_FOOTER_2,c->ep);
-    lang_x64->PrintMainClose(c);
+    IsNamedFunction(c->ep,&name);
+    lang_x64->PrintMainClose(c,name);
+    if (name != NULL) free(name);
 }
 
 #define SETAN1(R)   if (((reg == X86_REG_##R##L) || (reg == X86_REG_##R##H)) && (p->regs[X86_REG_E##R##X] != REG_NONE)) return;\
