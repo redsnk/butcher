@@ -42,3 +42,52 @@ int ret;
     }
     return (ret);
 }
+
+#define MAX_SUBMEM  (1024)
+#define PADDING (64)
+
+/*
+int MemUtil(uint8_t *mem,int read) {
+int n,c;
+
+    if (read >= 8) {
+        // Unicode
+        n = 0;
+        do {
+            if ((mem[n] != 0) && (mem[n+1] == 0)) {
+                n += 2;
+            } 
+            else {
+                break;
+            }  
+        }
+        while (n < (read-1));
+        c = (n/2);
+        if ((c >= 4) && (mem[n] == 0) && (mem[n+1] == 0)) {
+            // 4+ chars
+            return ((c+1)*2);
+        }
+    }
+    return (0);
+}
+*/
+
+uint8_t *Archive::GetMemUtil(uint64_t addr,uint64_t *start,int *count) {
+uint64_t n;
+uint8_t *mem;
+uint64_t read;
+
+    if (ValidMemory(addr)) {
+        for (n=1;n<=PADDING;n++) {
+            if (!ValidMemory(addr-n)) {
+                break;
+            }
+        }
+        n--;
+        *start = addr-n;
+        mem = GetMemory(*start,MAX_SUBMEM,&read);
+        *count = read;
+        return (mem);
+    }
+    return (NULL);
+}

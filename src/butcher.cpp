@@ -59,8 +59,8 @@ uint8_t *mem;
 char *lib,*func;
 
     /*
-    if (address == 0x410b88) {
-        printf("// test\n");
+    if (address == 0x44fc5cb) {
+        ncalls = 0; // test
     }
     */
     if (c == NULL) {
@@ -85,11 +85,11 @@ char *lib,*func;
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     if (ltraces) printf("%s 0x%llx:\t%s\t\t%s\n",lang->COMM(), sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    /*
-                    if (sc.insn[n].address == 0x410b88) {
+                    
+                    if (sc.insn[n].address == 0x44fc5cb) {
                         lend = false;   /// test
                     }
-                    */
+                    
                     if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
                         // New submem
                         if (ltraces) printf("%s *** Add submem 0x%llx(%li)\n",lang->COMM(),addr,count);

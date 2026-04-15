@@ -229,6 +229,7 @@ int IsRIP(int id) {
     return((id == X86_REG_EIP)||(id == X86_REG_RIP));
 }
 
+/*
 int MemUtil(uint8_t *mem,int read) {
 int n,c;
 
@@ -252,6 +253,7 @@ int n,c;
     }
     return (0);
 }
+*/
 
 // ---------------------------------------------------------------------------------------------------------
 
@@ -476,15 +478,16 @@ uint64_t addr;
     return (false);
 }
 
-#define MAX_SUBMEM  (1024*5)
+//#define MAX_SUBMEM  (1024*5)
 
 int Base_x64::IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) {
-uint64_t read;
+uint64_t read,maddr;
 int n;
 
     if (insn->id == X86_INS_MOV) {
         if (insn->detail->x86.operands[0].type == X86_OP_REG) {
             if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
+                /*
                 *addr = insn->detail->x86.operands[1].imm;
                 *mem = arch->GetMemory(*addr,MAX_SUBMEM,&read);
                 if (*mem != NULL) {
@@ -494,12 +497,32 @@ int n;
                     }
                     free(*mem);
                 }
+                */
+                maddr = insn->detail->x86.operands[1].imm;
+                *mem = arch->GetMemUtil(maddr,addr,count);
+                if (*mem != NULL) {
+                    return (true);
+                }
             }
             else if (insn->detail->x86.operands[1].type == X86_OP_MEM) {
                 if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
                     // mov rax, qword ptr [**rip** + 0x1dc97]
                     *addr = insn->address + insn->size + insn->detail->x86.operands[1].mem.disp;
                     n = insn->detail->x86.addr_size;
+                    *mem = arch->GetMemory(*addr,n,&read);
+                    if (*mem != NULL) {
+                        if (read == n) {
+                            *count = read;
+                            return (true);
+                        }
+                        free(mem);
+                    }
+                }
+                else if((insn->detail->x86.operands[1].mem.base == X86_REG_INVALID) && (insn->detail->x86.operands[1].mem.index == X86_REG_INVALID)) {
+                    // mov             al, byte ptr [0x44fc634]
+                    *addr = insn->detail->x86.operands[1].mem.disp;
+                    //n = insn->detail->x86.addr_size;
+                    n = insn->detail->x86.operands[0].size;
                     *mem = arch->GetMemory(*addr,n,&read);
                     if (*mem != NULL) {
                         if (read == n) {

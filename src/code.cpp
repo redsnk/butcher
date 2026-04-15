@@ -46,11 +46,53 @@ void Code::AddSubcode (struct _subcode *sc) {
 }
 
 void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
+int lsi,lei,l;
+uint64_t end,send,saddress,of;
+uint8_t *nmem;
+
+    /*
     for(int n=0;n<submem_count;n++) {
         if ((submems[n].addr >= address) && ((submems[n].addr+submems[n].size) <= (address+size))) {
             return;
         }
     }
+    */
+    // TODO: DelSubMem
+    // TODO: PackSubMem
+    end = address+size-1;
+    for(int n=0;n<submem_count;n++) {
+        saddress = submems[n].addr;
+        send = saddress+submems[n].size-1;
+        // start address included
+        lsi = ((address >= saddress) && (address <= send));
+        // end address included
+        lei = ((end >= saddress) && (end <= send));
+        if (lsi && lei) {
+            // Submem inside exisiting submem, exit
+            return;
+        }
+        if (lsi) {
+            // Submem extends existing submem
+            l = end-send;
+            of = send-address;
+            submems[n].mem = (uint8_t *) realloc(submems[n].mem,submems[n].size+l);
+            memcpy(submems[n].mem+submems[n].size,mem+of,l);
+            submems[n].size += l;
+            return;
+        }
+        if (lei) {
+            // Existing submem extends submem
+            l = saddress-address;
+            nmem = (uint8_t *) malloc(submems[n].size+l);
+            memcpy(nmem+l,submems[n].mem,submems[n].size);
+            memcpy(nmem,mem,l);
+            free(submems[n].mem);
+            submems[n].mem = nmem;
+            submems[n].size += l;
+            return;
+        }
+    }
+    // New submem
     if (!submem_count) {
         submems = (struct _submem *) malloc(sizeof(struct _submem));
     } else {
