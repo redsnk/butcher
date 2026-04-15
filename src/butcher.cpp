@@ -235,6 +235,7 @@ char *name;
             c = Include(c);
             //c->Print();
             AnalyzeCode(c);
+            c->PackSubMems();
             PrintCode(c);
             delete c;
         }

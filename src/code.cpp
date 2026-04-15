@@ -46,9 +46,9 @@ void Code::AddSubcode (struct _subcode *sc) {
 }
 
 void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
-int lsi,lei,l;
-uint64_t end,send,saddress,of;
-uint8_t *nmem;
+//int lsi,lei,l;
+//uint64_t end,send,saddress,of;
+//uint8_t *nmem;
 
     /*
     for(int n=0;n<submem_count;n++) {
@@ -59,6 +59,7 @@ uint8_t *nmem;
     */
     // TODO: DelSubMem
     // TODO: PackSubMem
+    /*
     end = address+size-1;
     for(int n=0;n<submem_count;n++) {
         saddress = submems[n].addr;
@@ -93,6 +94,7 @@ uint8_t *nmem;
         }
     }
     // New submem
+    */
     if (!submem_count) {
         submems = (struct _submem *) malloc(sizeof(struct _submem));
     } else {
@@ -108,6 +110,101 @@ uint8_t *nmem;
     submems[submem_count].size = size;
     submems[submem_count].addr = address;
     submem_count++;
+}
+
+void Code::DelSubMem (int n) {
+int m;
+
+    if (submems[n].mem != NULL) {
+        free(submems[n].mem);
+    }
+    for (m=n;m<(submem_count-1);m++) {
+        submems[m] = submems[m+1];
+    }
+    submem_count--;
+    submems = (struct _submem *) realloc(submems, sizeof(struct _submem)*(submem_count));
+}
+
+int Code::MixSubMems (int s1,int s2) {
+int le1i,ls1i,le2i,ls2i;
+uint64_t start1,start2,end1,end2,l,of;
+
+    start1 = submems[s1].addr;
+    start2 = submems[s2].addr;
+    end1 = start1+submems[s1].size-1;
+    end2 = start2+submems[s2].size-1;
+    ls1i = ((start1 >= start2) && (start1 <= end2));
+    le1i = ((end1 >= start2) && end1 <= end2);
+    ls2i = ((start2 >= start1) && (start2 <= end1));
+    le2i = ((end2 >= start1) && end2 <= end1);
+    if ((start1 == start2) && (end1 == end2)) {
+        // Submem1 equal Submem2
+        DelSubMem(s2);
+        return (true);
+    }
+    if (ls1i && le1i) {
+        // Submem1 inside Submem2
+        DelSubMem(s1);
+        return (true);
+    }
+    if (ls2i && le2i) {
+        // Submem2 inside Submem1
+        DelSubMem(s2);
+        return (true);
+    }
+    if (ls1i) {
+        // Submem1 extends Submem2
+        l = end1-end2;
+        of = end2-start2;
+        submems[s2].mem = (uint8_t *) realloc(submems[s2].mem,submems[s2].size+l);
+        memcpy(submems[s2].mem+submems[s2].size,submems[s1].mem+of,l);
+        submems[s2].size += l;
+        DelSubMem(s1);
+        return (true);
+    }
+    if (ls2i) {
+        // Submem2 extends Submem1
+        l = end2-end1;
+        of = end1-start1;
+        submems[s1].mem = (uint8_t *) realloc(submems[s1].mem,submems[s1].size+l);
+        memcpy(submems[s1].mem+submems[s1].size,submems[s2].mem+of,l);
+        submems[s1].size += l;
+        DelSubMem(s2);
+        return (true);
+    }
+    if ((end1+1) == start2) {
+        // Submem2 continues Submem1
+        submems[s1].mem = (uint8_t *) realloc(submems[s1].mem,submems[s1].size+submems[s2].size);
+        memcpy(submems[s1].mem+submems[s1].size,submems[s2].mem,submems[s2].size);
+        submems[s1].size += submems[s2].size;
+        DelSubMem(s2);
+        return (true);
+    }
+    if ((end2+1) == start1) {
+        // Submem1 continues Submem2
+        submems[s2].mem = (uint8_t *) realloc(submems[s2].mem,submems[s2].size+submems[s1].size);
+        memcpy(submems[s2].mem+submems[s2].size,submems[s1].mem,submems[s1].size);
+        submems[s2].size += submems[s1].size;
+        DelSubMem(s1);
+        return (true);
+    }
+    return (false);
+}
+
+void Code::PackSubMems(void) {
+int n,m,lmix;
+    
+    do {
+        lmix = false;
+        for (n=0;(n<submem_count) && (!lmix);n++) {
+            for (m=n+1;(m<submem_count) && (!lmix);m++) {
+                if(MixSubMems(n,m)) {
+                    lmix = true;
+                }
+            }
+        }
+    }
+    while (lmix);
 }
 
 int Code::HasAddr (uint64_t addr,int parent) {

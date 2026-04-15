@@ -63,6 +63,9 @@ class Code {
         void NewSubCode (struct _subcode *sc);
         void AddSubcode (struct _subcode *sc);
         void AddSubMem (uint64_t address,uint8_t *mem,uint64_t size);
+        void DelSubMem (int n);
+        int MixSubMems (int s1,int s2);
+        void PackSubMems(void);
         int HasAddr (uint64_t addr,int parent);
         void Print (void);
         struct _subcode *GetParent(struct _subcode *sc);

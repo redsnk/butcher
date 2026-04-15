@@ -484,6 +484,7 @@ int Base_x64::IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count)
 uint64_t read,maddr;
 int n;
 
+    // TODO: generic submem with all opcodes
     if (insn->id == X86_INS_MOV) {
         if (insn->detail->x86.operands[0].type == X86_OP_REG) {
             if (insn->detail->x86.operands[1].type == X86_OP_IMM) {
