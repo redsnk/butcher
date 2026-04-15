@@ -516,6 +516,11 @@ class _cpu:
         h = h | d
         return (l,h)
 
+    def mask(self,bits):
+        v = (1 << bits)
+        v = v - 1
+        return v
+
     #---------------------------------------------------------------
     # 64
     @property
