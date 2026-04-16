@@ -270,6 +270,14 @@ struct _cpu {
 #define _xmm6	(cpu->xmm6.r128)
 #define _xmm7	(cpu->xmm7.r128)
 
+#define _st0	cpu->fpu.r[cpu->fpu.top].r
+#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8].r
+#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].r
+
+#define s_st0	_st0
+#define s_st1	_st1
+#define s_st2	_st2
+
 #define _tmp 	(cpu->tmp)
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
@@ -290,20 +298,6 @@ struct _cpu {
 #define _set_qword_ptr(m,v)		set_qword_ptr(cpu,m,v)
 #define _set_xword_ptr(m,v)		set_xword_ptr(cpu,m,v)
 #define _set_dqword_ptr(m,v)	set_dqword_ptr(cpu,m,v)
-
-#define _st0	cpu->fpu.r[cpu->fpu.top].r
-
-/*
-#define _push_byte(v)		push(cpu,1,v)
-#define _push_word(v)		push(cpu,2,v)
-#define _push_dword(v)		push(cpu,4,v)
-#define _push_qword(v)		push(cpu,8,v)
-
-#define _pop_byte()			pop(cpu,1)
-#define _pop_word()			pop(cpu,2)
-#define _pop_dword()		pop(cpu,4)
-#define _pop_qword()		pop(cpu,8)
-*/
 
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);

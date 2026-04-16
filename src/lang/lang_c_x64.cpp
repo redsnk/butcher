@@ -274,6 +274,12 @@ char *buffer;
             case X86_REG_ST0:
                 sprintf(buffer,"_st0");
                 break;
+            case X86_REG_ST1:
+                sprintf(buffer,"_st1");
+                break;
+            case X86_REG_ST2:
+                sprintf(buffer,"_st2");
+                break;
             default:
                 sprintf(buffer,"_%s",cs_reg_name(handle,id_reg));
                 break;
@@ -293,6 +299,12 @@ char *buffer;
         switch (id_reg) {
             case X86_REG_ST0:
                 sprintf(buffer,"s_st0");
+                break;
+            case X86_REG_ST1:
+                sprintf(buffer,"s_st1");
+                break;
+            case X86_REG_ST2:
+                sprintf(buffer,"s_st2");
                 break;
             default:
                 sprintf(buffer,"s_%s",cs_reg_name(handle,id_reg));
