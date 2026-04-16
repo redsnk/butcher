@@ -976,6 +976,24 @@ int bits;
             free(reg0);
             num++;
             break;
+        case X86_INS_JB:
+            // (CF=1)
+            reg0 = lang_x64->Translate(handle,"get_cf()",insn,false);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_JBE:
+            // (CF=1 or ZF=1)
+            reg0 = lang_x64->Translate(handle,"get_cf() | get_zf()",insn,false);
+            reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
+            PrintLine(insn,1,reg1);
+            free(reg1);
+            free(reg0);
+            num++;
+            break;
         case X86_INS_PUSH:
             /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
