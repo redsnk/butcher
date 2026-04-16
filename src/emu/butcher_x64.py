@@ -128,7 +128,7 @@ class _cpu:
     def panic(self,text):
         for line in traceback.format_stack():
             print(line.strip())
-        print("panic: "+text)
+        print("PANIC: "+text)
         sys.exit(0)
 
     def locate_mem(self,addr):
@@ -156,7 +156,7 @@ class _cpu:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
                 return m.mem[start:start+size]
-        self.panic("get_mem - "+hex(addr))
+        self.panic("get_mem error: "+hex(addr)+":"+size)
 
     def get_mem_dump(self,addr,size):
         n = self.locate_addr_mem(addr)
@@ -178,7 +178,7 @@ class _cpu:
                 post = m.mem[start+size:]
                 m.mem = pre+data+post
                 return
-        self.panic("set_mem - "+hex(addr))
+        self.panic("set_mem error: "+hex(addr)+":"+len(addr))
 
     def load_mem (self,name,d_Offset,d_Size,v_Address,v_Size):
         if d_Size > 0:
@@ -225,13 +225,13 @@ class _cpu:
             if m >= 0:
                 self.set_mem(ret,self.mems[n].mem)
                 return ret
-        self.panic("realloc_mem")
+        self.panic("realloc_mem error: "+hex(addr)+":"+len(addr))
 
     def call_from_iat (self,lib,func):
-        self.panic("call_from_iat")
+        self.panic("call_from_iat not implemented - "+func)
 
     def jmp_from_iat (self,lib,func):
-        self.panic("jmp_from_iat")
+        self.panic("jmp_from_iat not implemented - "+fucn)
 
     def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)

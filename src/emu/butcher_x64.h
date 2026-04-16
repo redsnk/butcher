@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define FALSE 	(0)
 #define TRUE	(-1)
+
+#define MAX_PANIC	(256)
 
 struct _r8 {
 	uint8_t l;
@@ -304,7 +307,8 @@ struct _cpu {
 
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
-void panic(char *str1,char *str2);
+//void panic(char *str1,char *str2);
+void panic(const char *format,...);
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func);
