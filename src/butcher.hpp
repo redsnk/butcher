@@ -28,6 +28,7 @@ class Butcher {
         int lstack;
         std::set<uint64_t> in;
         std::set<uint64_t> ex;
+        std::set<uint64_t> mi;
         std::map<uint64_t, std::string> named;
 
         virtual cs_err Cs_open(void) = 0;
@@ -49,6 +50,7 @@ class Butcher {
         int Excluded(uint64_t addr);
         int IsNamedFunction (uint64_t addr, char **func);
         Code *Include(Code *c);
+        void IncMem(Code *c);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);
 };

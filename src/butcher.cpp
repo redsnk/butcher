@@ -45,6 +45,21 @@ char *func;
   return (c);
 }
 
+void Butcher::IncMem(Code *c) {
+std::set<uint64_t>::iterator itr;
+uint8_t *mem;
+uint64_t start;
+int size;
+
+  for (itr = mi.begin();itr != mi.end(); itr++) {
+    mem = arch->GetMemUtil(*itr,&start,&size);
+    if (mem != NULL) {
+        c->AddSubMem(start,mem,size);
+        free(mem);
+    }
+  }
+}
+
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lexit,lend;
 struct _subcode sc;
@@ -223,18 +238,11 @@ char *name;
     if (arch->OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
-            /*
-            char lib[256];
-            char func[256];
-            IsImportFunction(0x115378,lib,func);
-            IsSymbolFunction(0xbf890,func);
-            IsSymbolObject(0x11f5f8,func);
-            */
             IsNamedFunction(address,&name);
             Code *c = GetCode(NULL,address,name,SUBCODE_TOP);
             c = Include(c);
-            //c->Print();
             AnalyzeCode(c);
+            IncMem(c);
             c->PackSubMems();
             PrintCode(c);
             delete c;

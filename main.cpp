@@ -16,6 +16,7 @@ int opt_m = false;
 enum Languages opt_l = C;
 std::set<uint64_t> include;
 std::set<uint64_t> exclude;
+std::set<uint64_t> incmem;
 std::map<uint64_t, std::string> named;
 
 uint64_t string_to_num(char *num) {
@@ -144,6 +145,7 @@ Archive *a;
     b->loadm = opt_m;
     b->in = include;
     b->ex = exclude;
+    b->mi = incmem;
     //b->named.insert({ 0x0040B440,"UStrClr" });
     b->named = named;
     b->Cut(path,addr);
@@ -161,11 +163,12 @@ usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>
                     - c -> C\n\
                     - p -> Python\n\
 \n\
--m                  => Load memory from the original file\n\
--t                  => Enable traces\n\
--a                  => Enable asm code\n\
--i[addr,addr,...]   => Include addresses\n\
--e[addr,addr,...]   => Exclude addresses\n\
+-m                  => Load ALL memory from the original file at start\n\
+-t                  => Include commented traces\n\
+-a                  => Include commented asm code\n\
+-i[addr,addr,...]   => Include call addresses\n\
+-e[addr,addr,...]   => Exclude call addresses\n\
+-u[addr,addr,...]   => Include memory addresses\n\
 -n[file]            => Add named functions from <file>\n\
 \n";
 
@@ -174,7 +177,7 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"mtal:i:e:n:")) != -1) {
+    while ((p = getopt(argc,argv,"mtal:i:e:n:u:")) != -1) {
         switch (p) {
                 case 't':
                     opt_t = true;
@@ -200,6 +203,9 @@ uint64_t addr;
                     break;
                 case 'e':
                     parse_list(optarg,&exclude);
+                    break;
+                case 'u':
+                    parse_list(optarg,&incmem);
                     break;
                 case 'n':
                     parse_named(optarg);
