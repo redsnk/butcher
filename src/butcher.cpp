@@ -93,6 +93,12 @@ char *lib,*func;
     lexit = false;
     while (!lexit) {
         uint8_t *m = arch->GetMemory(sc.first,max_subcode,&read);
+        if (m == NULL) {
+            if (ltraces) printf("%s *** GetMemory error. 0x%llx\n",lang->COMM(),sc.first);
+        }
+        if (read != max_subcode) {
+            if (ltraces) printf("%s *** read != max_subcode: %li\n",lang->COMM(),read);
+        }
         // TODO: read < max_subcode
         if ((m != NULL) && (read == max_subcode)) {
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
@@ -204,6 +210,7 @@ char *lib,*func;
                     c->AddSubcode(&sc);
                 }
             } else {
+                if (ltraces) printf("%s *** count = 0\n",lang->COMM());
                 break;
             }
         } else {

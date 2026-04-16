@@ -349,6 +349,32 @@ char *lib,*func;
 }
 */
 
+#define VALID_CODE_LENGTH   16
+
+int Base_x64::ValidCode(uint64_t addr) {
+uint64_t read;
+int lok;
+int c;
+cs_insn *insn;
+
+    /*
+    if (arch->ValidMemory(addr)) {
+        return (true);
+    }
+    */
+    lok = false;
+    uint8_t *m = arch->GetMemory(addr,VALID_CODE_LENGTH,&read);
+    if (m!= NULL) {
+        c = cs_disasm(handle, m, VALID_CODE_LENGTH, addr, 0, &insn);
+        if (c) {
+            cs_free(insn,c);
+            lok = true;
+        }
+        free(m);
+    }
+    return (lok);
+}
+
 #define MAX_JMPS      (1024*10)
 
 int Base_x64::IsJmp(cs_insn *in, int num, uint64_t *addr[],int *count, int *anon) {
@@ -363,7 +389,8 @@ cs_insn *insn;
     if (insn->id == X86_INS_JMP) {
         if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
             d = insn->detail->x86.operands[0].imm;
-            if (arch->ValidMemory(d)) {
+            //if (arch->ValidMemory(d)) {
+            if (ValidCode(d)) {
                 *addr = (uint64_t *) malloc(sizeof(uint64_t));
                 (*addr)[c++] = d;
             }
@@ -376,7 +403,8 @@ cs_insn *insn;
                     a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                     b = insn->detail->x86.addr_size;
                     if (arch->Get_Address_At(a,&d,b*8)) {
-                        if (arch->ValidMemory(d)) {
+                        //if (arch->ValidMemory(d)) {
+                        if (ValidCode(d)) {
                             if (c == 0) {
                                 *addr = (uint64_t *) malloc(sizeof(uint64_t));
                             }
@@ -414,7 +442,8 @@ cs_insn *insn;
                     if (in[n].id == X86_INS_PUSH) {
                         if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
                             // push <addr>
-                            if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
+                            //if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
+                            if (ValidCode(in[n].detail->x86.operands[0].imm)) {
                                 (*addr)[c++] = in[n].detail->x86.operands[0].imm;
                                 break;
                             }
@@ -785,7 +814,8 @@ int bits;
                         addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                         b = insn->detail->x86.addr_size;
                         if (arch->Get_Address_At(addr,&d,b*8)) {
-                            if (arch->ValidMemory(d)) {
+                            //if (arch->ValidMemory(d)) {
+                            if (ValidCode(d)) {
                                 PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
                                 //PrintLine(insn,2,lang_x64->E_GOTO(),d);
                                 reg1 = GetGoto(d);
