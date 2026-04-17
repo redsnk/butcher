@@ -50,7 +50,8 @@ class Butcher {
         int Excluded(uint64_t addr);
         int IsNamedFunction (uint64_t addr, char **func);
         Code *Include(Code *c);
-        void IncMem(Code *c);
+        void IncludeMem(Code *c);
+        int CheckSubMems(Code *c,const char *text);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         void Cut(char *file_name,uint64_t address);
 };

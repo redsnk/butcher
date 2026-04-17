@@ -128,6 +128,12 @@ int m;
 int Code::MixSubMems (int s1,int s2) {
 int le1i,ls1i,le2i,ls2i;
 uint64_t start1,start2,end1,end2,l,of;
+    
+    /*
+    int ltest;
+    uint64_t atest = 0x44fca9c;
+    ltest = ((atest>=start1) && (atest<=end1)) | ((atest>=start2) && (atest<=end2));
+    */
 
     start1 = submems[s1].addr;
     start2 = submems[s2].addr;
@@ -139,23 +145,43 @@ uint64_t start1,start2,end1,end2,l,of;
     le2i = ((end2 >= start1) && end2 <= end1);
     if ((start1 == start2) && (end1 == end2)) {
         // Submem1 equal Submem2
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         DelSubMem(s2);
         return (true);
     }
     if (ls1i && le1i) {
         // Submem1 inside Submem2
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         DelSubMem(s1);
         return (true);
     }
     if (ls2i && le2i) {
         // Submem2 inside Submem1
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         DelSubMem(s2);
         return (true);
     }
     if (ls1i) {
         // Submem1 extends Submem2
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         l = end1-end2;
-        of = end2-start2;
+        of = end2-start1+1;
         submems[s2].mem = (uint8_t *) realloc(submems[s2].mem,submems[s2].size+l);
         memcpy(submems[s2].mem+submems[s2].size,submems[s1].mem+of,l);
         submems[s2].size += l;
@@ -164,8 +190,13 @@ uint64_t start1,start2,end1,end2,l,of;
     }
     if (ls2i) {
         // Submem2 extends Submem1
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         l = end2-end1;
-        of = end1-start1;
+        of = end1-start2+1;
         submems[s1].mem = (uint8_t *) realloc(submems[s1].mem,submems[s1].size+l);
         memcpy(submems[s1].mem+submems[s1].size,submems[s2].mem+of,l);
         submems[s1].size += l;
@@ -174,6 +205,11 @@ uint64_t start1,start2,end1,end2,l,of;
     }
     if ((end1+1) == start2) {
         // Submem2 continues Submem1
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         submems[s1].mem = (uint8_t *) realloc(submems[s1].mem,submems[s1].size+submems[s2].size);
         memcpy(submems[s1].mem+submems[s1].size,submems[s2].mem,submems[s2].size);
         submems[s1].size += submems[s2].size;
@@ -182,6 +218,11 @@ uint64_t start1,start2,end1,end2,l,of;
     }
     if ((end2+1) == start1) {
         // Submem1 continues Submem2
+        /*
+        if (ltest) {
+            ltest = true;
+        }
+        */
         submems[s2].mem = (uint8_t *) realloc(submems[s2].mem,submems[s2].size+submems[s1].size);
         memcpy(submems[s2].mem+submems[s2].size,submems[s1].mem,submems[s1].size);
         submems[s2].size += submems[s1].size;

@@ -45,7 +45,7 @@ char *func;
   return (c);
 }
 
-void Butcher::IncMem(Code *c) {
+void Butcher::IncludeMem(Code *c) {
 std::set<uint64_t>::iterator itr;
 uint8_t *mem;
 uint64_t start;
@@ -58,6 +58,36 @@ int size;
         free(mem);
     }
   }
+}
+
+int Butcher::CheckSubMems(Code *c,const char *text) {
+int n,m;
+uint8_t *mem;
+uint64_t read;
+
+    for (n=0;n<c->submem_count;n++) {
+        mem = arch->GetMemory(c->submems[n].addr,c->submems[n].size,&read);
+        if (mem != NULL) {
+            if (read == c->submems[n].size) {
+                for (m=0;m<read;m++) {
+                    if (mem[m] != c->submems[n].mem[m]) {
+                        printf("CheckSubMems %s error: mismatch at 0x%llx:%li\n",text,c->submems[n].addr,m);
+                        exit(0);
+                    }
+                }
+            }
+            else {
+                printf("CheckSubMems %s error: length\n",text);
+                exit(0);
+            }
+            free(mem);
+        }
+        else {
+            printf("CheckSubMems %s error: GetMemory 0x%llx:%li\n",text,c->submems[n].addr,c->submems[n].size);
+            exit(0);
+        }
+    }
+    return (true);
 }
 
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
@@ -249,8 +279,12 @@ char *name;
             Code *c = GetCode(NULL,address,name,SUBCODE_TOP);
             c = Include(c);
             AnalyzeCode(c);
-            IncMem(c);
-            c->PackSubMems();
+            if (!loadm) {
+                IncludeMem(c);
+                //CheckSubMems(c,"prepack");
+                c->PackSubMems();
+                //CheckSubMems(c,"postpack");
+            }
             PrintCode(c);
             delete c;
         }
