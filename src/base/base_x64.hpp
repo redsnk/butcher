@@ -10,7 +10,7 @@
 #include "../lang/lang_x64.hpp"
 
 #define STACK_ADDR		0xF000
-#define STACK_SIZE		(1024*10)
+#define STACK_SIZE		(1024*100)
 
 class Base_x64 : public Butcher {
     public:

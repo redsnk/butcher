@@ -1619,15 +1619,6 @@ int bits;
                 free(reg0);
             }
             break;
-        /*
-        case X86_INS_MOVABS:
-            // movabs		rdx, 0x5f3ae6d888f298a2
-            reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-            PrintLine(insn,1,lang_x64->E_MOV_RI,reg0,insn->detail->x86.operands[1].imm);
-            free(reg0);
-            num++;
-            break;
-        */
         case X86_INS_SETNE:
             //reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi",insn,true);
             reg0 = lang_x64->Translate(handle,"if !get_zf() then op0 = 1 else op0 = 0 fi",insn,true);
@@ -1640,6 +1631,22 @@ int bits;
         case X86_INS_SETE:
             //reg0 = lang_x64->Translate(handle,".if get_zf()==true then op0 = 1 else op0 = 0 fi",insn,true);
             reg0 = lang_x64->Translate(handle,"if get_zf() then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETB:
+            reg0 = lang_x64->Translate(handle,"if get_cf() then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETBE:
+            reg0 = lang_x64->Translate(handle,"if (get_cf() | get_zf()) then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;

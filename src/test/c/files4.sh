@@ -1,4 +1,5 @@
 #!/bin/bash
 
-../../../build/Butcher -lc -a -n"/home/alex/src/butcher/samples/libffi-6.txt" -u"0x435ae1" "/home/alex/src/butcher/samples/libffi-6.dll" "0x044FC7AC" > test.c
+../../../build/Butcher -lc -a -n"/home/alex/src/butcher/samples/libffi-6.txt" -e"0x66f388" -u"0x48651fe,0x435ae1,0x4865590,0x488cd10,0x486536a" "/home/alex/src/butcher/samples/libffi-6.dll" "0x044FC7AC" > test.c
+bash ../../sed/c/patch.sh test.c
 patch test.c test4.patch
