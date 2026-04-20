@@ -289,7 +289,8 @@ int Base_x64::IsCall(cs_insn *insn, uint64_t *addr) {
                     }
                     */
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,addr,insn->detail->x86.addr_size*8)) {
-                        if (arch->ValidMemory(*addr)) {
+                        //if (arch->ValidMemory(*addr)) {
+                        if (ValidCode(*addr)) {
                             return (true);
                         }
                     }
@@ -1720,6 +1721,7 @@ int bits;
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
                 addr = insn->detail->x86.operands[0].imm;
+                /*
                 name = c->GetFunctionName(addr);
                 if (name != NULL) {
                     PrintLine(insn,1,lang_x64->E_FUNC_NAME(),name);
@@ -1734,6 +1736,24 @@ int bits;
                     }
                 }
                 num++;
+                */
+                if (!Excluded(addr)) {
+                    if (ValidCode(addr)) {
+                        name = c->GetFunctionName(addr);
+                        if (name != NULL) {
+                            PrintLine(insn,1,lang_x64->E_FUNC_NAME(),name);
+                            free(name);   
+                        }
+                        else {
+                            PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
+                        }
+                        num++;
+                    }
+                }
+                else {
+                    PrintLine(insn,0,lang_x64->E_SPACE());
+                    num++;
+                }
             } 
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
                 // Memory
@@ -1749,6 +1769,7 @@ int bits;
                 else if ((insn->detail->x86.operands[0].mem.base == X86_OP_INVALID) && 
                         (insn->detail->x86.operands[0].mem.index == X86_OP_INVALID)) {
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
+                        /*
                         if (arch->ValidMemory(addr)) {
                             if (!Excluded(addr)) {
                                 PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
@@ -1756,6 +1777,24 @@ int bits;
                             else {
                                 PrintLine(insn,0,lang_x64->E_SPACE());
                             }
+                            num++;
+                        }
+                        */
+                        if (!Excluded(addr)) {
+                            if (ValidCode(addr)) {
+                                name = c->GetFunctionName(addr);
+                                if (name != NULL) {
+                                    PrintLine(insn,1,lang_x64->E_FUNC_NAME(),name);
+                                    free(name);   
+                                }
+                                else {
+                                    PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
+                                }
+                                num++;
+                            }
+                        }
+                        else {
+                            PrintLine(insn,0,lang_x64->E_SPACE());
                             num++;
                         }
                     }

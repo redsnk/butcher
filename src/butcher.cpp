@@ -182,7 +182,8 @@ char *lib,*func;
                         while (c->ExistFunctionName(tmp)) {
                             strcat(tmp,"_x");
                         }
-                        c->RenameFunction(&sc,tmp,false);
+                        // Function that calls IAT always with the same name
+                        c->RenameFunction(&sc,tmp,true);
                         free(tmp);
                         free(lib);
                         free(func);
