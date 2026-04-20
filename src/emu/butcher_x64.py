@@ -180,6 +180,10 @@ class _cpu:
                 return
         self.panic("set_mem error: "+hex(addr)+":"+len(addr))
 
+    def del_mem(delf,n):
+        # TODO:
+        return
+
     def load_mem (self,name,d_Offset,d_Size,v_Address,v_Size):
         if d_Size > 0:
             f = open(name,'rb')
@@ -224,14 +228,22 @@ class _cpu:
             m = self.locate_mem(ret)
             if m >= 0:
                 self.set_mem(ret,self.mems[n].mem)
+                self.del_mem()
                 return ret
         self.panic("realloc_mem error: "+hex(addr)+":"+len(addr))
+
+    def free_mem (self,addr):
+        n = self.locate_mem(addr)
+        if n >= 0:
+            self.del_mem()
+        else:
+            self.panic("free_mem error: "+hex(addr))
 
     def call_from_iat (self,lib,func):
         self.panic("call_from_iat not implemented - "+func)
 
     def jmp_from_iat (self,lib,func):
-        self.panic("jmp_from_iat not implemented - "+fucn)
+        self.panic("jmp_from_iat not implemented - "+func)
 
     def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)

@@ -57,13 +57,36 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 	}
 	cpu->mems[cpu->mem_count].addr = addr;
 	cpu->mems[cpu->mem_count].size = size;
-	cpu->mems[cpu->mem_count].mem = (uint8_t *) malloc(size);
+	cpu->mems[cpu->mem_count].real_size = size+EXTRA_MEM;
+	cpu->mems[cpu->mem_count].mem = (uint8_t *) malloc(size+EXTRA_MEM);
 	if (mem == NULL) {
 		memset(cpu->mems[cpu->mem_count].mem,0,size);
 	} else {
 		memcpy(cpu->mems[cpu->mem_count].mem,mem,size);
 	}
 	cpu->mem_count++;
+	sort_mem(cpu);
+}
+
+void sort_mem (struct _cpu *cpu) {
+int n;
+int lexit;
+struct _mem m;
+
+	do {
+		lexit = TRUE;
+		for (n=0;n<(cpu->mem_count-1);n++) {
+			if (cpu->mems[n].addr > cpu->mems[n+1].addr) {
+				m = cpu->mems[n];
+				cpu->mems[n] = cpu->mems[n+1];
+				cpu->mems[n+1] = m;
+ 				lexit = FALSE;
+				break;
+			}
+		}
+
+	}
+	while (!lexit);
 }
 
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
@@ -139,6 +162,15 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 	panic("set_mem error: 0x%llx:%li",addr,size);
 }
 
+void del_mem(struct _cpu *cpu,int n) {
+int m;
+
+	for (m=n;m<cpu->mem_count-1;m++) {
+		cpu->mems[m] = cpu->mems[m+1];
+	}
+	cpu->mem_count--;
+}
+
 #define DUMP_LINE (16)
 
 void hexdump (uint64_t off,void *addr,int len) {
@@ -192,6 +224,7 @@ int n;
 	free(mem);
 }
 
+/*
 int unasigned_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
 int n;
 
@@ -203,15 +236,29 @@ int n;
 	}
 	return (TRUE);
 }
+*/
+
+uint64_t get_free_chunk(struct _cpu *cpu,int size) {
+uint64_t i_addr,e_addr;
+int n;
+
+	i_addr = 0x1000;
+	for (n=0;n<cpu->mem_count;n++) {
+		e_addr = i_addr+size+EXTRA_MEM-1;
+		if (e_addr < cpu->mems[n].addr) {
+			return (i_addr);
+		}
+		i_addr = cpu->mems[n].addr+cpu->mems[n].real_size;
+	}
+	return (i_addr);
+}
 
 uint64_t alloc_mem (struct _cpu *cpu,int size) {
-uint64_t res = 0x1000,next;
+uint64_t addr;
 
-	while (!unasigned_mem(cpu,res,size,&next)) {
-		res = next;
-	}
-	add_mem(cpu,res,NULL,size);
-	return (res);
+	addr = get_free_chunk(cpu,size);
+	add_mem(cpu,addr,NULL,size);
+	return (addr);
 }
 
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size) {
@@ -220,19 +267,34 @@ uint64_t ret;
 
 	n = locate_mem(cpu,addr);
 	if (n >= 0) {
-		ret = alloc_mem(cpu,size);
-		m = locate_mem(cpu,ret);
-		if (m >= 0) {
-			set_mem (cpu,ret,cpu->mems[n].size,cpu->mems[n].mem);
-			free_mem(cpu,addr);
-			return (ret);
+		if (size >= cpu->mems[n].real_size) {
+			ret = alloc_mem(cpu,size);
+			m = locate_mem(cpu,ret);
+			if (m >= 0) {
+				set_mem (cpu,ret,cpu->mems[n].size,cpu->mems[n].mem);
+				del_mem(cpu,n);
+				return (ret);
+			}
+		}
+		else {
+			cpu->mems[n].size = size;
+			return(addr);
 		}
 	}
 	panic("realloc_mem error: 0x%llx:%li",addr,size);
 }
 
 void free_mem (struct _cpu *cpu,uint64_t addr) {
-	// TODO
+int n;
+
+	n = locate_mem(cpu,addr);
+	if (n >= 0) {
+		del_mem(cpu,n);
+		return;
+	}
+	else {
+		panic("free_mem error: 0x%llx",addr);
+	}
 }
 
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr) {
@@ -508,101 +570,8 @@ __int128 t;
 	}
 }
 
-/*
-char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max) {
-char *m;
-int n;
-
-	m = (char *) malloc(max);
-	n = 0;
-	for (n=0;n<(max);n++) {
-		get_mem(cpu,addr+n,1,m+n);
-		if (!m[n]) {
-			break;
-		}
-	}
-	return (m);
-}
-
-char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max) {
-char *m;
-int n;
-
-	m = (char *) malloc(max);
-	n = 0;
-	for (n=0;n<(max);n+=2) {
-		get_mem(cpu,addr+n,2,m+n);
-		if (!m[n] && !m[n+1]) {
-			break;
-		}
-	}
-	return (m);
-}
-
-char *uni16_to_str(char *su) {
-char *str;
-int n;
-
-	// TODO: max
-	str = (char *) malloc(1024);
-	n = 0;
-	while (su[n] != 0) {
-		str[n/2] = su[n];
-		n += 2;
-	}
-	str[n/2] = 0;
-	return (str);
-}
-*/
-
-/*
-void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {
-__int128 t;
-
-	switch(bits) {
-		case 8:
-			t = (__int128) (uint8_t) op1 - (__int128) (uint8_t) op2;
-			cpu->eflags.CF = (t > 0xff);
-			break;
-		case 16:
-			t = (__int128) (uint16_t) op1 - (__int128) (uint16_t) op2;
-			cpu->eflags.CF = (t > 0xffff);
-			break;
-		case 32:
-			t = (__int128) (uint32_t) op1 - (__int128) (uint32_t) op2;
-			cpu->eflags.CF = (t > 0xffffffff);
-			break;
-		case 64:
-			t = (__int128) (uint64_t) op1 - (__int128) (uint64_t) op2;
-			cpu->eflags.CF = (t > 0xffffffffffffffff);
-			break;
-	}
-}
-*/
 
 void push(struct _cpu *cpu,int b,uint64_t n) {
-	/*
-	switch (bits) {
-		case 8:
-			cpu->rsp.r64 -= 1;
-			set_mem(cpu,cpu->rsp.r64,1,(uint8_t *)&n);
-			break;
-		case 16:
-			cpu->rsp.r64 -= 2;
-			set_mem(cpu,cpu->rsp.r64,2,(uint8_t *)&n);
-			break;
-		case 32:
-			cpu->rsp.r64 -= 4;
-			set_mem(cpu,cpu->rsp.r64,4,(uint8_t *)&n);
-			break;
-		case 64:
-			cpu->rsp.r64 -= 8;
-			set_mem(cpu,cpu->rsp.r64,8,(uint8_t *)&n);
-			break;
-		default:
-			panic("push bits","");
-	}
-	*/
 	cpu->rsp.r64 -= b/8;
 	set_mem(cpu,cpu->rsp.r64,b/8,(uint8_t *)&n);
 }
@@ -610,28 +579,6 @@ void push(struct _cpu *cpu,int b,uint64_t n) {
 uint64_t pop(struct _cpu *cpu,int b) {
 uint64_t ret=0;
 
-	/*
-	switch (bits) {
-		case 8:
-			get_mem(cpu,cpu->rsp.r64,1,(uint8_t*) &ret);
-			cpu->rsp.r64 += 1;
-			break;
-		case 16:
-			get_mem(cpu,cpu->rsp.r64,2,(uint8_t*) &ret);
-			cpu->rsp.r64 += 2;
-			break;
-		case 32:
-			get_mem(cpu,cpu->rsp.r64,4,(uint8_t*) &ret);
-			cpu->rsp.r64 += 4;
-			break;
-		case 64:
-			get_mem(cpu,cpu->rsp.r64,8,(uint8_t*) &ret);
-			cpu->rsp.r64 += 8;
-			break;
-		default:
-			panic("pop bits","");
-	}
-	*/
 	get_mem(cpu,cpu->rsp.r64,b/8,(uint8_t*) &ret);
 	cpu->rsp.r64 += b/8;
 	return (ret);

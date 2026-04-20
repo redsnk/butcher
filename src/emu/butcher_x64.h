@@ -104,6 +104,7 @@ struct _fpu {
 struct _mem {
 	uint64_t addr;
 	uint64_t size;
+	uint64_t real_size;
 	uint8_t *mem;
 };
 
@@ -370,20 +371,19 @@ void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
-/*
-int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
-char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
-char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
-char *uni16_to_str(char *str);
-*/
+#define EXTRA_MEM	(1024)
 
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
+void sort_mem (struct _cpu *cpu);
+int locate_mem (struct _cpu *cpu,uint64_t addr);
 void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void del_mem(struct _cpu *cpu,int n);
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
+uint64_t get_free_chunk(struct _cpu *cpu,int size);
 uint64_t alloc_mem (struct _cpu *cpu,int size);
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
 void free_mem (struct _cpu *cpu,uint64_t addr);
