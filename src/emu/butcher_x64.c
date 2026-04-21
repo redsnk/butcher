@@ -224,20 +224,6 @@ int n;
 	free(mem);
 }
 
-/*
-int unasigned_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
-int n;
-
-	for (n=0;n<cpu->mem_count;n++) {
-		if ((addr>=cpu->mems[n].addr) && (addr<(cpu->mems[n].addr+cpu->mems[n].size))) {
-			*next = cpu->mems[n].addr+cpu->mems[n].size;
-			return (FALSE);
-		}
-	}
-	return (TRUE);
-}
-*/
-
 uint64_t get_free_chunk(struct _cpu *cpu,int size) {
 uint64_t i_addr,e_addr;
 int n;
@@ -290,7 +276,6 @@ int n;
 	n = locate_mem(cpu,addr);
 	if (n >= 0) {
 		del_mem(cpu,n);
-		return;
 	}
 	else {
 		panic("free_mem error: 0x%llx",addr);
