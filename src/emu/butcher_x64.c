@@ -620,6 +620,7 @@ uint64_t v;
 	cpu->fpu.r[cpu->fpu.top].r = 0;
 	cpu->fpu.top++;
 	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
+	return (v);
 }
 
 uint64_t mask(int bits) {
