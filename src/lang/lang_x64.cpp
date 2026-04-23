@@ -378,6 +378,9 @@ int bits;
     else if (!strcmp(name,"mask")) {
         return (strdup(F_MASK()));
     }
+    else if (!strcmp(name,"raddr")) {
+        return (strdup("raddr"));
+    }
     return (strdup("<Translate_var error>"));
 }
 

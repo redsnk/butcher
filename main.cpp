@@ -125,7 +125,6 @@ Archive *a;
         a = new Arch_Elf();
         if (!a->CheckFile(path)) {
             delete a;
-            delete l;
             printf("Error: format not compatible.\n");
             return (0);
         }

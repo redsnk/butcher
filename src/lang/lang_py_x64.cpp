@@ -2,109 +2,6 @@
 
 Lang_Py_x64::Lang_Py_x64(int b) {
     bits = b;
-    /*
-    COMM = "#";
-    COMM_SEP = 70;
-    INDENT = "    ";
-    ENDS = "";
-    SEPS = ";";
-    EQUAL = "==";
-    NEQUAL = "!=";
-    GT = ">";
-    LT = "<";
-    GTE = ">=";
-    LTE = "<=";
-    F_SET_ZF = "cpu.flag_z(";
-    F_SET_SF = "cpu.flag_s(";
-    F_SET_CF = "cpu.flag_c(";
-    F_SET_OF = "cpu.flag_o(";
-    F_GET_ZF = "cpu.get_flag_z(";
-    F_GET_SF = "cpu.get_flag_s(";
-    F_GET_CF = "cpu.get_flag_c(";
-    F_GET_OF = "cpu.get_flag_o(";
-    F_ADD_OF = "cpu.add_flag_o(";
-    F_ADD_CF = "cpu.add_flag_c(";
-    F_NUM_CF = "cpu.num_flag_c(";
-    F_SUB_OF = "cpu.sub_flag_o(";
-    F_IDIV = "cpu.idiv(";
-    //F_SUB_CF = "cpu.sub_flag_c(";
-    ENDF = ")";
-    AND = "&";
-    OR = "|";
-    XOR = "^";
-    SHL = "<<";
-    SHR = ">>";
-    F_TRUE = "True";
-    F_FALSE = "False";
-    F_PUSH = "cpu.push(";
-    F_POP = "cpu.pop(";
-    F_POW = "cpu.pow(";
-    E_JCC_GOTO = "if %s:\n        goto .label_0x%llx";
-    E_IFTHENELSE= "if %s:\n        %s\n    else:\n        %s";
-    E_IFTHEN= "if %s:\n        %s";
-    F_NOT = "cpu.f_not(";
-    F_NEG = "cpu.f_neg(";
-    F_PSHUFD = "cpu.pshufd(";
-    E_NOT = "not";
-    E_LABEL_NAME = "    label .label_%s\n";
-
-    OP_ALONE =              "cpu.op(\"%s\")";
-    OP_SUBNAME =            "cpu.op_%s(\"%s\",%s)";
-    OP_REG = "\"%s\",";
-    OP_IMM = "0x%llx,";
-    OP_MEM = "\"%s\",\"%s\",%i,%+lld,";
-
-    E_CALL_FROM_IAT =       "cpu.call_from_iat(\"%s\",\"%s\")";
-    E_FUNC_NAME =           "%s(cpu)";
-    E_FUNC_ADDR =           "func_0x%llx(cpu)";
-    E_RETURN =              "goto .label_return";
-    E_GOTO =                "goto .label_0x%llx";
-    E_LABEL =               "    label .label_0x%llx\n";
-    E_JMP_FROM_IAT =        "cpu.jmp_from_iat(\"%s\",\"%s\");";
-    E_JE =                  "if cpu.get_flag_z():\n        goto .label_0x%llx";
-    E_JNE =                 "if not cpu.get_flag_z():\n        goto .label_0x%llx";
-    E_JA =                  "if not cpu.get_flag_c() and not cpu.get_flag_z():\n        goto .label_0x%llx";
-    E_JAE =                 "if not cpu.get_flag_c():\n        goto .label_0x%llx";
-    E_JL =                  "if cpu.get_flag_o() != cpu.get_flag_s():\n        goto .label_0x%llx";
-    E_JLE =                 "if cpu.get_flag_z() or (cpu.get_flag_o() != cpu.get_flag_s()):\n        goto .label_0x%llx";
-    E_JGE =                 "if cpu.get_flag_o() == cpu.get_flag_s():\n        goto .label_0x%llx";
-    E_JG =                  "if (cpu.get_flag_o() == cpu.get_flag_s()) and not cpu.get_flag_z():\n        goto .label_0x%llx";
-    E_JO =                  "if cpu.get_flag_o():\n        goto .label_0x%llx";
-    E_JNO =                 "if not cpu.get_flag_o():\n        goto .label_0x%llx";
-    E_JS =                  "if cpu.get_flag_s():\n        goto .label_0x%llx";
-    E_PUSH =                "cpu.push_%s(%s)";
-    E_POP =                 "%s = cpu.pop_%s()";
-    E_SUB_RR =              "%s = %s - %s";
-    //E_SUB_RI =              "%s = %s - %lld";
-    E_ADD_RR =              "%s = %s + %s";
-    E_ADD_RI =              "%s = %s + %lld";
-    E_XOR_R =               "%s = 0";
-    E_XOR_RR =              "%s = %s ^ %s";
-    //E_XOR_RI =              "%s = %s ^ %lld";
-    E_JNE_R_GOTO =          "if %s != 0:\n        goto .label_0x%llx";
-    E_JE_R_GOTO =           "if %s == 0:\n        goto .label_0x%llx";
-    E_JLE_R_GOTO =          "if %s <= 0:\n        goto .label_0x%llx";
-    E_JA_RR_GOTO =          "if %s > %s:\n        goto .label_0x%llx";
-    E_JGE_RR_GOTO=          "if %s >= %s:\n        goto .label_0x%llx";
-    E_SPACE =               "";
-    E_MOV_RR =              "%s = %s";
-    E_MOV_RI =              "%s = 0x%llx";
-    E_LEA_M =               "%s = %s%+lld";
-    E_MOV_RP =              "%s = cpu.get_%s_ptr(0x%llx)";
-    E_MOV_RM =              "%s = cpu.get_%s_ptr(%s)";
-    E_MOV_PR =              "cpu.set_%s_ptr(0x%llx,%s)";
-    E_MOV_MR =              "cpu.set_%s_ptr(%s,%s)";
-    E_MOV_PI =              "cpu.set_%s_ptr(0x%llx,0x%llx)";
-    E_MOV_MI =              "cpu.set_%s_ptr(%s,0x%llx)";
-    E_STACK_INIT =          "    %s = 0x%llx\n    %s = %s\n";
-    E_IF_R_EQ_I =           "if %s == 0x%llx:";
-    E_ELIF_R_EQ_I =         "elif %s == 0x%llx:";
-    E_ENDIF =               "";
-    E_GET_MEM =             "cpu.get_%s_ptr(%s)";
-    E_S_GET_MEM =           "cpu.s_get_%s_ptr(%s)";
-    E_LOAD_MEM =            "cpu.load_mem(\"%s\",0x%llx,0x%llx,0x%llx,0x%llx)";
-    E_SET_MEM =             "cpu.set_%s_ptr(%s,%s)";
-    */
 }
 
 #define PY_HEADER "\
@@ -121,7 +18,7 @@ void Lang_Py_x64::PrintHeader(Code *c) {
 void Lang_Py_x64::PrintAnonCalls(Code *c) {
 int count = 0;
 
-    printf("def " ANON_CALL "(cpu,addr):\n");
+    printf("def " ANON_CALL "(cpu,addr,raddr):\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (!count) {
@@ -131,10 +28,10 @@ int count = 0;
                 printf("    elif addr == 0x%llx:\n",c->subcodes[n].first);
             }
             if (c->subcodes[n].name != NULL) {
-                printf("        %s(cpu)\n",c->subcodes[n].name);
+                printf("        %s(cpu,raddr)\n",c->subcodes[n].name);
             }
             else {
-                printf("        func_0x%llx(cpu)\n",c->subcodes[n].first);
+                printf("        func_0x%llx(cpu,raddr)\n",c->subcodes[n].first);
             }
             //printf("    }\n");
             count++;
@@ -168,10 +65,10 @@ void Lang_Py_x64::PrintMainOpen(Code *c) {
     # Insert code here ...\n"
 
 #define PY_FOOTER_F "\
-    func_0x%llx(cpu)\n"
+    func_0x%llx(cpu,0)\n"
 
 #define PY_FOOTER_N "\
-    %s(cpu)\n"
+    %s(cpu,0)\n"
 
 #define PY_FOOTER_3 "\
     # Insert code here ...\n\
@@ -215,7 +112,7 @@ char sub[128];
 
 #define PY_FUNC_HEADER_NAME "\
 @with_goto\n\
-def %s(cpu):\n\
+def %s(cpu,raddr):\n\
 "
 
 void Lang_Py_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
@@ -224,7 +121,7 @@ void Lang_Py_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
 
 #define PY_FUNC_HEADER_ADDR "\
 @with_goto\n\
-def func_0x%llx(cpu):\n\
+def func_0x%llx(cpu,raddr):\n\
 "
 
 void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
@@ -252,31 +149,6 @@ void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
 void Lang_Py_x64::PrintSubCodeSep(void) {
     printf("    # --------------------------------------------------------------\n");
 }
-
-/*
-char *Lang_Py_x64::mem_str(csh handle,cs_x86_op op) {
-char tmp[256];
-char *buffer;
-
-    // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
-    buffer = (char *) malloc(256);
-    if (op.mem.base != X86_REG_INVALID) {
-        sprintf(buffer,"%s",reg_name(handle,op.mem.base));
-    }
-    else {
-        buffer[0] = 0;
-    }
-    if (op.mem.index != X86_REG_INVALID) {
-        sprintf(tmp,"+%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
-        strcat (buffer,tmp);
-    }
-    if (op.mem.disp) {
-        sprintf(tmp,"%+lld",op.mem.disp);
-        strcat (buffer,tmp);
-    }
-    return (buffer);
-}
-*/
 
 char *Lang_Py_x64::reg_name(csh handle,int id_reg) {
 char *buffer;
@@ -332,11 +204,11 @@ const char *Lang_Py_x64::E_CALL_FROM_IAT(void) {
 }
 
 const char *Lang_Py_x64::E_FUNC_NAME(void) {
-    return ("%s(cpu)");
+    return ("%s(cpu,0x%llx)");
 }
 
 const char *Lang_Py_x64::E_FUNC_ADDR(void) {
-    return ("func_0x%llx(cpu)");
+    return ("func_0x%llx(cpu,0x%llx)");
 }
 
 const char *Lang_Py_x64::E_RETURN(void) {

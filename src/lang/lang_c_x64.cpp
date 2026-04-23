@@ -1,109 +1,6 @@
 #include "lang_c_x64.hpp"
 
 Lang_C_x64::Lang_C_x64() {
-    /*
-    COMM = "//";
-    COMM_SEP = 70;
-    INDENT = "    ";
-    ENDS = ";";
-    SEPS = ";";
-    EQUAL = "==";
-    NEQUAL = "!=";
-    GT = ">";
-    LT = "<";
-    GTE = ">=";
-    LTE = "<=";
-    F_SET_ZF = "set_flag_z(cpu,";
-    F_SET_SF = "set_flag_s(cpu,";
-    F_SET_CF = "set_flag_c(cpu,";
-    F_SET_OF = "set_flag_o(cpu,";
-    F_GET_ZF = "flag_z(cpu";
-    F_GET_SF = "flag_s(cpu";
-    F_GET_CF = "flag_c(cpu";
-    F_GET_OF = "flag_o(cpu";
-    F_ADD_OF = "add_flag_o(cpu,";
-    F_ADD_CF = "add_flag_c(cpu,";
-    F_NUM_CF = "num_flag_c(cpu";
-    F_SUB_OF = "sub_flag_o(cpu,";
-    F_IDIV = "idiv(";
-    //F_SUB_CF = "sub_flag_c(cpu,";
-    ENDF = ")";
-    AND = "&";
-    OR = "|";
-    XOR = "^";
-    SHL = "<<";
-    SHR = ">>";
-    F_TRUE = "1";
-    F_FALSE = "0";
-    F_PUSH = "push(cpu,";
-    F_POP = "pop(cpu,";
-    F_POW = "Pow(";
-    E_JCC_GOTO = "if (%s) goto label_0x%llx;";
-    E_IFTHENELSE= "if (%s) { %s; } else  { %s; }";
-    E_IFTHEN= "if (%s) { %s; }";
-    F_NOT = "not(";
-    F_NEG = "neg(";
-    F_PSHUFD = "pshufd(";
-    E_NOT = "!";
-    E_LABEL_NAME = "label_%s:\n";
- 
-    OP_ALONE =              "op(cpu,\"%s\");";
-    OP_SUBNAME =            "op_%s(cpu,\"%s\",%s);";
-    OP_REG = "\"%s\",";
-    OP_IMM = "0x%llx,";
-    OP_MEM = "\"%s\",\"%s\",%i,%+lld,";
-
-    E_CALL_FROM_IAT =       "call_from_iat(cpu,\"%s\",\"%s\");";
-    E_FUNC_NAME =           "%s(cpu);";
-    E_FUNC_ADDR =           "func_0x%llx(cpu);";
-    E_RETURN =              "return;";
-    E_GOTO =                "goto label_0x%llx;";
-    E_LABEL =               "label_0x%llx:\n";
-    E_JMP_FROM_IAT =        "jmp_from_iat(cpu,\"%s\",\"%s\");";
-    E_JE =                  "if (flag_z(cpu)) goto label_0x%llx;";
-    E_JNE =                 "if (!flag_z(cpu)) goto label_0x%llx;";
-    E_JA =                  "if (!flag_c(cpu) && !flag_z(cpu)) goto label_0x%llx;";
-    E_JAE =                 "if (!flag_c(cpu)) goto label_0x%llx;";
-    E_JL =                  "if (flag_o(cpu) != flag_s(cpu)) goto label_0x%llx;";
-    E_JLE =                 "if (flag_z(cpu) || (flag_o(cpu) != flag_s(cpu))) goto label_0x%llx;";
-    E_JGE =                 "if (flag_o(cpu) == flag_s(cpu)) goto label_0x%llx;";
-    E_JG =                  "if ((flag_o(cpu) == flag_s(cpu)) && !flag_z(cpu)) goto label_0x%llx;";
-    E_JO =                  "if (flag_o(cpu)) goto label_0x%llx;";
-    E_JNO =                 "if (!flag_o(cpu)) goto label_0x%llx;";
-    E_JS =                  "if (flag_s(cpu)) goto label_0x%llx;";
-    E_PUSH =                "_push_%s(%s);";
-    E_POP =                 "%s = _pop_%s();";
-    E_SUB_RR =              "%s = %s - %s;";
-    //E_SUB_RI =              "%s = %s - %lld;";
-    E_ADD_RR =              "%s = %s + %s;";
-    E_ADD_RI =              "%s = %s + %lld;";
-    E_XOR_R =               "%s = 0;";
-    E_XOR_RR =              "%s = %s ^ %s;";
-    //E_XOR_RI =              "%s = %s ^ %lld;";
-    E_JNE_R_GOTO =          "if (%s != 0) goto label_0x%llx;";
-    E_JE_R_GOTO =           "if (%s == 0) goto label_0x%llx;";
-    E_JLE_R_GOTO =          "if (%s <= 0) goto label_0x%llx;";
-    E_JA_RR_GOTO =          "if (%s > %s) goto label_0x%llx;";
-    E_JGE_RR_GOTO =         "if (%s >= %s) goto label_0x%llx;";
-    E_SPACE =               "";
-    E_MOV_RR =              "%s = %s;";
-    E_MOV_RI =              "%s = 0x%llx;";
-    E_LEA_M =               "%s = %s%+lld;";
-    E_MOV_RP =              "%s = _get_%s_ptr(0x%llx);";
-    E_MOV_RM =              "%s = _get_%s_ptr(%s);";
-    E_MOV_PR =              "_set_%s_ptr(0x%llx,%s);";
-    E_MOV_MR =              "_set_%s_ptr(%s,%s);";
-    E_MOV_PI =              "_set_%s_ptr(0x%llx,0x%llx);";
-    E_MOV_MI =              "_set_%s_ptr(%s,0x%llx);";
-    E_STACK_INIT =          "    %s = 0x%llx;\n    %s = %s;\n";
-    E_IF_R_EQ_I =           "if (%s == 0x%llx) {";
-    E_ELIF_R_EQ_I =         "else if (%s == 0x%llx) {";
-    E_ENDIF =               "}";
-    E_GET_MEM =             "_get_%s_ptr(%s)";
-    E_S_GET_MEM =           "s_get_%s_ptr(%s)";
-    E_LOAD_MEM =            "load_mem(cpu,\"%s\",0x%llx,0x%llx,0x%llx,0x%llx);";
-    E_SET_MEM =             "_set_%s_ptr(%s,%s)";
-    */
 }
 
 #define C_HEADER "\
@@ -111,16 +8,16 @@ Lang_C_x64::Lang_C_x64() {
 \n"
 
 #define C_FUNC_ADDR "\
-void func_0x%llx(struct _cpu *cpu);\n"
+void func_0x%llx(struct _cpu *cpu,uint64_t raddr);\n"
 
 #define C_FUNC_NAME "\
-void %s(struct _cpu *cpu);    // 0x%llx\n"
+void %s(struct _cpu *cpu,uint64_t raddr);    // 0x%llx\n"
 
 #define ANON_CALL   "AnonCall"
 
 void Lang_C_x64::PrintHeader(Code *c) {
     printf(C_HEADER);
-    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr);\n");
+    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr);\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (c->subcodes[n].name != NULL) {
@@ -136,7 +33,7 @@ void Lang_C_x64::PrintHeader(Code *c) {
 void Lang_C_x64::PrintAnonCalls(Code *c) {
 int count = 0;
 
-    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr) {\n");
+    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr) {\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (!count) {
@@ -146,10 +43,10 @@ int count = 0;
                 printf("    else if (addr == 0x%llx) {\n",c->subcodes[n].first);
             }
             if (c->subcodes[n].name != NULL) {
-                printf("        %s(cpu);\n",c->subcodes[n].name);
+                printf("        %s(cpu,raddr);\n",c->subcodes[n].name);
             }
             else {
-                printf("        func_0x%llx(cpu);\n",c->subcodes[n].first);
+                printf("        func_0x%llx(cpu,raddr);\n",c->subcodes[n].first);
             }
             printf("    }\n");
             count++;
@@ -179,10 +76,10 @@ void Lang_C_x64::PrintMainOpen(Code *c) {
     /* Insert code here ... */\n"
 
 #define C_FOOTER_F "\
-    func_0x%llx(cpu);\n"
+    func_0x%llx(cpu,0);\n"
 
 #define C_FOOTER_N "\
-    %s(cpu);\n"
+    %s(cpu,0);\n"
 
 #define C_FOOTER_3 "\
     /* Insert code here ... */\n\
@@ -223,7 +120,7 @@ char sub[128];
 }
 
 #define C_FUNC_HEADER_NAME "\
-void %s(struct _cpu *cpu) {\n\
+void %s(struct _cpu *cpu,uint64_t raddr) {\n\
 "
 
 void Lang_C_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
@@ -231,7 +128,7 @@ void Lang_C_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
 }
 
 #define C_FUNC_HEADER_ADDR "\
-void func_0x%llx(struct _cpu *cpu) {\n\
+void func_0x%llx(struct _cpu *cpu,uint64_t raddr) {\n\
 "
 
 void Lang_C_x64::PrintFuncHeaderAddr(Code *c,int num) {
@@ -333,11 +230,11 @@ const char *Lang_C_x64::E_CALL_FROM_IAT(void) {
 }
 
 const char *Lang_C_x64::E_FUNC_NAME(void) {
-    return ("%s(cpu);");
+    return ("%s(cpu,0x%llx);");
 }
 
 const char *Lang_C_x64::E_FUNC_ADDR(void) {
-    return ("func_0x%llx(cpu);");
+    return ("func_0x%llx(cpu,0x%llx);");
 }
 
 const char *Lang_C_x64::E_RETURN(void) {
