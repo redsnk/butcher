@@ -16,6 +16,7 @@ class Lang_Py_x64 : public Lang_x64 {
     void PrintFuncHeaderAddr(Code *c,int num);
     void PrintAnonJmpVar(void);
     void PrintAnonJmpCall(uint64_t addr,char *name);
+    void PrintAnonJmpEnd(void);
     void PrintFuncFooter(Code *c,int num);
     void PrintSubCodeSep(void);
 

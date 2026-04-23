@@ -142,6 +142,12 @@ void Lang_Py_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
     printf("        goto %s\n",name);
 }
 
+void Lang_Py_x64::PrintAnonJmpEnd(void) {
+    printf("    if anon == raddr:\n");
+    printf("        return\n");
+    printf("    panic(\"AnonJmp\")\n");
+}
+
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
     printf(PY_FUNC_FOOTER);
 }

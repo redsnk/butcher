@@ -1818,7 +1818,7 @@ char *name;
             */
             free(name);
         }
-
+        lang_x64->PrintAnonJmpEnd();
     }
     lang_x64->PrintFuncFooter(c,num);
 }

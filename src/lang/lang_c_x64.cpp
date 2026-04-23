@@ -149,6 +149,13 @@ void Lang_C_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
     printf("    }\n"); 
 }
 
+void Lang_C_x64::PrintAnonJmpEnd(void) {
+    printf("    if (anon == raddr) {\n");
+    printf("        return;\n");
+    printf("    }\n");
+    printf("    panic(\"AnonJmp\");\n");
+}
+
 void Lang_C_x64::PrintFuncFooter(Code *c,int num) {
     printf(C_FUNC_FOOTER);
 }
