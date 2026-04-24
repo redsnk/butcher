@@ -98,6 +98,8 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *E_BREAK(void);
     const char *E_TMP(void);
     const char *F_MASK(void);
+    const char *F_UTOD(void);
+    const char *F_DTOU(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);

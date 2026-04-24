@@ -490,3 +490,11 @@ const char *Lang_Py_x64::E_TMP(void) {
 const char *Lang_Py_x64::F_MASK(void) {
     return ("cpu.mask(");
 }
+
+const char *Lang_Py_x64::F_UTOD(void) {
+    return ("cpu.utod(");
+}
+
+const char *Lang_Py_x64::F_DTOU(void) {
+     return ("cpu.dtou(");
+}

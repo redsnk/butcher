@@ -353,11 +353,14 @@ int bits;
     else if (!strcmp(name,"st1")) {
         return (reg_name(handle,X86_REG_ST1));
     }
-    else if (!strcmp(name,"s_st0")) {
-        return (s_reg_name(handle,X86_REG_ST0));
+    else if (!strcmp(name,"st2")) {
+        return (reg_name(handle,X86_REG_ST2));
     }
-    else if (!strcmp(name,"s_st1")) {
-        return (s_reg_name(handle,X86_REG_ST1));
+    else if (!strcmp(name,"utod")) {
+        return (strdup(F_UTOD()));
+    }
+    else if (!strcmp(name,"dtou")) {
+        return (strdup(F_DTOU()));
     }
     else if (!strcmp(name,"break")) {
         return (strdup(E_BREAK()));

@@ -1600,16 +1600,21 @@ char buffer[256];
                 num++;
             }
             break;
-            break;
         case X86_INS_FILD:
-        case X86_INS_FLD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
             break;
+            break;
+        case X86_INS_FLD:
+            reg0 = lang_x64->Translate(handle,"pushfpu(utod(op0))",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
         case X86_INS_FIST:
-            reg0 = lang_x64->Translate(handle,"sop0 = s_st0",insn,true);
+            reg0 = lang_x64->Translate(handle,"sop0 = st0",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -1621,7 +1626,7 @@ char buffer[256];
             num++;
             break;
         case X86_INS_FSTP:
-            reg0 = lang_x64->Translate(handle,"op0 = popfpu()",insn,true);
+            reg0 = lang_x64->Translate(handle,"op0 = dtou(popfpu())",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -1634,7 +1639,7 @@ char buffer[256];
             break;
         case X86_INS_FADD:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 + op0",insn,true);
+                reg0 = lang_x64->Translate(handle,"st0 = st0 + utod(op0)",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -1642,7 +1647,7 @@ char buffer[256];
             break;
         case X86_INS_FSUB:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 - op0",insn,true);
+                reg0 = lang_x64->Translate(handle,"st0 = st0 - utod(op0)",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -1650,7 +1655,7 @@ char buffer[256];
             break;
         case X86_INS_FDIV:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 / op0",insn,true);
+                reg0 = lang_x64->Translate(handle,"st0 = st0 / utod(op0)",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;

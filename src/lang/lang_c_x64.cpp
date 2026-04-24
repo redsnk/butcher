@@ -199,15 +199,6 @@ char *buffer;
     }
     else {
         switch (id_reg) {
-            case X86_REG_ST0:
-                sprintf(buffer,"s_st0");
-                break;
-            case X86_REG_ST1:
-                sprintf(buffer,"s_st1");
-                break;
-            case X86_REG_ST2:
-                sprintf(buffer,"s_st2");
-                break;
             default:
                 sprintf(buffer,"s_%s",cs_reg_name(handle,id_reg));
                 break;
@@ -515,4 +506,12 @@ const char *Lang_C_x64::E_TMP(void) {
 
 const char *Lang_C_x64::F_MASK(void) {
     return ("mask(");
+}
+
+const char *Lang_C_x64::F_UTOD(void) {
+    return ("utod(");
+}
+
+const char *Lang_C_x64::F_DTOU(void) {
+     return ("dtou(");
 }

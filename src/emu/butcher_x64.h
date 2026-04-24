@@ -92,12 +92,13 @@ union _eflags {
   	uint32_t r32;
 };
 
-struct _freg {
-	uint64_t r;
+union _freg {
+	uint64_t u;
+	double d;
 };
 
 struct _fpu {
-	struct _freg r[8];
+	union _freg r[8];
 	int top;
 };
 
@@ -271,13 +272,9 @@ struct _cpu {
 #define _xmm6	(cpu->xmm6.r128)
 #define _xmm7	(cpu->xmm7.r128)
 
-#define _st0	cpu->fpu.r[cpu->fpu.top].r
-#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8].r
-#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].r
-
-#define s_st0	_st0
-#define s_st1	_st1
-#define s_st2	_st2
+#define _st0	cpu->fpu.r[cpu->fpu.top].d
+#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8].d
+#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].d
 
 #define _tmp 	(cpu->tmp)
 
@@ -352,9 +349,11 @@ uint64_t neg(uint64_t b,uint64_t p);
 uint64_t not(uint64_t b,uint64_t p);
 uint64_t idiv(uint64_t a,uint64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
-void pushfpu(struct _cpu *cpu,uint64_t v);
-uint64_t popfpu(struct _cpu *cpu);
+void pushfpu(struct _cpu *cpu,double v);
+double popfpu(struct _cpu *cpu);
 uint64_t mask(int bits);
+double utod(uint64_t v);
+uint64_t dtou(double v);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);

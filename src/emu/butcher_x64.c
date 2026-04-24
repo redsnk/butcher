@@ -607,20 +607,34 @@ uint8_t c;
 	return (r);
 }
 
-void pushfpu(struct _cpu *cpu,uint64_t v) {
+void pushfpu(struct _cpu *cpu,double v) {
 	cpu->fpu.top--;
 	if (cpu->fpu.top < 0) cpu->fpu.top = 7;
-	cpu->fpu.r[cpu->fpu.top].r = v;
+	cpu->fpu.r[cpu->fpu.top].d = v;
 }
 
-uint64_t popfpu(struct _cpu *cpu) {
+double popfpu(struct _cpu *cpu) {
 uint64_t v;
 
-	v = cpu->fpu.r[cpu->fpu.top].r;
-	cpu->fpu.r[cpu->fpu.top].r = 0;
+	v = cpu->fpu.r[cpu->fpu.top].d;
+	cpu->fpu.r[cpu->fpu.top].d = 0;
 	cpu->fpu.top++;
 	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
 	return (v);
+}
+
+double utod(uint64_t v) {
+union _freg c;
+
+	c.u = v;
+	return (c.d);
+}
+
+uint64_t dtou(double v) {
+union _freg c;
+
+	c.d = v;
+	return (c.u);
 }
 
 uint64_t mask(int bits) {
