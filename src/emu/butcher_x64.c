@@ -132,7 +132,7 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 			return;
 		}
 	}
-	panic("get_mem error: 0x%llx:%li",addr,size);
+	panic("get_mem error: 0x%" PRIx64 ":%li",addr,size);
 }
 
 int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
@@ -159,7 +159,7 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 			return;
 		}
 	}
-	panic("set_mem error: 0x%llx:%li",addr,size);
+	panic("set_mem error: 0x%" PRIx64 ":%li",addr,size);
 }
 
 void del_mem(struct _cpu *cpu,int n) {
@@ -203,7 +203,7 @@ char c;
 				strcat (str," ");
 				i++;
 			}
-			printf("0x%llx %s  %s\n",off,hex,str);
+			printf("0x%" PRIx64 " %s  %s\n",off,hex,str);
 			off += DUMP_LINE;
 			str[0] = 0;
 			hex[0] = 0;
@@ -267,7 +267,7 @@ uint64_t ret;
 			return(addr);
 		}
 	}
-	panic("realloc_mem error: 0x%llx:%li",addr,size);
+	panic("realloc_mem error: 0x%" PRIx64 ":%li",addr,size);
 }
 
 void free_mem (struct _cpu *cpu,uint64_t addr) {
@@ -278,7 +278,7 @@ int n;
 		del_mem(cpu,n);
 	}
 	else {
-		panic("free_mem error: 0x%llx",addr);
+		panic("free_mem error: 0x%" PRIx64,addr);
 	}
 }
 
@@ -670,37 +670,37 @@ void op_rr(struct _cpu *cpu,char *op,char *regd,char *regs) {
 }
 
 void op_ri(struct _cpu *cpu,char *op,char *reg,uint64_t i) {
-	printf("%s %s,0x%llx\n",op,reg,i);
+	printf("%s %s,0x%" PRIx64 "\n",op,reg,i);
 	panic("op_ri");
 }
 
 void op_rm(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp) {
-	printf("%s %s,[%s+%s*%i+0x%llx]\n",op,reg,base,index,mult,disp);
+	printf("%s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,reg,base,index,mult,disp);
 	panic("op_rm");
 }
 
 void op_mr(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,char *reg) {
-	printf("%s [%s+%s*%i+0x%llx],%s\n",op,base,index,mult,disp,reg);
+	printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],%s\n",op,base,index,mult,disp,reg);
 	panic("op_mr");
 }
 
 void op_mi(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
-	printf("%s [%s+%s*%i+0x%llx],%llx\n",op,base,index,mult,disp,i);
+	printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64 "\n",op,base,index,mult,disp,i);
 	panic("op_mi");
 }
 
 void op_m(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp) {
-	printf("%s [%s+%s*%i+0x%llx]\n",op,base,index,mult,disp);
+	printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,base,index,mult,disp);
 	panic("op_m");
 }
 
 void op_i(struct _cpu *cpu,char *op,uint64_t i) {
-	printf("%s %llx\n",op,i);
+	printf("%s 0x%" PRIx64 "\n",op,i);
 	panic("op_i");
 }
 
 void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i) {
-	printf("%s %s,%s,%llx\n",op,regd,regs,i);
+	printf("%s %s,%s,0x%" PRIx64 "\n",op,regd,regs,i);
 	panic("op_rri");
 }
 
@@ -710,16 +710,16 @@ void op_rrr(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege) {
 }
 
 void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
-	printf("%s %s,[%s+%s*%i+0x%llx],%llx\n",op,reg,base,index,mult,disp,i);
+	printf("%s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64 "\n",op,reg,base,index,mult,disp,i);
 	panic("op_rmi");
 }
 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps) {
-	printf("%s [%s+%s*%i+0x%llx],[%s+%s*%i+0x%llx]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
+	printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],[%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
 	panic("op_mm");
 }
 
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i) {
-	printf("%s %s,%s,%s,%llx\n",op,regd,regs,rege,i);
+	printf("%s %s,%s,%s,0x%" PRIx64 "\n",op,regd,regs,rege,i);
 	panic("op_rrri");
 }

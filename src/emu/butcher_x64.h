@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #define FALSE 	(0)
 #define TRUE	(-1)

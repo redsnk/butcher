@@ -35,7 +35,7 @@ char *buffer;
         strcat (buffer,tmp);
     }
     if (op.mem.disp) {
-        sprintf(tmp,"%+lld",op.mem.disp);
+        sprintf(tmp,"%+" PRId64,op.mem.disp);
         //sprintf(tmp,"+0x%llx",op.mem.disp);
         strcat (buffer,tmp);
     }
@@ -72,17 +72,17 @@ char *str;
         case X86_OP_IMM:
             switch (bits) {
                 case 8:
-                    sprintf(buffer,"0x%"PRIx8,(uint8_t)op.imm);
+                    sprintf(buffer,"0x%" PRIx8,(uint8_t)op.imm);
                     break;
                 case 16:
-                    sprintf(buffer,"0x%"PRIx16,(uint16_t)op.imm);
+                    sprintf(buffer,"0x%" PRIx16,(uint16_t)op.imm);
                     break;
                 case 32:
-                    sprintf(buffer,"0x%"PRIx32,(uint32_t)op.imm);
+                    sprintf(buffer,"0x%" PRIx32,(uint32_t)op.imm);
                     break;
                 case 64:
                 case 128:
-                    sprintf(buffer,"0x%"PRIx64,op.imm);
+                    sprintf(buffer,"0x%" PRIx64,op.imm);
                     break;
             }
             return (strdup(buffer));
@@ -120,6 +120,7 @@ int bits;
         case 64:
             return (sign?s_reg_name(handle,reg64):reg_name(handle,reg64));
     }
+    return (strdup("<Translate_reg bits ERROR>"));
 }
 
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name,int lset) {
@@ -370,12 +371,12 @@ int bits;
     }
     else if (!strcmp(name,"addr")) {
         char *buffer = (char *) malloc(32);
-        sprintf(buffer,"0x%llx",insn->address);
+        sprintf(buffer,"0x%" PRIx64,insn->address);
         return (buffer);
     }
     else if (!strcmp(name,"next_addr")) {
         char *buffer = (char *) malloc(32);
-        sprintf(buffer,"0x%llx",insn->address+insn->size);
+        sprintf(buffer,"0x%" PRIx64,insn->address+insn->size);
         return (buffer);
     }
     else if (!strcmp(name,"mask")) {
@@ -395,7 +396,7 @@ char *buffer;
             return (Translate_var(handle,insn,i->item.name,lset));
         case _id_item::NUMBER:
             buffer = (char *) malloc(MAX_STR_OP);
-            sprintf(buffer,"%lld",i->item.num);
+            sprintf(buffer,"%" PRId64,i->item.num);
             return (buffer);
         case _id_item::RESULT:
             return (strdup(i->item.name));
