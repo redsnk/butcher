@@ -586,6 +586,11 @@ int n;
                 break;
             case _id_item::GOTOEXPR:
                 it1 = Translate_item(handle,insn,&e->items[n-1],false);
+                if ((it1[0] >='0') && (it1[0]<='9')) {
+                    free(it1);
+                    it1 = (char *) malloc(MAX_STR_OP);
+                    sprintf(it1,E_LABEL_ADDR(),insn->detail->x86.operands[0].imm);
+                }
                 sprintf(tmp,"goto %s",it1);
                 free(it1);
                 e->res_item(n,tmp);

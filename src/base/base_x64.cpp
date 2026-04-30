@@ -29,6 +29,9 @@ int JccInst(cs_insn *insn) {
         case X86_INS_JP:
         case X86_INS_JRCXZ:
         case X86_INS_JS:
+        case X86_INS_LOOP:
+        case X86_INS_LOOPE:
+        case X86_INS_LOOPNE:
             return (true);
     }
     return (false);
@@ -57,7 +60,7 @@ int SetInst(cs_insn *insn) {
     return (false);
 }
 
-int ClearFlagInst(cs_insn *insn) {
+int SetFlagInst(cs_insn *insn) {
     switch(insn->id) {
         case X86_INS_SUB:
         case X86_INS_ADD:
@@ -68,6 +71,12 @@ int ClearFlagInst(cs_insn *insn) {
         case X86_INS_TEST:
         case X86_INS_INC:
         case X86_INS_DEC:
+        case X86_INS_SHL:
+        case X86_INS_SHR:
+        case X86_INS_SAL:
+        case X86_INS_SAR:
+        case X86_INS_RCL:
+        case X86_INS_RCR:
             return (true);
     }
     return (false);
@@ -80,6 +89,8 @@ int UseFlagInst(cs_insn *insn) {
     switch (insn->id) {
         case X86_INS_ADC:
         case X86_INS_SBB:
+        case X86_INS_RCL:
+        case X86_INS_RCR:
             return (true);
     }
     return (false);
@@ -94,7 +105,7 @@ cs_insn *insn;
         if (UseFlagInst(insn)) {
             return (false);
         }
-        if (ClearFlagInst(insn)) {
+        if (SetFlagInst(insn)) {
             return (true);
         }
         num++;
@@ -207,66 +218,73 @@ cs_insn *insn;
     insn = &in[num];
     c = 0;
     *anon = false;
-    if (insn->id == X86_INS_JMP) {
-        if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
-            d = insn->detail->x86.operands[0].imm;
-            //if (arch->ValidMemory(d)) {
-            if (ValidCode(d)) {
-                *addr = (uint64_t *) malloc(sizeof(uint64_t));
-                (*addr)[c++] = d;
+    switch (insn->id) {
+        case X86_INS_JMP:
+            if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
+                d = insn->detail->x86.operands[0].imm;
+                //if (arch->ValidMemory(d)) {
+                if (ValidCode(d)) {
+                    *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                    (*addr)[c++] = d;
+                }
             }
-        }
-        else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-            if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
-                            (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
-                            (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
-                for (n=0;n<MAX_JMPS;n++) {
-                    a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
-                    b = insn->detail->x86.addr_size;
-                    if (arch->Get_Address_At(a,&d,b*8)) {
-                        //if (arch->ValidMemory(d)) {
-                        if (ValidCode(d)) {
-                            if (c == 0) {
-                                *addr = (uint64_t *) malloc(sizeof(uint64_t));
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                                (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
+                                (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
+                    for (n=0;n<MAX_JMPS;n++) {
+                        a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
+                        b = insn->detail->x86.addr_size;
+                        if (arch->Get_Address_At(a,&d,b*8)) {
+                            //if (arch->ValidMemory(d)) {
+                            if (ValidCode(d)) {
+                                if (c == 0) {
+                                    *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                                }
+                                else {
+                                    *addr = (uint64_t *) realloc(*addr,sizeof(uint64_t)*(c+1));
+                                }
+                                (*addr)[c++] = d;
                             }
                             else {
-                                *addr = (uint64_t *) realloc(*addr,sizeof(uint64_t)*(c+1));
+                                break;
                             }
-                            (*addr)[c++] = d;
                         }
                         else {
                             break;
                         }
-                    }
-                    else {
-                        break;
-                    }
-                }       
+                    }       
+                }
+                else {
+                // Undefined jmp
+                    *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                    (*addr)[c++] = UNDEF_ADDR_JMP; 
+                }
             }
             else {
-               // Undefined jmp
+                // Undefined jmp X86_OP_REG
+                *anon = true;
                 *addr = (uint64_t *) malloc(sizeof(uint64_t));
-                (*addr)[c++] = UNDEF_ADDR_JMP; 
-            }
-        }
-        else {
-            // Undefined jmp X86_OP_REG
-            *anon = true;
-            *addr = (uint64_t *) malloc(sizeof(uint64_t));
-            if ((num>0) && (in[num-1].id == X86_INS_POP) && (in[num-1].detail->x86.operands[0].type == X86_OP_REG) &&
-                (in[num-1].detail->x86.operands[0].reg == insn->detail->x86.operands[0].reg)) {
-                // push <addr>
-                // [...]
-                // pop <reg>
-                // jmp <reg>
-                for (n=num-2;n>=0;n--) {
-                    if (in[n].id == X86_INS_PUSH) {
-                        if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
-                            // push <addr>
-                            //if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
-                            if (ValidCode(in[n].detail->x86.operands[0].imm)) {
-                                (*addr)[c++] = in[n].detail->x86.operands[0].imm;
-                                break;
+                if ((num>0) && (in[num-1].id == X86_INS_POP) && (in[num-1].detail->x86.operands[0].type == X86_OP_REG) &&
+                    (in[num-1].detail->x86.operands[0].reg == insn->detail->x86.operands[0].reg)) {
+                    // push <addr>
+                    // [...]
+                    // pop <reg>
+                    // jmp <reg>
+                    for (n=num-2;n>=0;n--) {
+                        if (in[n].id == X86_INS_PUSH) {
+                            if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
+                                // push <addr>
+                                //if (arch->ValidMemory(in[n].detail->x86.operands[0].imm)) {
+                                if (ValidCode(in[n].detail->x86.operands[0].imm)) {
+                                    (*addr)[c++] = in[n].detail->x86.operands[0].imm;
+                                    break;
+                                }
+                                else {
+                                    // exit
+                                    n = -1;
+                                    break;
+                                }
                             }
                             else {
                                 // exit
@@ -274,21 +292,25 @@ cs_insn *insn;
                                 break;
                             }
                         }
-                        else {
-                            // exit
-                            n = -1;
-                            break;
-                        }
+                    }
+                    if (n < 0) {
+                        (*addr)[c++] = UNDEF_ADDR_JMP;
                     }
                 }
-                if (n < 0) {
+                else {
                     (*addr)[c++] = UNDEF_ADDR_JMP;
                 }
             }
-            else {
-                (*addr)[c++] = UNDEF_ADDR_JMP;
+            break;
+        case X86_INS_LOOP:
+        case X86_INS_LOOPE:
+        case X86_INS_LOOPNE:
+            d = insn->detail->x86.operands[0].imm;
+            if (ValidCode(d)) {
+                *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                (*addr)[c++] = d;
             }
-        }
+            break;
     }
     *count = c;
     return (c);
@@ -752,6 +774,13 @@ char buffer[256];
             free(reg0);
             num++;
             break;
+        case X86_INS_LOOP:
+            reg0 = lang_x64->Translate(handle,  "rcx = rcx - 1;"
+                                                "if rcx > 0 then goto op0 fi",insn,false);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
         case X86_INS_PUSH:
             /*
             if (insn->detail->x86.operands[0].type == X86_OP_REG) {
@@ -908,7 +937,7 @@ char buffer[256];
                 reg0 = lang_x64->Translate(handle,  "if get_cf() then "
                                                         "op0 = op0 - (op1 + 1) "
                                                     "else "
-                                                        "op0 = op0 + op1 "
+                                                        "op0 = op0 - op1 "
                                                     "fi",insn,true);
             }
             else {
