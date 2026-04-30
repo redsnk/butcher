@@ -238,6 +238,9 @@ char *lib,*func;
                 } else {
                     // Done
                     if (ltraces) printf("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM(),sc.first,sc.last-sc.first,sc.parent);
+                    if (sc.first == 0x9086c7) {
+                        lexit = true;// debug
+                    }
                     c->AddSubcode(&sc);
                 }
             } else {

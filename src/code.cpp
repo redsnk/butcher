@@ -30,6 +30,7 @@ void Code::AddSubcode (struct _subcode *sc) {
                 }
                 if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last)) {
                     // Old subcode included in this one, replace it
+                    // TODO: displaced opcodes
                     cs_free(subcodes[n].insn, subcodes[n].count);
                     subcodes[n] = *sc;
                     return;

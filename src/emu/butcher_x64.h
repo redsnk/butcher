@@ -321,13 +321,6 @@ void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
 void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value);
-/*
-void *get_reg(struct _cpu *cpu,char *reg,int *bits);
-uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
-uint16_t *get_reg_16(struct _cpu *cpu,char *reg);
-uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
-uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
-*/
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
 //uint64_t num_flag_c(struct _cpu *cpu);

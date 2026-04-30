@@ -509,7 +509,7 @@ char buffer[256];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x4d9803) {
+    if (insn->address == 0x9086c7) {
         // test
         n = 0;
     }
@@ -566,7 +566,6 @@ char buffer[256];
                         (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
                     // jmp             dword ptr [eax*4 + 0x44fcb89]
-                    //PrintLine(insn,1,"switch(%s) {",lang_x64->reg_name(handle,insn->detail->x86.operands[0].mem.index));
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].mem.index);
                     for (n=0;n<MAX_JMPS;n++) {
                         addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
@@ -589,6 +588,7 @@ char buffer[256];
                             break;
                         }
                     }
+                    // TODO: else panic()
                     free(reg0);
                     //PrintLine(insn,1,lang_x64->E_ENDIF);
                     num++;
@@ -1476,6 +1476,12 @@ char buffer[256];
                 num++;
                 free(reg0);
             }
+            break;
+        case X86_INS_MOVSX:
+            reg0 = lang_x64->Translate(handle,"sop0 = sop1",insn,true);
+            PrintLine(insn,1,reg0);
+            num++;
+            free(reg0);
             break;
         case X86_INS_CALL:
             raddr = insn->address+insn->size;
