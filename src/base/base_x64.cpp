@@ -77,6 +77,8 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_SAR:
         case X86_INS_RCL:
         case X86_INS_RCR:
+        case X86_INS_JMP:
+        case X86_INS_CALL:
             return (true);
     }
     return (false);
@@ -1307,7 +1309,9 @@ char buffer[256];
                 reg0 = lang_x64->Translate(handle,"op0 = op0 << op1",insn,true);
             }
             else {
-                reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  "tmp = 1 << (bits0-1);"
+                                                    "cf((op0 & tmp) != 0);"
+                                                    "op0 = op0 << op1",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
