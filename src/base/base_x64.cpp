@@ -1321,30 +1321,17 @@ char buffer[256];
             }
             break;
         case X86_INS_ROL:
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
-                                                    "while tmp2 > 0 do "
-                                                        "tmp = op0;"
-                                                        "tmp = tmp << 1;"
-                                                        "op0 = tmp & mask(bits0);"
-                                                        "tmp = tmp >> bits0;"
-                                                        "op0 = op0 | tmp;"
-                                                        "tmp2 = tmp2 - 1"
-                                                    "endw",insn,true);
-            }
-            else {
-                // TODO: OF when op1 == 1
-                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
-                                                    "while tmp2 > 0 do "
-                                                        "tmp = op0;"
-                                                        "tmp = tmp << 1;"
-                                                        "op0 = tmp & mask(bits0);"
-                                                        "tmp = tmp >> bits0;"
-                                                        "cf(tmp > 0);"
-                                                        "op0 = op0 | tmp;"
-                                                        "tmp2 = tmp2 - 1"
-                                                    "endw",insn,true);
-            }
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "tmp = op0;"
+                                                    "tmp = tmp << 1;"
+                                                    "op0 = tmp & mask(bits0);"
+                                                    "tmp = tmp >> bits0;"
+                                                    "cf(tmp > 0);"
+                                                    "op0 = op0 | tmp;"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1352,13 +1339,17 @@ char buffer[256];
             }
             break;
         case X86_INS_RCL:
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = NULL;
-            }
-            else {
-                // TODO: OF when op1 == 1
-                reg0 = NULL;
-            }
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "tmp = op0;"
+                                                    "tmp = tmp << 1;"
+                                                    "if get_cf() then tmp = tmp | 1 fi;"
+                                                    "op0 = tmp & mask(bits0);"
+                                                    "tmp = tmp >> bits0;"
+                                                    "cf(tmp > 0);"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;

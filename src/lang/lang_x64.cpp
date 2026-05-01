@@ -82,7 +82,7 @@ char *str;
                     break;
                 case 64:
                 case 128:
-                    sprintf(buffer,"0x%" PRIx64,op.imm);
+                    sprintf(buffer,"0x%" PRIx64,(uint64_t) op.imm);
                     break;
             }
             return (strdup(buffer));

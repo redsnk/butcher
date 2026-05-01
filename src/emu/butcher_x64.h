@@ -343,7 +343,7 @@ uint64_t pop(struct _cpu *cpu,int b);
 uint64_t Pow(uint64_t b,uint64_t p);
 uint64_t neg(uint64_t b,uint64_t p);
 uint64_t not(uint64_t b,uint64_t p);
-uint64_t idiv(uint64_t a,uint64_t b);
+int64_t idiv(int64_t a,int64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
 void pushfpu(struct _cpu *cpu,double v);
 double popfpu(struct _cpu *cpu);
