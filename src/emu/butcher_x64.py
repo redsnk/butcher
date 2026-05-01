@@ -126,6 +126,7 @@ class _cpu:
     mems = []
 
     tmp = 0
+    tmp2 = 0
 
     EXTRA_MEM = 1024
 

@@ -97,6 +97,7 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *E_WHILE(void);
     const char *E_BREAK(void);
     const char *E_TMP(void);
+    const char *E_TMP2(void);
     const char *F_MASK(void);
     const char *F_UTOD(void);
     const char *F_DTOU(void);

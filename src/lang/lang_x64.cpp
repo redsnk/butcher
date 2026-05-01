@@ -369,6 +369,9 @@ int bits;
     else if (!strcmp(name,"tmp")) {
         return (strdup(E_TMP()));
     }
+    else if (!strcmp(name,"tmp2")) {
+        return (strdup(E_TMP2()));
+    }
     else if (!strcmp(name,"addr")) {
         char *buffer = (char *) malloc(32);
         sprintf(buffer,"0x%" PRIx64,insn->address);

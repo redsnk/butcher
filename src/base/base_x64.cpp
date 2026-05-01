@@ -75,6 +75,8 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_SHR:
         case X86_INS_SAL:
         case X86_INS_SAR:
+        case X86_INS_ROL:
+        case X86_INS_ROR:
         case X86_INS_RCL:
         case X86_INS_RCR:
         case X86_INS_JMP:
@@ -1278,7 +1280,6 @@ char buffer[256];
             break;
         case X86_INS_SHR:
             if (FlagsNotUsed(sc,num)) {
-                //reg0 = lang_x64->Translate(handle,".op0 = op0 / pow(2,op1)",insn,true);
                 reg0 = lang_x64->Translate(handle,"op0 = op0 >> op1",insn,true);
             }
             else {
@@ -1295,7 +1296,8 @@ char buffer[256];
                 reg0 = lang_x64->Translate(handle,"sop0 = sdiv(sop0,pow(2,op1))",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,"sop0 = sdiv(sop0,pow(2,op1))",insn,true);
+                //reg0 = lang_x64->Translate(handle,"sop0 = sdiv(sop0,pow(2,op1))",insn,true);
+                reg0 = NULL;
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
@@ -1305,7 +1307,6 @@ char buffer[256];
             break;    
         case X86_INS_SHL:
             if (FlagsNotUsed(sc,num)) {
-                //reg0 = lang_x64->Translate(handle,".op0 = op0 * pow(2,op1)",insn,true);
                 reg0 = lang_x64->Translate(handle,"op0 = op0 << op1",insn,true);
             }
             else {
@@ -1318,6 +1319,23 @@ char buffer[256];
                 num++;
                 free(reg0);
             }
+            break;
+        case X86_INS_ROL:
+            /*
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,"op0 = op0 << op1",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,  "tmp = 1 << (bits0-1);"
+                                                    "cf((op0 & tmp) != 0);"
+                                                    "op0 = op0 << op1",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            */
             break;
         case X86_INS_MUL:
             // TODO: ax = al * mem

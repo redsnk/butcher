@@ -487,6 +487,10 @@ const char *Lang_Py_x64::E_TMP(void) {
     return ("cpu.tmp");
 }
 
+const char *Lang_Py_x64::E_TMP2(void) {
+    return ("cpu.tmp2");
+}
+
 const char *Lang_Py_x64::F_MASK(void) {
     return ("cpu.mask(");
 }

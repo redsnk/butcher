@@ -504,6 +504,10 @@ const char *Lang_C_x64::E_TMP(void) {
     return ("_tmp");
 }
 
+const char *Lang_C_x64::E_TMP2(void) {
+    return ("_tmp2");
+}
+
 const char *Lang_C_x64::F_MASK(void) {
     return ("mask(");
 }

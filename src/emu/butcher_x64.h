@@ -118,6 +118,7 @@ struct _cpu {
 	struct _fpu fpu;
 	int mem_count;
 	__int128_t tmp;
+	__int128_t tmp2;
 };
 
 // 64
@@ -278,6 +279,7 @@ struct _cpu {
 #define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].d
 
 #define _tmp 	(cpu->tmp)
+#define _tmp2 	(cpu->tmp2)
 
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)
