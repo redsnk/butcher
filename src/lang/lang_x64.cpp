@@ -15,7 +15,7 @@ const char *Lang_x64::ptr(cs_x86_op op) {
         case 16:
             return("dqword");
     }
-    return ("ptr_error");
+    return ("<ptr_error>");
 }
 
 char *Lang_x64::mem_str(csh handle,cs_x86_op op) {
@@ -125,6 +125,7 @@ int bits;
 
 char *Lang_x64::Translate_var (csh handle,cs_insn *insn,char *name,int lset) {
 int bits;
+char buffer[MAX_STR_OP];
 
     //bits = insn->detail->x86.addr_size * 8;
     if (!strcmp(name,"op0")) {
@@ -388,7 +389,8 @@ int bits;
     else if (!strcmp(name,"raddr")) {
         return (strdup("raddr"));
     }
-    return (strdup("<Translate_var error>"));
+    sprintf(buffer,"<Translate_var error '%s'>",name);
+    return (strdup(buffer));
 }
 
 char *Lang_x64::Translate_item (csh handle,cs_insn *insn,_s_item *i,int lset) {
@@ -406,7 +408,7 @@ char *buffer;
         default:
             break;
     }
-    return (strdup("<Translate_item  error>"));
+    return (strdup("<Translate_item _id_item error>"));
 }
 
 char *Lang_x64::Translate (csh handle,char *s, cs_insn *insn,int ends) {

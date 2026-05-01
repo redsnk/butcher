@@ -1321,25 +1321,52 @@ char buffer[256];
             }
             break;
         case X86_INS_ROL:
-            /*
             if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,"op0 = op0 << op1",insn,true);
+                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                    "while tmp2 > 0 do "
+                                                        "tmp = op0;"
+                                                        "tmp = tmp << 1;"
+                                                        "op0 = tmp & mask(bits0);"
+                                                        "tmp = tmp >> bits0;"
+                                                        "op0 = op0 | tmp;"
+                                                        "tmp2 = tmp2 - 1"
+                                                    "endw",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,  "tmp = 1 << (bits0-1);"
-                                                    "cf((op0 & tmp) != 0);"
-                                                    "op0 = op0 << op1",insn,true);
+                // TODO: OF when op1 == 1
+                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                    "while tmp2 > 0 do "
+                                                        "tmp = op0;"
+                                                        "tmp = tmp << 1;"
+                                                        "op0 = tmp & mask(bits0);"
+                                                        "tmp = tmp >> bits0;"
+                                                        "cf(tmp > 0);"
+                                                        "op0 = op0 | tmp;"
+                                                        "tmp2 = tmp2 - 1"
+                                                    "endw",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
                 free(reg0);
             }
-            */
+            break;
+        case X86_INS_RCL:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = NULL;
+            }
+            else {
+                // TODO: OF when op1 == 1
+                reg0 = NULL;
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
             break;
         case X86_INS_MUL:
             // TODO: ax = al * mem
-            //reg0 = lang_x64->Translate(handle,"rax = rax * op0; rdx = 0",insn,true);
             reg0 = lang_x64->Translate(handle,  "tmp = rax;"
                                                 "tmp = tmp * op0;"
                                                 "rax = tmp & mask(bits0);"
@@ -1403,6 +1430,7 @@ char buffer[256];
             }
             break;
         case X86_INS_CDQ:
+            // TODO: ??
             PrintLine(insn,1,"");
             num++;
             break;
