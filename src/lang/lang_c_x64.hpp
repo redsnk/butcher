@@ -8,6 +8,7 @@ class Lang_C_x64 : public Lang_x64 {
     void PrintHeader(Code *c);
     void PrintAnonCalls(Code *c);
     void PrintMainOpen(Code *c);
+    void PrintLoadError(const char *code,int num,const char *msg);
     void PrintMainClose(Code *c,char *name);
     void PrintSubMem(Code *c,int num);
     void PrintFuncHeaderName(Code *c,int num,char *name);

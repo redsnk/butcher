@@ -72,9 +72,10 @@ void Lang_Py_x64::PrintMainOpen(Code *c) {
 
 #define PY_FOOTER_3 "\
     # Insert code here ...\n\
+    return %i\n\
 \n\
 if __name__==\"__main__\":\n\
-    main()\n\
+    sys.exit(main())\n\
 \n"
 
 void Lang_Py_x64::PrintMainClose(Code *c,char *name) {
@@ -86,7 +87,7 @@ void Lang_Py_x64::PrintMainClose(Code *c,char *name) {
     else {
         printf(PY_FOOTER_F,c->ep);
     }
-    printf(PY_FOOTER_3);
+    printf(PY_FOOTER_3,ERR_CODE_OK);
 }
 
 void Lang_Py_x64::PrintSubMem(Code *c,int num) {
@@ -154,6 +155,10 @@ void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
 
 void Lang_Py_x64::PrintSubCodeSep(void) {
     printf("    # --------------------------------------------------------------\n");
+}
+
+void Lang_Py_x64::PrintLoadError(const char *code,int num,const char *msg) {
+    // TODO:
 }
 
 char *Lang_Py_x64::reg_name(csh handle,int id_reg) {

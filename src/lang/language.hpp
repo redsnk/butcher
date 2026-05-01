@@ -11,6 +11,9 @@ enum Languages {
   PYTHON,
 };
 
+
+#define ERR_CODE_OK         0
+
 #define MAX_STR_OP     (1024*5)
 
 class Language {
@@ -72,6 +75,7 @@ class Language {
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintAnonCalls(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;
+    virtual void PrintLoadError(const char *code,int num,const char *msg) = 0;
     virtual void PrintMainClose(Code *c,char *name) = 0;
     virtual void PrintSubMem(Code *c,int num) = 0;
     virtual void PrintFuncHeaderName(Code *c,int num,char *name) = 0;

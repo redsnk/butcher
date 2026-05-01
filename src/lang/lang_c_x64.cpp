@@ -84,7 +84,7 @@ void Lang_C_x64::PrintMainOpen(Code *c) {
 #define C_FOOTER_3 "\
     /* Insert code here ... */\n\
     end(cpu);\n\
-    return (0);\n\
+    return (%i);\n\
 }\n\
 \n"
 
@@ -96,7 +96,7 @@ void Lang_C_x64::PrintMainClose(Code *c,char *name) {
     else {
         printf(C_FOOTER_F,c->ep);
     }
-    printf(C_FOOTER_3);
+    printf(C_FOOTER_3,ERR_CODE_OK);
 }
 
 void Lang_C_x64::PrintSubMem(Code *c,int num) {
@@ -162,6 +162,12 @@ void Lang_C_x64::PrintFuncFooter(Code *c,int num) {
 
 void Lang_C_x64::PrintSubCodeSep(void) {
     printf("    // --------------------------------------------------------------\n");
+}
+
+void Lang_C_x64::PrintLoadError(const char *code,int num,const char *msg) {
+    printf("    cpu->errors[cpu->num_errors].code = \"%s\";\n",code);
+    printf("    cpu->errors[cpu->num_errors].num = %i;\n",num);
+    printf("    cpu->errors[cpu->num_errors++].msg = \"%s\";\n",msg);
 }
 
 char *Lang_C_x64::reg_name(csh handle,int id_reg) {

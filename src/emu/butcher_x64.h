@@ -110,6 +110,14 @@ struct _mem {
 	uint8_t *mem;
 };
 
+struct _error {
+	const char *code;
+	int num;
+	const char *msg;
+};
+
+#define MAX_ERRORS	20
+
 struct _cpu {
     union _reg rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;
 	union _xmm xmm0,xmm1,xmm2,xmm3,xmm4,xmm5,xmm6,xmm7;
@@ -119,6 +127,8 @@ struct _cpu {
 	int mem_count;
 	__int128_t tmp;
 	__int128_t tmp2;
+	struct _error errors[MAX_ERRORS];
+	int num_errors;
 };
 
 // 64
@@ -306,6 +316,7 @@ void end(struct _cpu *cpu);
 void panic(const char *format,...);
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
+//void panic (int num,char *msg);
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func);
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);

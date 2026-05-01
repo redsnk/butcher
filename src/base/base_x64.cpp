@@ -1939,6 +1939,11 @@ char *name;
     printf("\n");
     // Main function
     lang_x64->PrintMainOpen(c);
+    // Load Errors
+    lang_x64->PrintLoadError("OPCODE",1,"Opcode not defined.");
+    lang_x64->PrintLoadError("MEMORY",2,"Memory address not found.");
+    lang_x64->PrintLoadError("CALL",3,"Call address not found.");
+    lang_x64->PrintLoadError("IAT",4,"Call to an external library function not implemented.");
     // Load Submemories
     for (int n=0;n<c->submem_count;n++) {
         lang_x64->PrintSubMem(c,n);
