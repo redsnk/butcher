@@ -576,13 +576,15 @@ class _cpu:
 
     def idiv(self,a,b):
         return int(a/b)
-        
+
+    '''
     def pow(self,b,p):
         r = 1
         for n in range(p):
             r = r * p
         return r
-
+    '''
+    
     def pshufd(self,op1,op2):
         #l = c_uint64(0).value
         #h = c_uint64(0).value

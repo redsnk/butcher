@@ -80,7 +80,7 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *F_FALSE(void);
     const char *F_PUSH(void);
     const char *F_POP(void);
-    const char *F_POW(void);
+    //const char *F_POW(void);
     const char *E_IFTHENELSE(void);
     const char *E_IFTHEN(void);
     const char *F_NOT(void);

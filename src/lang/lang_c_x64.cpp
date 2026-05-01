@@ -420,10 +420,11 @@ const char *Lang_C_x64::F_PUSH(void) {
 const char *Lang_C_x64::F_POP(void) {
     return ("pop(cpu,");
 }
-
+/*
 const char *Lang_C_x64::F_POW(void) {
     return ("Pow(");
 }
+*/
 
 const char *Lang_C_x64::E_IFTHENELSE(void) {
     return ("if(%s) {\n%s;\n}\nelse {\n%s;\n}");

@@ -569,6 +569,7 @@ uint64_t ret=0;
 	return (ret);
 }
 
+/*
 uint64_t Pow(uint64_t b,uint64_t p) {
 uint64_t n,r;
 
@@ -578,6 +579,7 @@ uint64_t n,r;
 	}
 	return (r);
 }
+*/
 
 uint64_t neg(uint64_t b,uint64_t p) {
 	return ((~p)+(uint64_t)1);

@@ -320,9 +320,11 @@ char buffer[MAX_STR_OP];
     else if (!strcmp(name,"pop")) {
         return (strdup(F_POP()));
     }
+    /*
     else if (!strcmp(name,"pow")) {
         return (strdup(F_POW()));
     }
+    */
     else if (!strcmp(name,"not")) {
         return (strdup(F_NOT()));
     }

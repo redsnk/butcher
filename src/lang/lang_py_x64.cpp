@@ -402,11 +402,11 @@ const char *Lang_Py_x64::F_PUSH(void) {
 const char *Lang_Py_x64::F_POP(void) {
     return ("cpu.pop(");
 }
-
+/*
 const char *Lang_Py_x64::F_POW(void) {
     return ("cpu.pow(");
 }
-
+*/
 const char *Lang_Py_x64::E_IFTHENELSE(void) {
     return ("if %s:\n%s\nelse:\n%s");
 }

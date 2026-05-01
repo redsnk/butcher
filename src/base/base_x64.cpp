@@ -1292,13 +1292,17 @@ char buffer[256];
             }
             break;
         case X86_INS_SAR:
-            if (FlagsNotUsed(sc,num)) {
-                reg0 = lang_x64->Translate(handle,"sop0 = sdiv(sop0,pow(2,op1))",insn,true);
-            }
-            else {
-                //reg0 = lang_x64->Translate(handle,"sop0 = sdiv(sop0,pow(2,op1))",insn,true);
-                reg0 = NULL;
-            }
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "tmp = op0 >> (bits0-1);"
+                                                "tmp = tmp << (bits0-1);"
+                                                "while tmp2 > 0 do "
+                                                    "cf((op0 & 1) > 0);"
+                                                    "op0 = op0 >> 1;"
+                                                    "op0 = op0 | tmp;"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw;"
+                                                "zf(op0 == 0);"
+                                                "sf(sop0 < 0)",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1306,13 +1310,22 @@ char buffer[256];
             }
             break;    
         case X86_INS_SHL:
+        case X86_INS_SAL:
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,"op0 = op0 << op1",insn,true);
             }
             else {
-                reg0 = lang_x64->Translate(handle,  "tmp = 1 << (bits0-1);"
-                                                    "cf((op0 & tmp) != 0);"
-                                                    "op0 = op0 << op1",insn,true);
+                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                    "while tmp2 > 0 do "
+                                                        "tmp = op0;"
+                                                        "tmp = tmp << 1;"
+                                                        "op0 = tmp & mask(bits0);"
+                                                        "tmp = tmp >> bits0;"
+                                                        "cf(tmp > 0);"
+                                                        "tmp2 = tmp2 - 1"
+                                                    "endw;"
+                                                    "zf(op0 == 0);"
+                                                    "sf(sop0 < 0)",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);

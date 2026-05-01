@@ -43,7 +43,7 @@ class Language {
     virtual const char *F_FALSE(void) = 0;
     virtual const char *F_PUSH(void) = 0;
     virtual const char *F_POP(void) = 0;
-    virtual const char *F_POW(void) = 0;
+    //virtual const char *F_POW(void) = 0;
     virtual const char *E_IFTHENELSE(void) = 0;
     virtual const char *E_IFTHEN(void) = 0;
     virtual const char *F_NOT(void) = 0;
