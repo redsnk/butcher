@@ -486,15 +486,21 @@ int n;
                 n -= 2;
                 break;
             case _id_item::JOIN:
-                it1 = Translate_item(handle,insn,&e->items[n-2],false);
-                it2 = Translate_item(handle,insn,&e->items[n-1],false);
-                sprintf(tmp,"%s%s\n%s",it1,ENDS(),it2);
-                free(it2);
-                free(it1);
-                e->res_item(n,tmp);
-                e->del_item(n-2);
-                e->del_item(n-2);
-                n -= 2;
+                if (n <= 1) {
+                    e->del_item(n);
+                    n -= 1;
+                }
+                else {
+                    it1 = Translate_item(handle,insn,&e->items[n-2],false);
+                    it2 = Translate_item(handle,insn,&e->items[n-1],false);
+                    sprintf(tmp,"%s%s\n%s",it1,ENDS(),it2);
+                    free(it2);
+                    free(it1);
+                    e->res_item(n,tmp);
+                    e->del_item(n-2);
+                    e->del_item(n-2);
+                    n -= 2;
+                }
                 break;
             case _id_item::ASSIGN:
                 it1 = Translate_var(handle,insn,e->items[n].item.name,true);
