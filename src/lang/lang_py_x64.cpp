@@ -5,6 +5,7 @@ Lang_Py_x64::Lang_Py_x64(int b) {
 }
 
 #define PY_HEADER "\
+import sys\n\
 from butcher_x64 import _cpu\n\
 from goto import with_goto\n\
 \n"
@@ -39,7 +40,7 @@ int count = 0;
     }
     if (count) {
         printf("    else:\n");
-        printf("        cpu.panic(\"" ANON_CALL ": \"+hex(addr))\n");
+        printf("        cpu.panic(cpu,\"CALL\",\"0x%%llx\",addr)\n");
         //printf("    }\n");
     }
     //printf("}\n");
@@ -146,7 +147,7 @@ void Lang_Py_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
 void Lang_Py_x64::PrintAnonJmpEnd(void) {
     printf("    if anon == raddr:\n");
     printf("        return\n");
-    printf("    panic(\"AnonJmp\")\n");
+    printf("    cpu.panic(\"JMP\",\"0x%%llx\",raddr)\n");
 }
 
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
@@ -158,7 +159,7 @@ void Lang_Py_x64::PrintSubCodeSep(void) {
 }
 
 void Lang_Py_x64::PrintLoadError(const char *code,int num,const char *msg) {
-    // TODO:
+    printf("    cpu.errors[\"%s\"] = [%i,\"%s\"]\n",code,num,msg);
 }
 
 char *Lang_Py_x64::reg_name(csh handle,int id_reg) {

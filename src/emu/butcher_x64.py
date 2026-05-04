@@ -92,6 +92,10 @@ class _eflags(Structure):
                 ("ZF",c_bool),
                 ("SF",c_bool)]
 
+class _errors:
+    num = 0
+    msg = ""
+
 class _cpu:
     b32 = False
 
@@ -128,13 +132,25 @@ class _cpu:
     tmp = 0
     tmp2 = 0
 
+    errors =  dict()
+
     EXTRA_MEM = 1024
 
+    '''
     def panic(self,text):
         for line in traceback.format_stack():
             print(line.strip())
         print("PANIC: "+text)
         sys.exit(0)
+    '''
+
+    def panic(self,code,info):
+        if code in self.errors:
+            a = self.errors[code]
+        else:
+            a = self.error["DEFAULT"]
+        sys.stderr.write("ERROR|"+str(a[0])+"|"+info+"|"+a[1]+"\n")
+        sys.exit(a[0])
 
     def locate_mem(self,addr):
         for n in range(len(self.mems)):
@@ -199,7 +215,7 @@ class _cpu:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
                 return m.mem[start:start+size]
-        self.panic("get_mem error: "+hex(addr)+":"+str(size))
+        self.panic("GETMEM",hex(addr)+":"+str(size))
 
     def get_mem_dump(self,addr,size):
         n = self.locate_addr_mem(addr)
@@ -221,7 +237,7 @@ class _cpu:
                 post = m.mem[start+size:]
                 m.mem = pre+data+post
                 return
-        self.panic("set_mem error: "+hex(addr)+":"+str(len(addr)))
+        self.panic("SETMEM",hex(addr)+":"+str(len(addr)))
     
     '''
     void del_mem(struct _cpu *cpu,int n) {
@@ -316,20 +332,20 @@ class _cpu:
                 # cpu->mems[n].size = size;
                 self.mems[n].size = size
                 return addr
-        self.panic("realloc_mem error: "+hex(addr)+":"+str(len(addr)))
+        self.panic("DEFAULT","realloc_mem error: "+hex(addr)+":"+str(len(addr)))
 
     def free_mem (self,addr):
         n = self.locate_mem(addr)
         if n >= 0:
             self.del_mem(n)
         else:
-            self.panic("free_mem error: "+hex(addr))
+            self.panic("DEFAULT","free_mem error: "+hex(addr))
 
     def call_from_iat (self,lib,func):
-        self.panic("call_from_iat not implemented - "+func)
+        self.panic("IAT","call_from_iat not implemented - "+func)
 
     def jmp_from_iat (self,lib,func):
-        self.panic("jmp_from_iat not implemented - "+func)
+        self.panic("IAT","jmp_from_iat not implemented - "+func)
 
     def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)
