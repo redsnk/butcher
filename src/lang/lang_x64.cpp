@@ -70,20 +70,39 @@ char *str;
             free(str);
             return (strdup(buffer));
         case X86_OP_IMM:
-            switch (bits) {
-                case 8:
-                    sprintf(buffer,"0x%" PRIx8,(uint8_t)op.imm);
-                    break;
-                case 16:
-                    sprintf(buffer,"0x%" PRIx16,(uint16_t)op.imm);
-                    break;
-                case 32:
-                    sprintf(buffer,"0x%" PRIx32,(uint32_t)op.imm);
-                    break;
-                case 64:
-                case 128:
-                    sprintf(buffer,"0x%" PRIx64,(uint64_t) op.imm);
-                    break;
+            if (!sign) {
+                switch (bits) {
+                    case 8:
+                        sprintf(buffer,"0x%" PRIx8,(uint8_t)op.imm);
+                        break;
+                    case 16:
+                        sprintf(buffer,"0x%" PRIx16,(uint16_t)op.imm);
+                        break;
+                    case 32:
+                        sprintf(buffer,"0x%" PRIx32,(uint32_t)op.imm);
+                        break;
+                    case 64:
+                    case 128:
+                        sprintf(buffer,"0x%" PRIx64,(uint64_t) op.imm);
+                        break;
+                }
+            }
+            else {
+                switch (bits) {
+                    case 8:
+                        sprintf(buffer,"(%" PRIi8 ")",(int8_t)op.imm);
+                        break;
+                    case 16:
+                        sprintf(buffer,"(%" PRIi16 ")",(int16_t)op.imm);
+                        break;
+                    case 32:
+                        sprintf(buffer,"(%" PRIi32 ")",(int32_t)op.imm);
+                        break;
+                    case 64:
+                    case 128:
+                        sprintf(buffer,"(%" PRIi64 ")",(int64_t) op.imm);
+                        break;
+                }
             }
             return (strdup(buffer));
     }
