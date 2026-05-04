@@ -1943,10 +1943,13 @@ char *name;
     // Main function
     lang_x64->PrintMainOpen(c);
     // Load Errors
-    lang_x64->PrintLoadError("OPCODE",1,"Opcode not defined.");
-    lang_x64->PrintLoadError("MEMORY",2,"Memory address not found.");
-    lang_x64->PrintLoadError("CALL",3,"Call address not found.");
-    lang_x64->PrintLoadError("IAT",4,"Call to an external library function not implemented.");
+    lang_x64->PrintLoadError("OP",1,"Opcode not implemented.");
+    lang_x64->PrintLoadError("GETMEM",2,"Read memory address not found.");
+    lang_x64->PrintLoadError("SETMEM",3,"Set memory address not found.");
+    lang_x64->PrintLoadError("CALL",4,"Call address not found.");
+    lang_x64->PrintLoadError("JMP",5,"Jmp address not found.");
+    lang_x64->PrintLoadError("IAT",6,"Call to an external library function not implemented.");
+    lang_x64->PrintLoadError("DEFAULT",255,"Default error, error description not implemented yet.");
     // Load Submemories
     for (int n=0;n<c->submem_count;n++) {
         lang_x64->PrintSubMem(c,n);

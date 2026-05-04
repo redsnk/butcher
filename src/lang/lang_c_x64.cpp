@@ -54,7 +54,7 @@ int count = 0;
     }
     if (count) {
         printf("    else {\n");
-        printf("        panic(\"" ANON_CALL " 0x%%llx\",addr);\n");
+        printf("        panic(cpu,\"CALL\",\"0x%%llx\",addr);\n");
         printf("    }\n");
     }
     printf("}\n");
@@ -153,7 +153,7 @@ void Lang_C_x64::PrintAnonJmpEnd(void) {
     printf("    if (anon == raddr) {\n");
     printf("        return;\n");
     printf("    }\n");
-    printf("    panic(\"AnonJmp\");\n");
+    printf("    panic(cpu,\"JMP\",\"0x%%llx\",raddr);\n");
 }
 
 void Lang_C_x64::PrintFuncFooter(Code *c,int num) {

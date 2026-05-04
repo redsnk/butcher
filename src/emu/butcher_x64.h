@@ -12,7 +12,7 @@
 #define FALSE 	(0)
 #define TRUE	(-1)
 
-#define MAX_PANIC	(256)
+#define MAX_PANIC	(1024*10)
 
 struct _r8 {
 	uint8_t l;
@@ -313,7 +313,8 @@ struct _cpu {
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
 //void panic(char *str1,char *str2);
-void panic(const char *format,...);
+//void panic(const char *format,...);
+void panic(struct _cpu *cpu,const char *code,char *format,...);
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
 //void panic (int num,char *msg);
