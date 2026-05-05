@@ -178,9 +178,20 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
             return(true);
         }
     }
-    else if ((insn[n].size == 2) && !insn[n].bytes[0] && !insn[n].bytes[1]) {
+    if ((insn[n].size == 2) && !insn[n].bytes[0] && !insn[n].bytes[1]) {
         // 0000           add byte [eax], al
         return (true);
+    }
+    switch (insn[n].id) {
+        case X86_INS_IN:
+        case X86_INS_INSB:
+        case X86_INS_INSW:
+        case X86_INS_INSD:
+        case X86_INS_OUT:
+        case X86_INS_OUTSB:
+        case X86_INS_OUTSW:
+        case X86_INS_OUTSD:
+            return (true);
     }
     return (false);
 }
