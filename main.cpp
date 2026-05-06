@@ -6,7 +6,7 @@
 #include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
 
-#define MY_VERSION  "v0.0.5"
+#define MY_VERSION  "v0.0.6"
 
 #define MAX_STR     (1024)
 
@@ -50,30 +50,36 @@ char  *p,*i;
     free(t);
 }
 
-/*
-void parse_ex(char *list) {
-char *t;
-char  *p,*i;
-
-    t = strdup(list);
-    i = p = t;
-    while (*i) {
-        p = strchr(i,',');
-        if (p != NULL) {
-            *p = 0;
-            exclude.insert(string_to_num(i));
-            i = p+1;
-        }
-        else {
-            exclude.insert(string_to_num(i));
-            break;
-        }
-    }
-    free(t);
-}
-*/
-
 #define MAX_BUFFER  (1024)
+
+void parse_file(char *name,std::set<uint64_t> *s) {
+FILE *f;
+char buffer[MAX_BUFFER];
+char *p;
+
+    f = fopen(name,"r");
+    if (f != NULL) {
+        while (fgets(buffer,MAX_BUFFER-1,f) != NULL) {
+            while ((p=strchr(buffer,'\n'))!= NULL) *p = 0;
+            if (strlen(buffer)) {
+                s->insert(string_to_num(buffer));
+            }
+        }
+        fclose(f);
+    }
+    else {
+        printf("Error: parse_file not found '%s'.\n",name);
+    }
+}
+
+void parse_param(char *param,std::set<uint64_t> *s) {
+    if (param[0] == '@') {
+        parse_file(param+1,s);
+    }
+    else {
+        parse_list(param,s);
+    }
+}
 
 void parse_named(char *name) {
 FILE *f;
@@ -162,13 +168,13 @@ usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>
                     - c -> C\n\
                     - p -> Python\n\
 \n\
--m                  => Load ALL memory from the original file at start\n\
--t                  => Include commented traces\n\
--a                  => Include commented asm code\n\
--i[addr,addr,...]   => Include call addresses\n\
--e[addr,addr,...]   => Exclude call addresses\n\
--u[addr,addr,...]   => Include memory addresses\n\
--n[file]            => Add named functions from <file>\n\
+-m                          => Load ALL memory from the original file at start\n\
+-t                          => Include commented traces\n\
+-a                          => Include commented asm code\n\
+-i[addr,addr,...]|@file     => Include call addresses\n\
+-e[addr,addr,...]|@file     => Exclude call addresses\n\
+-u[addr,addr,...]|@file     => Include memory addresses\n\
+-n[file]                    => Add named functions from <file>\n\
 \n";
 
 int main (int argc, char **argv) {
@@ -198,13 +204,13 @@ uint64_t addr;
                     }
                     break;
                 case 'i':
-                    parse_list(optarg,&include);
+                    parse_param(optarg,&include);
                     break;
                 case 'e':
-                    parse_list(optarg,&exclude);
+                    parse_param(optarg,&exclude);
                     break;
                 case 'u':
-                    parse_list(optarg,&incmem);
+                    parse_param(optarg,&incmem);
                     break;
                 case 'n':
                     parse_named(optarg);
