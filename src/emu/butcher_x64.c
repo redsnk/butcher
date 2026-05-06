@@ -428,6 +428,16 @@ char *str,c;
 	return (str);
 }
 
+char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+char *str;
+
+	str = get_unicode_ptr(cpu,addr);
+	if (str != NULL) {
+		printf("'%s'\n",str);
+		free(str);
+	}
+}
+
 void set_z(struct _cpu *cpu,uint64_t i) {
 	cpu->eflags.ZF = (i == 0);
 }
