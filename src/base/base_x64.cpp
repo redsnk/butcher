@@ -546,7 +546,7 @@ char buffer[256];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x9086c7) {
+    if (insn->address == 0x771b36) {
         // test
         n = 0;
     }
@@ -1448,9 +1448,16 @@ char buffer[256];
             }
             break;
         case X86_INS_CDQ:
-            // TODO: ??
-            PrintLine(insn,1,"");
-            num++;
+            reg0 = lang_x64->Translate(handle,  "tmp = s_rax;"
+                                                "rax = tmp&mask(bits);"
+                                                "tmp = tmp >> bits;"
+                                                "rdx = tmp"
+                                                ,insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
             break;
         case X86_INS_LEA:
             /*
