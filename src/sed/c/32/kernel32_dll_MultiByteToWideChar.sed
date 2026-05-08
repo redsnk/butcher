@@ -10,6 +10,7 @@
         set_unicode_ptr(cpu,out,str);\
         free(str);\
     }\
-    _eax = (len+1)*2;\
+    //_eax = (len+1)*2;\
+    _eax = len;\
     _esp += 4*6;\
     return;

@@ -1344,6 +1344,35 @@ char buffer[256];
                 free(reg0);
             }
             break;
+        case X86_INS_SHLD:
+            if (FlagsNotUsed(sc,num)) {
+                reg0 = lang_x64->Translate(handle,  "tmp = op0;"
+                                                    "tmp = tmp << bits0;"
+                                                    "tmp = tmp | op1;"
+                                                    "tmp = tmp << op2;"
+                                                    "op0 = tmp >> bits0",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,  "tmp2 = op2;"
+                                                    "while tmp2 > 0 do "
+                                                        "tmp = op0 >> (bits0-1);"
+                                                        "cf(tmp > 0);"
+                                                        "tmp = op0;"
+                                                        "tmp = tmp << bits0;"
+                                                        "tmp = tmp | op1;"
+                                                        "tmp = tmp << 1;"
+                                                        "op0 = tmp >> bits0;"
+                                                        "tmp2 = tmp2 - 1"
+                                                    "endw;"
+                                                    "zf(op0 == 0);"
+                                                    "sf(sop0 < 0)",insn,true);
+            }
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_ROL:
             // TODO: OF when op1 == 1
             reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"

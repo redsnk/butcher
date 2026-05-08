@@ -209,6 +209,7 @@ char c;
 	n = 0;
 	hex[0] = 0;
 	str[0] = 0;
+	printf("hexdump: %" PRIi64 "(0x%" PRIx64 ") -------\n",off,off);
 	while (i < len) {
 		c = ((char *) addr)[i];
 		sprintf(buffer," %02x",(unsigned char )c);
@@ -233,7 +234,7 @@ char c;
 			hex[0] = 0;
 		}
 	}
-
+	printf("----------------------------\n");
 }
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
