@@ -1455,8 +1455,15 @@ char buffer[256];
             }
             break;
         case X86_INS_DIV:
+            /*
             reg0 = lang_x64->Translate(handle,  "rdx = rax % op0;"
                                                 "rax = rax / op0",insn,true);
+            */
+            reg0 = lang_x64->Translate(handle,  "tmp = rdx;"
+                                                "tmp = tmp << bits0;"
+                                                "tmp = tmp | rax;"
+                                                "rdx = tmp % op0;"
+                                                "rax = tmp / op0",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1464,11 +1471,18 @@ char buffer[256];
             }
             break;
         case X86_INS_IDIV:
+            /*
             reg0 = lang_x64->Translate(handle,  "s_rdx = s_rax % sop0;"
                                                 // TODO: delete idiv
                                                 "s_rax = sdiv(s_rax,sop0)"
                                                 //"s_rax = s_rax / sop0"
                                                 ,insn,true);
+            */
+            reg0 = lang_x64->Translate(handle,  "tmp = rdx;"
+                                                "tmp = tmp << bits0;"
+                                                "tmp = tmp | rax;"
+                                                "s_rdx = tmp % sop0;"
+                                                "s_rax = tmp / sop0",insn,true);
             //reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
