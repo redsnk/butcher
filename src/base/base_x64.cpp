@@ -1477,10 +1477,18 @@ char buffer[256];
             }
             break;
         case X86_INS_CDQ:
+            /*
             reg0 = lang_x64->Translate(handle,  "tmp = s_rax;"
                                                 "rax = tmp&mask(bits);"
                                                 "tmp = tmp >> bits;"
                                                 "rdx = tmp"
+                                                ,insn,true);
+            */
+            reg0 = lang_x64->Translate(handle,  "if s_rax < 0 then "
+                                                    "rdx = mask(bits) "
+                                                "else "
+                                                    "rdx = 0 "
+                                                "fi"
                                                 ,insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);

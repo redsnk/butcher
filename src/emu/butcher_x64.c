@@ -175,6 +175,11 @@ uint64_t last;
 }
 
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
+	/*
+	if ((addr <= 0x1faa008) && ((addr+size)>0x1faa008)) {
+		cpu->tmp2 = 0;
+	}
+	*/
 	for (int n=0;n<cpu->mem_count;n++) {
 		if ((addr >= cpu->mems[n].addr) && ((addr+size) <= (cpu->mems[n].addr+cpu->mems[n].size))) {
 			int o = addr - cpu->mems[n].addr;
