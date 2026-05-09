@@ -1755,7 +1755,11 @@ char buffer[256];
             break;
             break;
         case X86_INS_FLD:
-            reg0 = lang_x64->Translate(handle,"pushfpu(utod(op0))",insn,true);
+            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                    "pushfpu(utof(op0)) "
+                                                "else "
+                                                    "pushfpu(utod(op0)) "
+                                                "fi",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -1773,7 +1777,11 @@ char buffer[256];
             num++;
             break;
         case X86_INS_FSTP:
-            reg0 = lang_x64->Translate(handle,"op0 = dtou(popfpu())",insn,true);
+            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                    "op0 = ftou(popfpu()) "
+                                                "else "
+                                                    "op0 = dtou(popfpu()) "
+                                                "fi",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -1786,7 +1794,11 @@ char buffer[256];
             break;
         case X86_INS_FADD:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 + utod(op0)",insn,true);
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "st0 = st0 + utof(op0) "
+                                                    "else "
+                                                        "st0 = st0 + utod(op0) "
+                                                    "fi",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -1794,7 +1806,11 @@ char buffer[256];
             break;
         case X86_INS_FSUB:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 - utod(op0)",insn,true);
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "st0 = st0 - utof(op0) "
+                                                    "else "
+                                                        "st0 = st0 - utod(op0) "
+                                                    "fi",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -1802,7 +1818,11 @@ char buffer[256];
             break;
         case X86_INS_FDIV:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 / utod(op0)",insn,true);
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "st0 = st0 / utof(op0) "
+                                                    "else "
+                                                        "st0 = st0 / utod(op0) "
+                                                    "fi",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -1810,7 +1830,11 @@ char buffer[256];
             break;
         case X86_INS_FMUL:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,"st0 = st0 * op0",insn,true);
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "st0 = st0 * utof(op0) "
+                                                    "else "
+                                                        "st0 = st0 * utod(op0) "
+                                                    "fi",insn,true);
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;

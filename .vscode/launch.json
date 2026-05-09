@@ -16,7 +16,7 @@
             //"args": ["-lc","-t","-a","-m","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x044FC7AC"],
             // ** "args": ["-lc","-t","-a","-u0x435ae1","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x044FC7AC"],
             //"args": ["-lc","-a","-u0x404d95,0xbd8e0c","-n/home/alex/src/Deloitte/grando/gsites/cobrakai/14/GbXTIGDHXQfFhJLfTL.txt","/home/alex/src/Deloitte/grando/gsites/cobrakai/14/GbXTIGDHXQfFhJLfTL.qpi","0x007608A0"],
-            "args": ["-lc","-a","-t","-m","-i@/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/dec_calls.txt","-n/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/VideoGlowProxppxttEmberPulse.txt","/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/VideoGlowProxppxttEmberPulse.exe","0x00A15C6C"],
+            "args": ["-lc","-a","-t","-m","-i@/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/dec_calls.txt","-n/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/VideoGlowProxppxttEmberPulse.txt","/home/alex/src/Deloitte/grando/gsites/cobrakai/18/robado/VideoGlowProxppxttEmberPulse.exe","0x00CF88D0"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

@@ -40,7 +40,9 @@ class Lang_x64 : public Language {
     virtual const char *E_TMP(void) = 0;
     virtual const char *E_TMP2(void) = 0;
     virtual const char *F_UTOD(void) = 0;
+    virtual const char *F_UTOF(void) = 0;
     virtual const char *F_DTOU(void) = 0;
+    virtual const char *F_FTOU(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

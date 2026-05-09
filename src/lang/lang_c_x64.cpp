@@ -526,3 +526,11 @@ const char *Lang_C_x64::F_UTOD(void) {
 const char *Lang_C_x64::F_DTOU(void) {
      return ("dtou(");
 }
+
+const char *Lang_C_x64::F_UTOF(void) {
+    return ("utof(");
+}
+
+const char *Lang_C_x64::F_FTOU(void) {
+     return ("ftou(");
+}

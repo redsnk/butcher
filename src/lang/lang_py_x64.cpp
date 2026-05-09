@@ -508,3 +508,11 @@ const char *Lang_Py_x64::F_UTOD(void) {
 const char *Lang_Py_x64::F_DTOU(void) {
      return ("cpu.dtou(");
 }
+
+const char *Lang_Py_x64::F_UTOF(void) {
+    return ("cpu.utof(");
+}
+
+const char *Lang_Py_x64::F_FTOU(void) {
+     return ("cpu.ftou(");
+}

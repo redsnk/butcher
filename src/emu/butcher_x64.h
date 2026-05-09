@@ -96,6 +96,7 @@ union _eflags {
 union _freg {
 	uint64_t u;
 	double d;
+	float f;
 };
 
 struct _fpu {
@@ -362,6 +363,8 @@ double popfpu(struct _cpu *cpu);
 uint64_t mask(int bits);
 double utod(uint64_t v);
 uint64_t dtou(double v);
+float utof(uint64_t v);
+uint64_t ftou(float v);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);

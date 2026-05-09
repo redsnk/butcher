@@ -102,6 +102,8 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *F_MASK(void);
     const char *F_UTOD(void);
     const char *F_DTOU(void);
+    const char *F_UTOF(void);
+    const char *F_FTOU(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);

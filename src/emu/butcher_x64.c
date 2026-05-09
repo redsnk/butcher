@@ -672,10 +672,24 @@ union _freg c;
 	return (c.d);
 }
 
+float utof(uint64_t v) {
+union _freg c;
+
+	c.u = v;
+	return (c.f);
+}
+
 uint64_t dtou(double v) {
 union _freg c;
 
 	c.d = v;
+	return (c.u);
+}
+
+uint64_t ftou(float v) {
+union _freg c;
+
+	c.f = v;
 	return (c.u);
 }
 
