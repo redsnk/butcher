@@ -155,7 +155,7 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 		}
 	}
 	//panic("get_mem error: 0x%" PRIx64 ":%li",addr,size);
-	panic(cpu,"GETMEM","0x%" PRIx64 ":%li",addr,size);
+	panic(cpu,"GETMEM","0x%" PRIx64,addr);
 }
 
 int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
@@ -188,7 +188,7 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 		}
 	}
 	//panic("set_mem error: 0x%" PRIx64 ":%li",addr,size);
-	panic(cpu,"SETMEM","0x%" PRIx64 ":%li",addr,size);
+	panic(cpu,"SETMEM","0x%" PRIx64,addr);
 }
 
 void del_mem(struct _cpu *cpu,int n) {

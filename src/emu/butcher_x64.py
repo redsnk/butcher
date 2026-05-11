@@ -215,7 +215,7 @@ class _cpu:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
                 return m.mem[start:start+size]
-        self.panic("GETMEM",hex(addr)+":"+str(size))
+        self.panic("GETMEM",hex(addr))
 
     def get_mem_dump(self,addr,size):
         n = self.locate_addr_mem(addr)
@@ -237,7 +237,7 @@ class _cpu:
                 post = m.mem[start+size:]
                 m.mem = pre+data+post
                 return
-        self.panic("SETMEM",hex(addr)+":"+str(len(addr)))
+        self.panic("SETMEM",hex(addr))
     
     '''
     void del_mem(struct _cpu *cpu,int n) {
