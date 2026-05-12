@@ -400,5 +400,6 @@ void free_mem (struct _cpu *cpu,uint64_t addr);
 void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str);
 char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr);
 char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr);
+uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str);
 
 #endif // _BUTCHER_X64_H

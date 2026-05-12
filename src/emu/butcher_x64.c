@@ -444,6 +444,16 @@ char *str;
 	}
 }
 
+uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str) {
+uint64_t m;
+
+	m = alloc_mem(cpu,8+(strlen(str)+1)*2);
+    _set_dword_ptr(m,0xffffffff);
+    _set_dword_ptr(m+4,strlen(str));
+    set_unicode_ptr(cpu,m+8,str);
+	return (m+8);
+}
+
 void set_z(struct _cpu *cpu,uint64_t i) {
 	cpu->eflags.ZF = (i == 0);
 }
