@@ -4,7 +4,7 @@
     uint32_t out = _get_dword_ptr(_esp+16);\
     uint32_t olen = _get_dword_ptr(_esp+20);\
     if (olen) {\
-        char *p = get_unicode_ptr(cpu,in);\
+        char *p = get_unicode_ptr(cpu,in,len);\
         set_mem(cpu,out,len,p);\
         free(p);\
     }\

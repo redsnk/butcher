@@ -414,11 +414,11 @@ int n;
 	}
 }
 
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len) {
 int n;
 char *str,c;
 
-	str = (char *) malloc(1024);
+	str = (char *) malloc(1024*5);
 	n = 0;
 	while (TRUE) {
 		c = byte_ptr(cpu,addr);
@@ -429,6 +429,7 @@ char *str,c;
 		else {
 			break;
 		}
+		if ((len) && (n == len)) break;
 	}
 	str[n] = 0;
 	return (str);
@@ -437,7 +438,7 @@ char *str,c;
 char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
 char *str;
 
-	str = get_unicode_ptr(cpu,addr);
+	str = get_unicode_ptr(cpu,addr,0);
 	if (str != NULL) {
 		printf("'%s'\n",str);
 		free(str);

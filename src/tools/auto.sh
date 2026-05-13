@@ -19,7 +19,7 @@ do
                 if [ "$result" -ne 0 ]; then
                     echo "$info" >> $3
                 else
-                    echo "repeated"
+                    echo "repeated."
                     exit
                 fi
                 ;;
@@ -30,7 +30,7 @@ do
 				if [ "$result" -ne 0 ]; then
 					echo "$info" >> $2
 				else
-					echo "repeated"
+					echo "repeated."
 					exit
 				fi
 				;;
@@ -38,5 +38,8 @@ do
 				exit
 				;;
 		esac
+	else
+		echo "done."
+		exit
 	fi
 done

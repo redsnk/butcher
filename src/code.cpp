@@ -54,13 +54,14 @@ void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
     /*
     for(int n=0;n<submem_count;n++) {
         if ((submems[n].addr >= address) && ((submems[n].addr+submems[n].size) <= (address+size))) {
+            // Submem inside another.
             return;
         }
     }
     */
     // TODO: DelSubMem
     // TODO: PackSubMem
-    /*
+    /*  
     end = address+size-1;
     for(int n=0;n<submem_count;n++) {
         saddress = submems[n].addr;

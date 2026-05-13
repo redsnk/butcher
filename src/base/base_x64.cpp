@@ -393,7 +393,7 @@ int n,b;
                         *count = read;
                         return (true);
                     }
-                    free(mem);
+                    free(*mem);
                 }
             }
             else if((insn->detail->x86.operands[n].mem.base == X86_REG_INVALID) && (insn->detail->x86.operands[n].mem.index == X86_REG_INVALID)) {
@@ -407,8 +407,21 @@ int n,b;
                         *count = read;
                         return (true);
                     }
-                    free(mem);
+                    free(*mem);
                 }
+            }
+            else if((insn->detail->x86.operands[n].mem.base == X86_REG_INVALID) && (insn->detail->x86.operands[n].mem.index != X86_REG_INVALID)) {
+                //if ((insn->id != X86_INS_JMP) && (insn->id != X86_INS_LEA)) {
+                // xor		esi, dword ptr [edi*4 + 0x1fd2534]
+                b = insn->detail->x86.operands[0].size;
+                *addr = insn->detail->x86.operands[n].mem.disp;
+                *mem = arch->GetMemory(*addr,1024*b,&read);
+                if (*mem != NULL) {
+                    *count = read;
+                    return (true);
+                }
+                free(*mem);
+                //}
             }
         }
     }

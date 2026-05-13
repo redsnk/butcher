@@ -398,7 +398,7 @@ uint64_t alloc_mem (struct _cpu *cpu,int size);
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
 void free_mem (struct _cpu *cpu,uint64_t addr);
 void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str);
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr);
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len);
 char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str);
 
