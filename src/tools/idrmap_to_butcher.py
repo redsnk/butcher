@@ -28,5 +28,5 @@ for line in file:
 					break
 				count += 1
 		names.append(name)
-		print("0x"+hex(int(offset,16)+base)+","+name)
+		print(hex(int(offset,16)+base)+","+name)
 file.close()
