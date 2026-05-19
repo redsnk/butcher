@@ -1,5 +1,21 @@
 #include "language.hpp"
 
+void Language::PrintF(const char *format,...) {
+char buffer[MAX_PRINTF];
+int n;
+
+    va_list argptr;
+    va_start(argptr, format);
+    //vsprintf(buffer,format, argptr);
+    n = vsnprintf(buffer,MAX_PRINTF,format,argptr);
+    if (n == (MAX_PRINTF-1)) {
+        fprintf(stderr,"Error: PrintF/vsnprintf not enough\n");
+        exit(0);
+    }
+    va_end(argptr);
+    fwrite(buffer,1,strlen(buffer),stdout);
+}
+
 char *Language::Indent(char *str) {
 char *p,*n;
 char *res;

@@ -15,6 +15,7 @@ enum Languages {
 #define ERR_CODE_OK         0
 
 #define MAX_STR_OP     (1024*5)
+#define MAX_PRINTF     (1024*1024)
 
 class Language {
     public:
@@ -85,6 +86,7 @@ class Language {
 
     virtual char *Translate (csh handle,char *s, cs_insn *insn,int ends) = 0;
 
+    void PrintF(const char *format,...);
     char *Indent(char *str);
     Emit *Parse(char *str);
 };

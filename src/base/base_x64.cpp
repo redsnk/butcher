@@ -437,7 +437,8 @@ char *tmp;
 
     va_list argptr;
     va_start(argptr, format);
-    vsprintf(buffer,format, argptr);
+    //vsprintf(buffer,format, argptr);
+    vsnprintf(buffer,MAX_STR_OP,format,argptr);
     va_end(argptr);
     
     strcpy(out,buffer);
@@ -461,11 +462,11 @@ char *tmp;
     
     //while (strlen(buffer) < lang_x64->COMM_SEP) strcat(buffer," ");
     if ((insn == NULL) || !lasm) {
-        printf("%s\n", out);
+        lang_x64->PrintF("%s\n", out);
     }
     else {
         while (strlen(p) < lang_x64->COMM_SEP()) strcat(p," ");
-        printf("%s%s 0x%llx:\t%s\t\t%s\n", out, lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
+        lang_x64->PrintF("%s%s 0x%llx:\t%s\t\t%s\n", out, lang_x64->COMM(), insn->address, insn->mnemonic,insn->op_str);
     }
 }
 
@@ -528,7 +529,7 @@ char *name;
         //    printf(lang_x64->E_LABEL(),addr);
         //}
         name = GetLabel(addr);
-        printf(lang_x64->E_LABEL(),name);
+        lang_x64->PrintF(lang_x64->E_LABEL(),name);
         free (name);
     }
 }
@@ -1961,7 +1962,7 @@ char *name;
         for (int n=0;n<X86_REG_ENDING;n++) {
             //if ((n != X86_REG_ESP) && (n != X86_REG_RSP)) {
                 if (c->subcodes[num].regs[n] == REG_USED) {
-                    printf("%s %s\n",lang_x64->COMM(),lang_x64->reg_name(handle,n));
+                    lang_x64->PrintF("%s %s\n",lang_x64->COMM(),lang_x64->reg_name(handle,n));
                     inputs++;
                 }
             //}
@@ -1971,13 +1972,13 @@ char *name;
             int b = (arch->Is32()?4:8);
             char *sp = lang_x64->reg_name(handle,(arch->Is32()?X86_REG_EBP:X86_REG_RBP));
             for (int n=0;n<(c->subcodes[num].ret_bytes/b);n++) {
-                printf("%s [%s+%li]\n",lang_x64->COMM(),sp,(n+1)*b);
+                lang_x64->PrintF("%s [%s+%li]\n",lang_x64->COMM(),sp,(n+1)*b);
                 inputs++;
             }
             free(sp);
         }
         if (inputs == 0) {
-        printf("%s none.\n",lang_x64->COMM());
+            lang_x64->PrintF("%s none.\n",lang_x64->COMM());
         }
     }
     // Anno jmp var
@@ -2009,7 +2010,7 @@ char *name;
     // Anon jmps
     if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
         lang_x64->PrintSubCodeSep();
-        printf(lang_x64->E_LABEL_ANON());
+        lang_x64->PrintF(lang_x64->E_LABEL_ANON());
         for (int n=0;n<c->subcodes[num].l_count;n++) {
             uint64_t addr = c->subcodes[num].labels[n];
             name = GetLabel(addr);
@@ -2037,7 +2038,7 @@ char *name;
     // Header
     lang_x64->PrintHeader(c);
     // Code
-    printf("\n");
+    lang_x64->PrintF("\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             PrintSubCode(c,n);
@@ -2045,7 +2046,7 @@ char *name;
     }
     // Anonymous Calls
     lang_x64->PrintAnonCalls(c);
-    printf("\n");
+    lang_x64->PrintF("\n");
     // Main function
     lang_x64->PrintMainOpen(c);
     // Load Errors
@@ -2070,7 +2071,7 @@ char *name;
             free(sections);
         }
     }
-    printf(lang_x64->E_STACK_INIT(),lang_x64->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
+    lang_x64->PrintF(lang_x64->E_STACK_INIT(),lang_x64->reg_name(handle,X86_REG_RSP),STACK_ADDR+(STACK_SIZE/2),
                                 lang_x64->reg_name(handle,X86_REG_RBP),
                                 lang_x64->reg_name(handle,X86_REG_RSP));
     //printf(C_FOOTER_2,c->ep);

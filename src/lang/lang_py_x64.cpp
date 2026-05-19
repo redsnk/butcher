@@ -11,7 +11,7 @@ from goto import with_goto\n\
 \n"
 
 void Lang_Py_x64::PrintHeader(Code *c) {
-    printf(PY_HEADER);
+    PrintF(PY_HEADER);
 }
 
 #define ANON_CALL   "AnonCall"
@@ -19,28 +19,28 @@ void Lang_Py_x64::PrintHeader(Code *c) {
 void Lang_Py_x64::PrintAnonCalls(Code *c) {
 int count = 0;
 
-    printf("def " ANON_CALL "(cpu,addr,raddr):\n");
+    PrintF("def " ANON_CALL "(cpu,addr,raddr):\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (!count) {
-                printf("    if addr == 0x%llx:\n",c->subcodes[n].first);
+                PrintF("    if addr == 0x%llx:\n",c->subcodes[n].first);
             }
             else {
-                printf("    elif addr == 0x%llx:\n",c->subcodes[n].first);
+                PrintF("    elif addr == 0x%llx:\n",c->subcodes[n].first);
             }
             if (c->subcodes[n].name != NULL) {
-                printf("        %s(cpu,raddr)\n",c->subcodes[n].name);
+                PrintF("        %s(cpu,raddr)\n",c->subcodes[n].name);
             }
             else {
-                printf("        func_0x%llx(cpu,raddr)\n",c->subcodes[n].first);
+                PrintF("        func_0x%llx(cpu,raddr)\n",c->subcodes[n].first);
             }
             //printf("    }\n");
             count++;
         }
     }
     if (count) {
-        printf("    else:\n");
-        printf("        cpu.panic(cpu,\"CALL\",\"0x%%llx\",addr)\n");
+        PrintF("    else:\n");
+        PrintF("        cpu.panic(cpu,\"CALL\",\"0x%%llx\",addr)\n");
         //printf("    }\n");
     }
     //printf("}\n");
@@ -56,9 +56,9 @@ def main():\n\
 "
 
 void Lang_Py_x64::PrintMainOpen(Code *c) {
-    printf(PY_FOOTER_1);
+    PrintF(PY_FOOTER_1);
     if (bits == 32) {
-        printf(PY_FOOTER_32B);
+        PrintF(PY_FOOTER_32B);
     }
 }
 
@@ -81,14 +81,14 @@ if __name__==\"__main__\":\n\
 
 void Lang_Py_x64::PrintMainClose(Code *c,char *name) {
     //printf(PY_FOOTER_2,c->ep);
-    printf(PY_FOOTER_2);
+    PrintF(PY_FOOTER_2);
     if (name != NULL) {
-        printf(PY_FOOTER_N,name);
+        PrintF(PY_FOOTER_N,name);
     }
     else {
-        printf(PY_FOOTER_F,c->ep);
+        PrintF(PY_FOOTER_F,c->ep);
     }
-    printf(PY_FOOTER_3,ERR_CODE_OK);
+    PrintF(PY_FOOTER_3,ERR_CODE_OK);
 }
 
 void Lang_Py_x64::PrintSubMem(Code *c,int num) {
@@ -104,11 +104,11 @@ char sub[128];
             strcat(buffer,sub);
         }
         strcat(buffer,"'");
-        printf("    cpu.add_mem(0x%llx,%s)\n",sm->addr,buffer);
+        PrintF("    cpu.add_mem(0x%llx,%s)\n",sm->addr,buffer);
         free(buffer);
     }
     else {
-        printf("    cpu.add_zero_mem(0x%llx,%i)\n",sm->addr,sm->size);
+        PrintF("    cpu.add_zero_mem(0x%llx,%i)\n",sm->addr,sm->size);
     }
 }
 
@@ -118,7 +118,7 @@ def %s(cpu,raddr):\n\
 "
 
 void Lang_Py_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
-    printf(PY_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+    PrintF(PY_FUNC_HEADER_NAME,name,c->subcodes[num].first);
 }
 
 #define PY_FUNC_HEADER_ADDR "\
@@ -127,7 +127,7 @@ def func_0x%llx(cpu,raddr):\n\
 "
 
 void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
-    printf(PY_FUNC_HEADER_ADDR,c->subcodes[num].first);
+    PrintF(PY_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
 #define PY_FUNC_FOOTER "\
@@ -140,26 +140,26 @@ void Lang_Py_x64::PrintAnonJmpVar(void) {
 }
 
 void Lang_Py_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
-    printf("    if anon == 0x%llx:\n",addr);
-    printf("        goto %s\n",name);
+    PrintF("    if anon == 0x%llx:\n",addr);
+    PrintF("        goto %s\n",name);
 }
 
 void Lang_Py_x64::PrintAnonJmpEnd(void) {
-    printf("    if anon == raddr:\n");
-    printf("        return\n");
-    printf("    cpu.panic(\"JMP\",\"0x%%llx\",raddr)\n");
+    PrintF("    if anon == raddr:\n");
+    PrintF("        return\n");
+    PrintF("    cpu.panic(\"JMP\",\"0x%%llx\",raddr)\n");
 }
 
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
-    printf(PY_FUNC_FOOTER);
+    PrintF(PY_FUNC_FOOTER);
 }
 
 void Lang_Py_x64::PrintSubCodeSep(void) {
-    printf("    # --------------------------------------------------------------\n");
+    PrintF("    # --------------------------------------------------------------\n");
 }
 
 void Lang_Py_x64::PrintLoadError(const char *code,int num,const char *msg) {
-    printf("    cpu.errors[\"%s\"] = [%i,\"%s\"]\n",code,num,msg);
+    PrintF("    cpu.errors[\"%s\"] = [%i,\"%s\"]\n",code,num,msg);
 }
 
 char *Lang_Py_x64::reg_name(csh handle,int id_reg) {

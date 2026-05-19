@@ -16,15 +16,15 @@ void %s(struct _cpu *cpu,uint64_t raddr);    // 0x%llx\n"
 #define ANON_CALL   "AnonCall"
 
 void Lang_C_x64::PrintHeader(Code *c) {
-    printf(C_HEADER);
-    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr);\n");
+    PrintF(C_HEADER);
+    PrintF("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr);\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (c->subcodes[n].name != NULL) {
-                printf(C_FUNC_NAME,c->subcodes[n].name,c->subcodes[n].first);
+                PrintF(C_FUNC_NAME,c->subcodes[n].name,c->subcodes[n].first);
             }
             else {
-                printf(C_FUNC_ADDR,c->subcodes[n].first);
+                PrintF(C_FUNC_ADDR,c->subcodes[n].first);
             }
         }
     } 
@@ -33,31 +33,31 @@ void Lang_C_x64::PrintHeader(Code *c) {
 void Lang_C_x64::PrintAnonCalls(Code *c) {
 int count = 0;
 
-    printf("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr) {\n");
+    PrintF("void " ANON_CALL "(struct _cpu *cpu,uint64_t addr,uint64_t raddr) {\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
             if (!count) {
-                printf("    if (addr == 0x%llx) {\n",c->subcodes[n].first);
+                PrintF("    if (addr == 0x%llx) {\n",c->subcodes[n].first);
             }
             else {
-                printf("    else if (addr == 0x%llx) {\n",c->subcodes[n].first);
+                PrintF("    else if (addr == 0x%llx) {\n",c->subcodes[n].first);
             }
             if (c->subcodes[n].name != NULL) {
-                printf("        %s(cpu,raddr);\n",c->subcodes[n].name);
+                PrintF("        %s(cpu,raddr);\n",c->subcodes[n].name);
             }
             else {
-                printf("        func_0x%llx(cpu,raddr);\n",c->subcodes[n].first);
+                PrintF("        func_0x%llx(cpu,raddr);\n",c->subcodes[n].first);
             }
-            printf("    }\n");
+            PrintF("    }\n");
             count++;
         }
     }
     if (count) {
-        printf("    else {\n");
-        printf("        panic(cpu,\"CALL\",\"0x%%llx\",addr);\n");
-        printf("    }\n");
+        PrintF("    else {\n");
+        PrintF("        panic(cpu,\"CALL\",\"0x%%llx\",addr);\n");
+        PrintF("    }\n");
     }
-    printf("}\n");
+    PrintF("}\n");
 }
 
 #define C_FOOTER_1 "\
@@ -69,7 +69,7 @@ struct _cpu c,*cpu;\n\
 "
 
 void Lang_C_x64::PrintMainOpen(Code *c) {
-    printf(C_FOOTER_1);
+    PrintF(C_FOOTER_1);
 }
 
 #define C_FOOTER_2 "\
@@ -89,14 +89,14 @@ void Lang_C_x64::PrintMainOpen(Code *c) {
 \n"
 
 void Lang_C_x64::PrintMainClose(Code *c,char *name) {
-    printf(C_FOOTER_2);
+    PrintF(C_FOOTER_2);
     if (name != NULL) {
-        printf(C_FOOTER_N,name);
+        PrintF(C_FOOTER_N,name);
     }
     else {
-        printf(C_FOOTER_F,c->ep);
+        PrintF(C_FOOTER_F,c->ep);
     }
-    printf(C_FOOTER_3,ERR_CODE_OK);
+    PrintF(C_FOOTER_3,ERR_CODE_OK);
 }
 
 void Lang_C_x64::PrintSubMem(Code *c,int num) {
@@ -111,11 +111,11 @@ char sub[128];
             sprintf(sub,"\\x%02x",sm->mem[n]);
             strcat(buffer,sub);
         }
-        printf("    add_mem(cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
+        PrintF("    add_mem(cpu,0x%llx,\"%s\",%i);\n",sm->addr,buffer,sm->size);
         free(buffer);
     }
     else {
-        printf("    add_mem(cpu,0x%llx,NULL,%i);\n",sm->addr,sm->size);
+        PrintF("    add_mem(cpu,0x%llx,NULL,%i);\n",sm->addr,sm->size);
     }
 }
 
@@ -124,7 +124,7 @@ void %s(struct _cpu *cpu,uint64_t raddr) {\n\
 "
 
 void Lang_C_x64::PrintFuncHeaderName(Code *c,int num,char *name) {
-    printf(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
+    PrintF(C_FUNC_HEADER_NAME,name,c->subcodes[num].first);
 }
 
 #define C_FUNC_HEADER_ADDR "\
@@ -132,7 +132,7 @@ void func_0x%llx(struct _cpu *cpu,uint64_t raddr) {\n\
 "
 
 void Lang_C_x64::PrintFuncHeaderAddr(Code *c,int num) {
-    printf(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
+    PrintF(C_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
 #define C_FUNC_FOOTER "\
@@ -140,34 +140,34 @@ void Lang_C_x64::PrintFuncHeaderAddr(Code *c,int num) {
 \n"
 
 void Lang_C_x64::PrintAnonJmpVar(void) {
-    printf("uint64_t anon;\n\n");
+    PrintF("uint64_t anon;\n\n");
 }
 
 void Lang_C_x64::PrintAnonJmpCall(uint64_t addr,char *name) {
-    printf("    if (anon == 0x%llx) {\n",addr);
-    printf("        goto %s;\n",name);
-    printf("    }\n"); 
+    PrintF("    if (anon == 0x%llx) {\n",addr);
+    PrintF("        goto %s;\n",name);
+    PrintF("    }\n"); 
 }
 
 void Lang_C_x64::PrintAnonJmpEnd(void) {
-    printf("    if (anon == raddr) {\n");
-    printf("        return;\n");
-    printf("    }\n");
-    printf("    panic(cpu,\"JMP\",\"0x%%llx\",raddr);\n");
+    PrintF("    if (anon == raddr) {\n");
+    PrintF("        return;\n");
+    PrintF("    }\n");
+    PrintF("    panic(cpu,\"JMP\",\"0x%%llx\",raddr);\n");
 }
 
 void Lang_C_x64::PrintFuncFooter(Code *c,int num) {
-    printf(C_FUNC_FOOTER);
+    PrintF(C_FUNC_FOOTER);
 }
 
 void Lang_C_x64::PrintSubCodeSep(void) {
-    printf("    // --------------------------------------------------------------\n");
+    PrintF("    // --------------------------------------------------------------\n");
 }
 
 void Lang_C_x64::PrintLoadError(const char *code,int num,const char *msg) {
-    printf("    cpu->errors[cpu->num_errors].code = \"%s\";\n",code);
-    printf("    cpu->errors[cpu->num_errors].num = %i;\n",num);
-    printf("    cpu->errors[cpu->num_errors++].msg = \"%s\";\n",msg);
+    PrintF("    cpu->errors[cpu->num_errors].code = \"%s\";\n",code);
+    PrintF("    cpu->errors[cpu->num_errors].num = %i;\n",num);
+    PrintF("    cpu->errors[cpu->num_errors++].msg = \"%s\";\n",msg);
 }
 
 char *Lang_C_x64::reg_name(csh handle,int id_reg) {
