@@ -5,11 +5,13 @@
 #include "src/lang/lang_c_x64.hpp"
 #include "src/lang/lang_py_x64.hpp"
 #include "src/base/base_x64.hpp"
+#include "src/mcp/mcp_server.hpp"
 
-#define MY_VERSION  "v0.0.6"
+#define MY_VERSION  "v0.0.10"
 
 #define MAX_STR     (1024)
 
+int opt_p = false;
 int opt_t = false;
 int opt_a = false;
 int opt_m = false;
@@ -68,7 +70,7 @@ char *p;
         fclose(f);
     }
     else {
-        printf("Error: parse_file not found '%s'.\n",name);
+        fprintf(stderr,"Error: parse_file not found '%s'.\n",name);
     }
 }
 
@@ -98,7 +100,7 @@ char *p;
                     named.insert({ string_to_num(buffer),p+1 });
                 }
                 else {
-                    printf("Error: named format.\n");
+                    fprintf(stderr,"Error: named format.\n");
                 }
             }
         }
@@ -112,26 +114,13 @@ Language *l;
 Archive *a;
 
 
-    /*
-    Butcher *b = new Pe_x64();
-    if (!b->CheckFile(path)) {
-        delete b;
-        b = new Elf_x64();
-        if (!b->CheckFile(path)) {
-            delete b;
-            printf("Error: format not compatible.\n");
-            return (0);
-        }
-    }
-    */
-    //l = new Lang_C();
     a = new Arch_Pe();
     if (!a->CheckFile(path)) {
         delete a;
         a = new Arch_Elf();
         if (!a->CheckFile(path)) {
             delete a;
-            printf("Error: format not compatible.\n");
+            fprintf(stderr,"Error: format not compatible.\n");
             return (0);
         }
     }
@@ -151,10 +140,14 @@ Archive *a;
     b->in = include;
     b->ex = exclude;
     b->mi = incmem;
-    //b->named.insert({ 0x0040B440,"UStrClr" });
     b->named = named;
     b->Cut(path,addr);
     delete b;
+    return (1);
+}
+
+int butcher_mcp(void) {
+
     return (1);
 }
 
@@ -165,9 +158,11 @@ Butcher ("MY_VERSION") programed by Alex Bassas.\n\
 usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>\n\
 \n\
 -l<lang>    => Output language: [c|p]\n\
-                    - c -> C\n\
-                    - p -> Python\n\
+\
+                            c -> C\n\
+                            p -> Python\n\
 \n\
+-p                          => Start MCP server\n\
 -m                          => Load ALL memory from the original file at start\n\
 -t                          => Include commented traces\n\
 -a                          => Include commented asm code\n\
@@ -182,8 +177,11 @@ int p,i;
 char path[MAX_STR];
 uint64_t addr;
 
-    while ((p = getopt(argc,argv,"mtal:i:e:n:u:")) != -1) {
+    while ((p = getopt(argc,argv,"pmtal:i:e:n:u:")) != -1) {
         switch (p) {
+                case 'p':
+                    opt_p = true;
+                    break;
                 case 't':
                     opt_t = true;
                     break;
@@ -217,21 +215,26 @@ uint64_t addr;
                     break;
                 case '?':
                 default:
-                        printf(HELP);
+                        fprintf(stderr,HELP);
                         exit(0);
         }
     }
     path[0] = 0;
     if (optind == argc) {
-        printf(HELP);
-        exit(0);
+        if (opt_p) {
+            return(butcher_mcp());
+        }
+        else {
+            fprintf(stderr,HELP);
+            exit(0);
+        }
     }
     if ((optind+1)<argc) {
         strcpy(path,argv[optind]);
         addr = string_to_num(argv[optind+1]);
     }
     else {
-        printf(HELP);
+        fprintf(stderr,HELP);
         exit(0);
     }
     return(butcher(path,addr));

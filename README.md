@@ -18,7 +18,7 @@ Let's start with an easy example:
 git clone https://github.com/redsnk/butcher
 sudo apt install build-essential
 sudo apt install cmake
-sudo apt-get install libcapstone-dev
+sudo apt-get install libcapstone-dev libjsoncpp-dev
 cd butcher/
 cmake CMakeLists.txt
 make
