@@ -28,6 +28,9 @@
 
 #include <json/json.h>
 
+#define MCP_SERVER_NAME         "butcher-mcp-server"
+#define MCP_SERVER_VERSION      "1.0.0"
+
 /* =========================================================================
  * Helpers — JSON serialisation / parsing
  * ========================================================================= */
@@ -124,8 +127,8 @@ class MCPServer {
         std::cerr << "[mcp] initialised\n";
 
         Json::Value serverInfo(Json::objectValue);
-        serverInfo["name"]    = "bucher-mcp-server";
-        serverInfo["version"] = "1.0.0";
+        serverInfo["name"]    = MCP_SERVER_NAME;
+        serverInfo["version"] = MCP_SERVER_VERSION;
 
         Json::Value capabilities(Json::objectValue);
         capabilities["tools"] = Json::Value(Json::objectValue);

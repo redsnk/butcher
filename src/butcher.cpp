@@ -273,9 +273,11 @@ char *lib,*func;
     return (c);
 }
 
-void Butcher::Cut(char *file_name,uint64_t address) {
+char *Butcher::Cut(char *file_name,uint64_t address,int lstdout) {
 char *name;
 
+    lang->lstdout = lstdout;
+    lang->out = NULL;
     if (arch->OpenFile(file_name)) {
         if (Cs_open() == CS_ERR_OK) {
             cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
@@ -294,6 +296,7 @@ char *name;
         }
         arch->CloseFile();
     }
+    return (lang->out);
 }
 
 Butcher::Butcher(Archive *a,Language *l) {

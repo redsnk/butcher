@@ -16,16 +16,15 @@ enum Languages {
 
 #define MAX_STR_OP     (1024*5)
 #define MAX_PRINTF     (1024*1024)
+#define BUFFER_STEP    (1024*100)
 
 class Language {
     public:
-    /*
-    const char *COMM = "";
-    int COMM_SEP = 0;
-    const char *INDENT = "";
-    const char *ENDS = "";
-    const char *SEPS = "";
-    */
+    int lstdout;
+    int len;
+    int max_len;
+    char *out;
+
     virtual const char *COMM(void) = 0;
     virtual int COMM_SEP(void) = 0;
     virtual const char *INDENT(void) = 0;

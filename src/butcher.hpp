@@ -53,7 +53,7 @@ class Butcher {
         void IncludeMem(Code *c);
         int CheckSubMems(Code *c,const char *text);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
-        void Cut(char *file_name,uint64_t address);
+        char *Cut(char *file_name,uint64_t address,int lstdout);
 };
 
 #endif // _BUTCHER_H

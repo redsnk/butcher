@@ -108,7 +108,8 @@ char *p;
     }
 }
 
-int butcher(char *path,uint64_t addr) {
+//Butcher *butcher(char *path,uint64_t addr) {
+Butcher *butcher(char *path) {
 Butcher *b;
 Language *l;
 Archive *a;
@@ -120,8 +121,8 @@ Archive *a;
         a = new Arch_Elf();
         if (!a->CheckFile(path)) {
             delete a;
-            fprintf(stderr,"Error: format not compatible.\n");
-            return (0);
+            fprintf(stderr,"Error: format not compatible: '%s'\n",path);
+            return (NULL);
         }
     }
     switch (opt_l) {
@@ -141,13 +142,56 @@ Archive *a;
     b->ex = exclude;
     b->mi = incmem;
     b->named = named;
+    /*
     b->Cut(path,addr);
     delete b;
     return (1);
+    */
+    return(b);
+}
+
+static std::string tool_cut(const Json::Value& args) {
+char *out = NULL;
+std::string vout;
+
+    if (!args.isMember("path") || !args["path"].isString())
+        return "(no path provided)";
+    if (!args.isMember("addr") || !args["addr"].isString())
+        return "(no address provided)";
+    //
+    char *path = strdup((char *) args["path"].asString().c_str());
+    uint64_t addr = string_to_num((char *) args["addr"].asString().c_str());
+    Butcher *b = butcher(path);
+    printf("%s\n",path);
+    if (b != NULL) {
+        out = b->Cut(path,addr,false);
+        delete b;
+    }
+    if (out != NULL) {
+        vout = out;
+        free(out);
+    }
+    else {
+        vout = "Error.";
+    }
+    free(path);
+    return (vout);
 }
 
 int butcher_mcp(void) {
-
+    std::cout.setf(std::ios::unitbuf);
+    MCPServer server;
+    server.add_tool({
+            "cut",
+            "Decompiles a file from an address",
+            {
+                {"path", "string", "Path of the file", true},
+                {"addr", "string", "Address of the function to decompile",  true}
+            },
+            tool_cut
+        });
+    std::cerr << "[mcp] " MCP_SERVER_NAME "(" MCP_SERVER_VERSION ") ready (stdio)\n";
+    server.run();
     return (1);
 }
 
@@ -155,14 +199,14 @@ const char* HELP = "\
 --------------------------------------------------------------\n\
 Butcher ("MY_VERSION") programed by Alex Bassas.\n\
 --------------------------------------------------------------\n\
-usage: Butcher [-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>\n\
+usage: Butcher [-p][-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>\n\
 \n\
 -l<lang>    => Output language: [c|p]\n\
 \
                             c -> C\n\
                             p -> Python\n\
 \n\
--p                          => Start MCP server\n\
+-p                          => Stdin MCP server\n\
 -m                          => Load ALL memory from the original file at start\n\
 -t                          => Include commented traces\n\
 -a                          => Include commented asm code\n\
@@ -237,5 +281,10 @@ uint64_t addr;
         fprintf(stderr,HELP);
         exit(0);
     }
-    return(butcher(path,addr));
+    Butcher *b = butcher(path);
+    if (b != NULL) {
+        b->Cut(path,addr,true);
+        delete b;
+    }
+    return(1);
 }

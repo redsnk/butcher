@@ -13,7 +13,24 @@ int n;
         exit(0);
     }
     va_end(argptr);
-    fwrite(buffer,1,strlen(buffer),stdout);
+    if (lstdout) {
+        // STDOUT
+        fwrite(buffer,1,strlen(buffer),stdout);
+    }
+    else {
+        // BUFFER
+        if (out == NULL) {
+            out = (char *) calloc(BUFFER_STEP,1);
+            len = 0;
+            max_len = BUFFER_STEP;
+        }
+        if (strlen(buffer) > (max_len-len-1)) {
+            out = (char *) realloc(out,max_len+BUFFER_STEP);
+            max_len += BUFFER_STEP;
+        }
+        strcat(out,buffer);
+        len += strlen(buffer);
+    }
 }
 
 char *Language::Indent(char *str) {
