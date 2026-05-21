@@ -7,7 +7,7 @@
 #include "src/base/base_x64.hpp"
 #include "src/mcp/mcp_server.hpp"
 
-#define MY_VERSION  "v0.0.10"
+#define MY_VERSION  "v0.0.11"
 
 #define MAX_STR     (1024)
 
@@ -156,13 +156,55 @@ std::string vout;
 
     if (!args.isMember("path") || !args["path"].isString())
         return "(no path provided)";
+    char *path = strdup((char *) args["path"].asString().c_str());
+    //
     if (!args.isMember("addr") || !args["addr"].isString())
         return "(no address provided)";
-    //
-    char *path = strdup((char *) args["path"].asString().c_str());
     uint64_t addr = string_to_num((char *) args["addr"].asString().c_str());
+    //
+    if (args.isMember("l") && args["l"].isString()) {
+        switch (args["l"].asString().c_str()[0]) {
+            case 'c':
+                opt_l = C;
+                break;
+            case 'p':
+                opt_l = PYTHON;
+                break;
+            default:
+                return "(output language unknown)";
+        }
+    }
+    //
+    if (args.isMember("m") && args["m"].isBool()) {
+        opt_m = args["m"].asBool();
+    }
+    //
+    if (args.isMember("t") && args["t"].isBool()) {
+        opt_t = args["t"].asBool();
+    }
+    //
+    if (args.isMember("a") && args["a"].isBool()) {
+        opt_m = args["a"].asBool();
+    }
+    //
+    if (args.isMember("i") && args["i"].isString()) {
+        parse_param((char *)args["i"].asString().c_str(),&include);
+    }
+    //
+    if (args.isMember("e") && args["e"].isString()) {
+        parse_param((char *)args["e"].asString().c_str(),&exclude);
+    }
+    //
+    if (args.isMember("u") && args["u"].isString()) {
+        parse_param((char *)args["u"].asString().c_str(),&incmem);
+    }
+    //
+    if (args.isMember("n") && args["n"].isString()) {
+        parse_named((char *)args["n"].asString().c_str());
+    }
+    //
     Butcher *b = butcher(path);
-    printf("%s\n",path);
+    //printf("%s\n",path);
     if (b != NULL) {
         out = b->Cut(path,addr,false);
         delete b;
@@ -186,7 +228,15 @@ int butcher_mcp(void) {
             "Decompiles a file from an address",
             {
                 {"path", "string", "Path of the file", true},
-                {"addr", "string", "Address of the function to decompile",  true}
+                {"addr", "string", "Address of the function to decompile",  true},
+                {"l", "string", "Output language, 'c' or 'p'",  false},
+                {"m", "bool", "Load ALL memory from the original file at start",  false},
+                {"t", "bool", "Include commented traces",  false},
+                {"a", "bool", "Include commented asm code",  false},
+                {"i", "string", "Include call addresses",  false},
+                {"e", "string", "Exclude call addresses",  false},
+                {"u", "string", "Include memory addresses",  false},
+                {"n", "string", "Add named functions from <file>",  false}
             },
             tool_cut
         });
