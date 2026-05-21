@@ -1,7 +1,7 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in a new tool.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in new tools.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
@@ -9,10 +9,8 @@ Butcher is a decompiler but also a binary deconstructor, a tool to extract usefu
 Let's start with an easy example:
 1. Clone this project, compile it and move to the tutorial directory:
 ```
+sudo apt install git build-essential cmake libcapstone-dev libjsoncpp-dev unzip
 git clone https://github.com/redsnk/butcher
-sudo apt install build-essential
-sudo apt install cmake
-sudo apt-get install libcapstone-dev libjsoncpp-dev
 cd butcher/
 cmake CMakeLists.txt
 make
@@ -67,30 +65,20 @@ The **GetSecret1** starts at **044FCB68**:
 int main (int argc, char **argv) {
 struct _cpu c,*cpu;
 
-    cpu = &c;
-    init(cpu);
-    add_mem(cpu,0xf000,NULL,10240);
-    load_mem(cpu,"libffi-6.dll",0x400,0x4458a00,0x401000,0x4459000);
-    load_mem(cpu,"libffi-6.dll",0x4458e00,0x8800,0x485a000,0x9000);
-    load_mem(cpu,"libffi-6.dll",0x4461600,0x22200,0x4863000,0x23000);
-    load_mem(cpu,"libffi-6.dll",0x0,0x0,0x4886000,0x9e000);
-    load_mem(cpu,"libffi-6.dll",0x4483800,0x4e00,0x4924000,0x5000);
-    load_mem(cpu,"libffi-6.dll",0x4488600,0x6400,0x4929000,0x7000);
-    load_mem(cpu,"libffi-6.dll",0x448ea00,0x600,0x4930000,0x1000);
-    load_mem(cpu,"libffi-6.dll",0x448f000,0x200,0x4931000,0x1000);
-    load_mem(cpu,"libffi-6.dll",0x448f200,0xb4800,0x4932000,0xb5000);
-    load_mem(cpu,"libffi-6.dll",0x4543a00,0x223000,0x49e7000,0x224000);
-    _rsp = 0x10400;
+    [ ... ]
+    _rsp = 0x1b800;
     _rbp = _rsp;
     /* Insert code here ... */
     if (argc > 1) {
         _eax = atoi(argv[1]);
     }
-    func_0x44fcb68(cpu);
+    /* .................... */
+    func_0x44fcb68(cpu,0);
     /* Insert code here ... */
-    char *str = get_unicode_ptr(cpu,_edx);
+    char *str = get_unicode_ptr(cpu,_edx,0);
     printf("%s\n",str);
     free(str);
+    /* .................... */
     end(cpu);
     return (0);
 }
@@ -112,7 +100,21 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c secret.c -o secret
 
 7. Let's try with **Python**:
 
-> *** **Warning, this version only works with Python 3.7** ***
+> *** **Warning, this version only works with Python 3.7, install Python 3.7 if you don't have it** ***
+
+```
+# Install Python 3.7
+sudo apt install libssl-dev libffi-dev
+wget https://www.python.org/ftp/python/3.7.17/Python-3.7.17.tgz
+tar zxf Python-3.7.17.tgz
+cd Python-3.7.17/
+./configure --prefix=/usr/local
+make
+sudo make install
+cd ..
+
+```
+Extract de **GetSecret** function from the malware but as Python source code:
 
 ```
 ../Butcher -lp -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.py
@@ -125,37 +127,31 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c secret.c -o secret
 
 ```
 def main():
-    cpu = _cpu()
-    cpu.b32 = True
-    cpu.add_zero_mem(0xf000,10240)
-    cpu.load_mem("libffi-6.dll",0x400,0x4458a00,0x401000,0x4459000)
-    cpu.load_mem("libffi-6.dll",0x4458e00,0x8800,0x485a000,0x9000)
-    cpu.load_mem("libffi-6.dll",0x4461600,0x22200,0x4863000,0x23000)
-    cpu.load_mem("libffi-6.dll",0x0,0x0,0x4886000,0x9e000)
-    cpu.load_mem("libffi-6.dll",0x4483800,0x4e00,0x4924000,0x5000)
-    cpu.load_mem("libffi-6.dll",0x4488600,0x6400,0x4929000,0x7000)
-    cpu.load_mem("libffi-6.dll",0x448ea00,0x600,0x4930000,0x1000)
-    cpu.load_mem("libffi-6.dll",0x448f000,0x200,0x4931000,0x1000)
-    cpu.load_mem("libffi-6.dll",0x448f200,0xb4800,0x4932000,0xb5000)
-    cpu.load_mem("libffi-6.dll",0x4543a00,0x223000,0x49e7000,0x224000)
-    cpu._rsp = 0x10400
+    [ ... ]
+    cpu._rsp = 0x1b800
     cpu._rbp = cpu._rsp
     # Insert code here ...
     import sys
     if len(sys.argv) > 1:
         cpu._eax = int(sys.argv[1])
-    func_0x44fcb68(cpu)
+    # ...
+    func_0x44fcb68(cpu,0)
     # Insert code here ...
     str = cpu.get_unicode_ptr(cpu._edx)
     print(str)
+    # ...
+    return 0
+
+if __name__=="__main__":
+    sys.exit(main())
 ```
 
 9. Execute the new **Python** tool:
 
 ```
-sudo pip install goto-statement
+sudo pip3.7 install goto-statement
 ln -s ../src/emu/butcher_x64.py .
-python3 secret.py 10
+python3.7 secret.py 5
 ```
 
 > MkIzMjk1QzMwQzRBRjkxNQ==

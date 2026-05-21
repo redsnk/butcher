@@ -434,7 +434,7 @@ class _cpu:
             self.set_word_ptr(addr+(n*2),ord(c))
             n += 1
 
-    def get_unicode_ptr(self,addr):
+    def get_unicode_ptr(self,addr,len):
         n = 0
         str = ""
         while True:
@@ -444,7 +444,20 @@ class _cpu:
                 addr += 2
             else:
                 break
+            if (len > 0) and (n == len):
+                break
         return str
+
+    def print_unicode_ptr(self,addr):
+        str = self.get_unicode_ptr(addr,0)
+        print(str)
+
+    def alloc_delphi_ustr(self,str):
+        m = self.alloc_mem(8+(len(str)+1)*2)
+        self.set_dword_ptr(m,0xffffffff)
+        self.set_dword_ptr(m+4,len(str))
+        self.set_unicode_ptr(m+8,str)
+        return m+8
 
     def push_byte(self,value):
         self.rsp.r64 = self.rsp.r64 - 1
