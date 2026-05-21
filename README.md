@@ -1,13 +1,7 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a binary deconstructor, a tool to extract useful code from compiled programs.
-## What can I do with Butcher?
-With Butcher you can extract part of a binary as source code and use it in a new tool.
-## Can you put and example?
-Imagine you're analyzing a malware and you discover a function used to decrypt the configuration. With Butcher, you can extract this function as C or Python source code and use it into a different utility that decrypts malware configurations.
-## Is Butcher a decompiler?
-Yes, it could be called a generic decompiler.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in a new tool.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
