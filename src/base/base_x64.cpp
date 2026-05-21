@@ -1496,7 +1496,8 @@ char buffer[256];
                                                 "tmp = tmp << bits0;"
                                                 "tmp = tmp | rax;"
                                                 "s_rdx = tmp % sop0;"
-                                                "s_rax = tmp / sop0",insn,true);
+                                                "s_rax = sdiv(tmp,sop0)",insn,true);
+                                                //"s_rax = tmp / sop0",insn,true);
             //reg0 = lang_x64->Translate(handle,".s_rdx = s_rax % sop0;:.s_rax = s_rax / sop0",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);

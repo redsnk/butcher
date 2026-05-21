@@ -591,7 +591,8 @@ class _cpu:
         return ~c_uint64(p).value + c_uint64(1).value
 
     def idiv(self,a,b):
-        return int(a/b)
+        return a//b
+        #return int(a/b)
 
     '''
     def pow(self,b,p):

@@ -233,10 +233,10 @@ int butcher_mcp(void) {
                 {"m", "bool", "Load ALL memory from the original file at start",  false},
                 {"t", "bool", "Include commented traces",  false},
                 {"a", "bool", "Include commented asm code",  false},
-                {"i", "string", "Include call addresses",  false},
-                {"e", "string", "Exclude call addresses",  false},
-                {"u", "string", "Include memory addresses",  false},
-                {"n", "string", "Add named functions from <file>",  false}
+                {"i", "string", "Include call addresses: list 'addr1,addr2,..' or file '@file.txt'",  false},
+                {"e", "string", "Exclude call addresses: list 'addr1,addr2,..' or file '@file.txt'",  false},
+                {"u", "string", "Include memory addresses: list 'addr1,addr2,..' or file '@file.txt'",  false},
+                {"n", "string", "Add named functions from file: 'file.txt'",  false}
             },
             tool_cut
         });
