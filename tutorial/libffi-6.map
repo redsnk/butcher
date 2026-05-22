@@ -31643,7 +31643,7 @@
  0001:040FB574       IdAuthenticationDigest.Finalization
  0001:040FB5A4       _Unit181.sub_044FC5A4
  0001:040FB658       _Unit181.sub_044FC658
- 0001:040FB7AC       _Unit181.sub_044FC7AC
+ 0001:040FB7AC       _Unit181.DecryptDecoded
  0001:040FBAF8       _Unit181.Decrypt
  0001:040FBB68       _Unit181.GetSecret1
  0001:0410F174       _Unit181.sub_04510174

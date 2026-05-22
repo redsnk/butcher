@@ -8,7 +8,8 @@ Butcher is a decompiler but also a binary deconstructor, a tool to extract usefu
 
 Let's start with an easy example:
 1. Clone this project, compile it and move to the tutorial directory:
-```
+
+```bash
 sudo apt install git build-essential cmake libcapstone-dev libjsoncpp-dev unzip
 git clone https://github.com/redsnk/butcher
 cd butcher/
@@ -20,11 +21,11 @@ cd tutorial
 
 > zip protected with the password "*infected*"
 
-```
+```bash
 unzip -P infected libffi-6.zip
 ```
 
-> *libffi-6.dll* is a malware called *Grandoreiro*, a tipical Brasilian RAT compiled with **Delphi**
+> *libffi-6.dll* contains a malware called *Grandoreiro*, a tipical Brasilian RAT compiled with **Delphi**
 
 If we examine this malware with [IDR](https://github.com/crypto2011/IDR) we can identify two functions used to decrypt hidden strings:
 
@@ -43,7 +44,7 @@ The **GetSecret1** starts at **044FCB68**:
 
 3. Extract de **GetSecret** function from the malware:
 
-```
+```bash
 ../Butcher -lc -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.c
 ```
 
@@ -59,9 +60,9 @@ The **GetSecret1** starts at **044FCB68**:
 > -e0x40b830
 >> Exclude the address 0x40b830 from the analisis, this address is used to create an internal Delphi string that is no necessary in this case.
 
-4. Modify the **main** function at **secret.c** below the "*Insert code here ...*" lines:
+4. Modify the **main** function at **secret.c** below the "*Insert code here ...*" lines with new code:
 
-```
+```C
 int main (int argc, char **argv) {
 struct _cpu c,*cpu;
 
@@ -86,15 +87,16 @@ struct _cpu c,*cpu;
 
 5. Compile the new tool:
 
-```
+```bash
 gcc -I../src/emu/ ../src/emu/butcher_x64.c secret.c -o secret
 ```
 
 6. Execute the new tool:
 
-```
+```bash
 ./secret 5
 ```
+Now we have the secret with index number 5:
 
 > MkIzMjk1QzMwQzRBRjkxNQ==
 
@@ -102,8 +104,11 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c secret.c -o secret
 
 > *** **Warning, this version only works with Python 3.7, install Python 3.7 if you don't have it** ***
 
-```
-# Install Python 3.7
+```bash
+#
+# If you don't have Python 3.7 install it
+#
+
 sudo apt install libssl-dev libffi-dev
 wget https://www.python.org/ftp/python/3.7.17/Python-3.7.17.tgz
 tar zxf Python-3.7.17.tgz
@@ -116,16 +121,16 @@ cd ..
 ```
 Extract de **GetSecret** function from the malware but as Python source code:
 
-```
+```bash
 ../Butcher -lp -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.py
 ```
 
 > -lp
 >> Python source code.
 
-8. Modify the **main** function at **secret.py** below the "*Insert code here ...*" lines:
+8. Modify the **main** function at **secret.py** below the "*Insert code here ...*" with this lines:
 
-```
+```Python
 def main():
     [ ... ]
     cpu._rsp = 0x1b800
@@ -137,7 +142,7 @@ def main():
     # ...
     func_0x44fcb68(cpu,0)
     # Insert code here ...
-    str = cpu.get_unicode_ptr(cpu._edx)
+    str = cpu.get_unicode_ptr(cpu._edx,0)
     print(str)
     # ...
     return 0
@@ -148,11 +153,13 @@ if __name__=="__main__":
 
 9. Execute the new **Python** tool:
 
-```
+```bash
 sudo pip3.7 install goto-statement
 ln -s ../src/emu/butcher_x64.py .
 python3.7 secret.py 5
 ```
+
+The same output but with Python source code:
 
 > MkIzMjk1QzMwQzRBRjkxNQ==
 
@@ -190,7 +197,7 @@ Now we must patch some code inside the newly generated **decrypt.c**.
 
 ### __GetMem:
 
-```
+```C
 void __GetMem(struct _cpu *cpu) {
     // ---
     // _eax = size
