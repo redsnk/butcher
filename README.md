@@ -1,7 +1,7 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs to recompile it in a new tools.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
