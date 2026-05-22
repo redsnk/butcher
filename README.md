@@ -176,7 +176,7 @@ First of all we are going to add more symbols to the generated code, [IDR](https
 
 ![Decrypt.](./tutorial/map.png "Decrypt.")
 
-The file is called **libffi-6.map** and is inclmemoryuded in the tutorial folder, execute this command to convert this map to a list of addresses/names:
+The file is called **libffi-6.map** and is included in the tutorial folder, execute this command to convert this map to a list of addresses/names:
 
 ```bash
 python3.7 ../src/tools/idrmap_to_butcher.py libffi-6.map > libffi-6.txt
@@ -250,7 +250,7 @@ First af all, we save the original **decrypt.c** for future use in this tutorial
 ```bash
 cp decrypt.c decrypt.old.c
 ```
-And then, patch the file:
+And then, patch the file **decrypt.c**:
 
 ```C
 int main (int argc, char **argv) {
@@ -301,7 +301,7 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 
 > Inbursa
 
-16. At the end, join all together in a new script **tool.sh**:
+16. At the end, join all together in a new script called **tool.sh**:
 
 ```bash
 #!/bin/bash
@@ -370,7 +370,7 @@ chmod +x ./decrypt.sh
 ```
 >ERROR|2|0x435ae1|Read memory address not found.
 
-This error means that a memory from the original file (0x435ae1) is needed and has not been detected by **butcher** during the analysis.
+This error means that a memory from the original file (0x435ae1) is needed and has not been detected by **butcher** during the initial analysis.
 
 We can add this address to the **dec_mem.txt** file and restart the process, this file tells **Butcher** to add the contents of that memory to the source code:
 
@@ -381,5 +381,12 @@ echo "0x435ae1" >> dec_mem.txt
 
 > Inbursa
 
-Great!, now we have a decryptor that is independent from the original file.
+Great!, now we have a **decrypt** tool that is independent from the original file and much faster:
 
+```bash
+./tool.sh 5
+```
+
+> Inbursa
+
+>* **Note that the secret utility still depends on the original file**
