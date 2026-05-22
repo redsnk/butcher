@@ -107,7 +107,7 @@ Now we have the secret with index number 5:
 # If you don't have Python 3.7 install it
 #
 
-sudo apt install libssl-dev libffi-dev
+sudo apt install libssl-dev libffi-dev zlib1g-dev
 wget https://www.python.org/ftp/python/3.7.17/Python-3.7.17.tgz
 tar zxf Python-3.7.17.tgz
 cd Python-3.7.17/
@@ -117,7 +117,7 @@ sudo make install
 cd ..
 
 ```
-Extract de **GetSecret** function from the malware but as Python source code:
+Extract de **GetSecret** function from the malware but as Python source code now:
 
 ```bash
 ../Butcher -lp -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.py
@@ -172,7 +172,7 @@ Inside the **Decrypt** function we identify two phases, **Base64 decoding** at *
 
 ![DecryptDecoded.](./tutorial/decdec.png "DecryptDecoded.")
 
-First of all we are going to add more symbols to the generated code, [IDR](https://github.com/crypto2011/IDR) contains and option to extract a map of symbols:
+First of all we are going to add more symbols to the generated code, [IDR](https://github.com/crypto2011/IDR) contains an option to extract a map of symbols:
 
 ![Decrypt.](./tutorial/map.png "Decrypt.")
 
