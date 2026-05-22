@@ -2051,10 +2051,10 @@ char *name;
     // Main function
     lang_x64->PrintMainOpen(c);
     // Load Errors
-    lang_x64->PrintLoadError("OP",1,"Opcode not implemented.");
-    lang_x64->PrintLoadError("GETMEM",2,"Read memory address not found.");
-    lang_x64->PrintLoadError("SETMEM",3,"Set memory address not found.");
-    lang_x64->PrintLoadError("CALL",4,"Call address not found.");
+    lang_x64->PrintLoadError("OP",1,"Opcode not implemented, could be an error but if not, you must wait the next version.");
+    lang_x64->PrintLoadError("GETMEM",2,"Read memory address not found, if it's correct, use the '-u' option to add the address.");
+    lang_x64->PrintLoadError("SETMEM",3,"Set memory address not found, if it's correct, use the '-u' option to add the address.");
+    lang_x64->PrintLoadError("CALL",4,"Call address not found, if it's correct, use the '-i' option to add the calling address.");
     lang_x64->PrintLoadError("JMP",5,"Jmp address not found.");
     lang_x64->PrintLoadError("IAT",6,"Call to an external library function not implemented.");
     lang_x64->PrintLoadError("DEFAULT",255,"Default error, error description not implemented yet.");
