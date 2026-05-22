@@ -27,7 +27,7 @@ cs_x86_op op;
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
     buffer = (char *) malloc(256);
     if (op.mem.base != X86_REG_INVALID) {
-        if ((op.mem.base == X86_REG_RIP) || (op.mem.base == X86_REG_EIP) || (op.mem.base == X86_REG_EIP)) {
+        if ((op.mem.base == X86_REG_RIP) || (op.mem.base == X86_REG_EIP) || (op.mem.base == X86_REG_IP)) {
             sprintf(buffer,"0x%" PRIx64,insn->address+insn->size);
         }
         else {
