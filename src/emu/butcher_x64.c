@@ -440,7 +440,7 @@ char *str;
 
 	str = get_unicode_ptr(cpu,addr,0);
 	if (str != NULL) {
-		printf("'%s'\n",str);
+		printf("%s\n",str);
 		free(str);
 	}
 }

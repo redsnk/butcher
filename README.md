@@ -1,7 +1,7 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in new tools.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in a new tools.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
@@ -76,9 +76,7 @@ struct _cpu c,*cpu;
     /* .................... */
     func_0x44fcb68(cpu,0);
     /* Insert code here ... */
-    char *str = get_unicode_ptr(cpu,_edx,0);
-    printf("%s\n",str);
-    free(str);
+    print_unicode_ptr(cpu,_edx);
     /* .................... */
     end(cpu);
     return (0);
@@ -128,7 +126,7 @@ Extract de **GetSecret** function from the malware but as Python source code:
 > -lp
 >> Python source code.
 
-8. Modify the **main** function at **secret.py** below the "*Insert code here ...*" with this lines:
+8. Modify the **main** function at **secret.py**:
 
 ```Python
 def main():
@@ -142,8 +140,7 @@ def main():
     # ...
     func_0x44fcb68(cpu,0)
     # Insert code here ...
-    str = cpu.get_unicode_ptr(cpu._edx,0)
-    print(str)
+    cpu.print_unicode_ptr(cpu._edx)
     # ...
     return 0
 
@@ -302,7 +299,7 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 ./decrypt 2B3295C30C4AF915
 ```
 
-> 'Inbursa'
+> Inbursa
 
 16. At the end, join all together in a new the script **tool.sh**:
 
@@ -318,11 +315,11 @@ secret=$(./secret $1 | base64 -d)
 ```bash
 chmod +x tool.sh
 ./tool.sh 5
-'Inbursa'
+Inbursa
 ./tool.sh 6
-'Bajionet'
+Bajionet
 ./tool.sh 7
-'BanCoppel'
+BanCoppel
 ```
 ## Unleashing the utility from memory
 
@@ -382,7 +379,7 @@ echo "0x435ae1" >> dec_mem.txt
 ./decrypt.sh
 ```
 
-> 'Inbursa'
+> Inbursa
 
 Great!, now we have a decryptor that is independent from the original file.
 
