@@ -18,10 +18,12 @@ const char *Lang_x64::ptr(cs_x86_op op) {
     return ("<ptr_error>");
 }
 
-char *Lang_x64::mem_str(csh handle,cs_x86_op op) {
+char *Lang_x64::mem_str(csh handle,cs_insn *insn,int nop) {
 char tmp[256];
 char *buffer;
+cs_x86_op op;
 
+    op = insn->detail->x86.operands[nop];
     // mov		ecx, dword ptr [r8 + rax*4 + 0x27b8]
     buffer = (char *) malloc(256);
     if (op.mem.base != X86_REG_INVALID) {
@@ -47,10 +49,12 @@ char *buffer;
     return (buffer);
 }
 
-char *Lang_x64::op_str(csh handle,cs_x86_op op,int bits,int sign, int lset) {
+char *Lang_x64::op_str(csh handle,cs_insn *insn,int nop,int bits,int sign, int lset) {
 char buffer[MAX_STR_OP];
 char *str;
+cs_x86_op op;
 
+    op = insn->detail->x86.operands[nop];
     switch (op.type) {
         case X86_OP_REG:
             if (!sign) {
@@ -60,7 +64,7 @@ char *str;
                 return (s_reg_name(handle,op.reg));
             }
         case X86_OP_MEM:
-            str = mem_str(handle,op);
+            str = mem_str(handle,insn,nop);
             if (lset) {
                 strcpy(buffer,str);
             }
@@ -109,12 +113,12 @@ char *str;
     return(NULL);
 }
 
-char *Lang_x64::get_op_str(csh handle,cs_x86_op op,int bits,int sign) {
-    return(op_str(handle,op,bits,sign,false));
+char *Lang_x64::get_op_str(csh handle,cs_insn *insn,int nop,int bits,int sign) {
+    return(op_str(handle,insn,nop,bits,sign,false));
 }
 
-char *Lang_x64::set_op_str(csh handle,cs_x86_op op,int bits,int sign) {
-    return(op_str(handle,op,bits,sign,true));
+char *Lang_x64::set_op_str(csh handle,cs_insn *insn,int nop,int bits,int sign) {
+    return(op_str(handle,insn,nop,bits,sign,true));
 }
 
 char *Lang_x64::Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign) {
@@ -150,62 +154,62 @@ char buffer[MAX_STR_OP];
     if (!strcmp(name,"op0")) {
         bits = insn->detail->x86.operands[0].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[0],bits,false));
+            return (set_op_str(handle,insn,0,bits,false));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[0],bits,false));
+            return (get_op_str(handle,insn,0,bits,false));
         }
     }
     else if (!strcmp(name,"op1")) {
         bits = insn->detail->x86.operands[1].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[1],bits,false));
+            return (set_op_str(handle,insn,1,bits,false));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[1],bits,false));
+            return (get_op_str(handle,insn,1,bits,false));
         }
     }
     else if (!strcmp(name,"op2")) {
         bits = insn->detail->x86.operands[2].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[2],bits,false));
+            return (set_op_str(handle,insn,2,bits,false));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[2],bits,false));
+            return (get_op_str(handle,insn,2,bits,false));
         }
     }
     else if (!strcmp(name,"sop0")) {
         bits = insn->detail->x86.operands[0].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[0],bits,true));
+            return (set_op_str(handle,insn,0,bits,true));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[0],bits,true));
+            return (get_op_str(handle,insn,0,bits,true));
         }
     }
     else if (!strcmp(name,"sop1")) {
         bits = insn->detail->x86.operands[1].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[1],bits,true));
+            return (set_op_str(handle,insn,1,bits,true));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[1],bits,true));
+            return (get_op_str(handle,insn,1,bits,true));
         }
     }
     else if (!strcmp(name,"sop2")) {
         bits = insn->detail->x86.operands[2].size*8;
         if (lset) {
-            return (set_op_str(handle,insn->detail->x86.operands[2],bits,true));
+            return (set_op_str(handle,insn,2,bits,true));
         }
         else {
-            return (get_op_str(handle,insn->detail->x86.operands[2],bits,true));
+            return (get_op_str(handle,insn,2,bits,true));
         }
     }
     else if (!strcmp(name,"mem0")) {
-        return(mem_str(handle,insn->detail->x86.operands[0]));
+        return(mem_str(handle,insn,0));
     }
     else if (!strcmp(name,"mem1")) {
-        return(mem_str(handle,insn->detail->x86.operands[1]));
+        return(mem_str(handle,insn,1));
     }
     else if (!strcmp(name,"rax")) {
         //return(Translate_reg(insn,"_al","_ax","_eax","_rax"));

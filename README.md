@@ -1,7 +1,7 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs and recompile it in a new tools.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs to recompile it in a new tools.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
@@ -176,7 +176,7 @@ First of all we are going to add more symbols to the generated code, [IDR](https
 
 ![Decrypt.](./tutorial/map.png "Decrypt.")
 
-The file is called **libffi-6.map** and is included in the tutorial folder, execute this command to convert this map to a list of addresses/names:
+The file is called **libffi-6.map** and is inclmemoryuded in the tutorial folder, execute this command to convert this map to a list of addresses/names:
 
 ```bash
 python3.7 ../src/tools/idrmap_to_butcher.py libffi-6.map > libffi-6.txt
@@ -321,7 +321,7 @@ Bajionet
 ./tool.sh 7
 BanCoppel
 ```
-## Unleashing the utility from memory
+## Unleashing the tool from the original file.
 
 Until now, we have used **Butcher** with the **'-m'** option, this option tells the generated code to load the memory from the original file at the start:
 
@@ -355,7 +355,7 @@ diff -u decrypt.old.c decrypt.c > decrypt.path
 ../Butcher -lc -a -u"@dec_mem.txt" -n"libffi-6.txt" "libffi-6.dll" "0x044FC7AC" > decrypt.c
 # patch system functions
 bash ../src/sed/c/32/patch.sh decrypt.c
-# patch ower moficications
+# patch our modfications
 patch decrypt.c decrypt.path
 # compile
 gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
@@ -372,7 +372,7 @@ chmod +x ./decrypt.sh
 
 This error means that a memory from the original file (0x435ae1) is needed and has not been detected by **butcher** during the analysis.
 
-We can add this address to the **dec_mem.txt** file and restart the process:
+We can add this address to the **dec_mem.txt** file and restart the process, this file tells **Butcher** to add the contents of that memory to the source code:
 
 ```bash
 echo "0x435ae1" >> dec_mem.txt
