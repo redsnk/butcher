@@ -1687,8 +1687,8 @@ char buffer[256];
                         num++;
                     }    
                 }
-                else if ((insn->detail->x86.operands[0].mem.base == X86_OP_INVALID) && 
-                        (insn->detail->x86.operands[0].mem.index == X86_OP_INVALID)) {
+                else if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                        (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
                         /*
                         if (arch->ValidMemory(addr)) {
