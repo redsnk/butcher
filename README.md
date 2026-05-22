@@ -220,14 +220,14 @@ Now we must patch some code inside the newly generated **decrypt.c**.
 | **System__FreeMem** |
 | **System__ReallocMem** |
 
-Also **decrypt.c** some uses other **imported** functions that we must fill with our code:
+Also **decrypt.c** uses some other **imported** functions that we must fill with our code:
 
 | System function |
 | ------------- |
 | **CharLowerBuffW** |
 | **CharUpperBuffW** |
 
-Fortunately, We have included a small script that patches all these functions:
+Fortunately, I have included a small script that patches all these functions:
 
 ```bash
 bash ../src/sed/c/32/patch.sh decrypt.c
@@ -301,7 +301,7 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 
 > Inbursa
 
-16. At the end, join all together in a new the script **tool.sh**:
+16. At the end, join all together in a new script **tool.sh**:
 
 ```bash
 #!/bin/bash
@@ -323,7 +323,7 @@ BanCoppel
 ```
 ## Unleashing the utility from memory
 
-Until now, we have used **Butcher** with the '-m' option, this option tell the generated code to use the memory from the original file:
+Until now, we have used **Butcher** with the **'-m'** option, this option tells the generated code to load the memory from the original file at the start:
 
 ```C
 [ ... ]
@@ -340,13 +340,13 @@ Until now, we have used **Butcher** with the '-m' option, this option tell the g
 [ ... ]
 ```
 
-This is not a good option if we want to create an independent tool free from the original file.
+This is not a good option if you want to create an independent tool free from the original file.
 
 17. Get a patch of the last modification:
 ```bash
 diff -u decrypt.old.c decrypt.c > decrypt.path
 ```
-18. Create a new script called **decrypt.sh":
+18. Create a new script called **decrypt.sh**:
 
 ```bash
 #!/bin/bash
