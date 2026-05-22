@@ -198,7 +198,7 @@ uint64_t start,end,index;
         // TODO; Elf32
         index = ((addr-start) / 8)+1;
         //strcpy (in->lib_name,"<none>");
-        *lib = strdup("<none>");
+        *lib = strdup("undefined");
         //strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
         *func = strdup(elf->DynStrTable+elf->DynSymTable[index].st_name);
         return (true);
