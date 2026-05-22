@@ -83,7 +83,7 @@ class Language {
     virtual void PrintFuncFooter(Code *c,int num) = 0;
     virtual void PrintSubCodeSep(void) = 0;
 
-    virtual char *Translate (csh handle,char *s, cs_insn *insn,int ends) = 0;
+    virtual char *Translate (csh handle,const char *s, cs_insn *insn,int ends) = 0;
 
     void PrintF(const char *format,...);
     char *Indent(char *str);

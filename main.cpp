@@ -247,7 +247,7 @@ int butcher_mcp(void) {
 
 const char* HELP = "\
 --------------------------------------------------------------\n\
-Butcher ("MY_VERSION") programed by Alex Bassas.\n\
+Butcher (" MY_VERSION ") programed by Alex Bassas.\n\
 --------------------------------------------------------------\n\
 usage: Butcher [-p][-l<lang>][-m][-a][-t][-e<addr,addr,...>][-n<file>] <path> <addr>\n\
 \n\

@@ -447,7 +447,7 @@ char *buffer;
     return (strdup("<Translate_item _id_item error>"));
 }
 
-char *Lang_x64::Translate (csh handle,char *s, cs_insn *insn,int ends) {
+char *Lang_x64::Translate (csh handle,const char *s, cs_insn *insn,int ends) {
 Emit *e;
 char *buffer,*it1,*it2,*it3,*it4,*it5;
 const char *op;
@@ -457,7 +457,7 @@ int n;
 
     buffer = (char *) malloc(MAX_STR_OP);
     buffer[0] = 0;
-    e = Parse(s);
+    e = Parse((char *)s);
     n = 0;
     while (n < e->count) {
         op = NULL;

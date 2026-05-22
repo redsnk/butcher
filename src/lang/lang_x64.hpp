@@ -68,7 +68,7 @@ class Lang_x64 : public Language {
     char *Translate_reg (csh handle,cs_insn *insn,int reg8,int reg16,int reg32,int reg64,int sign);
     char *Translate_var (csh handle,cs_insn *insn,char *name, int lset);
     char *Translate_item (csh handle,cs_insn *insn,_s_item *i,int lset);
-    char *Translate (csh handle,char *s, cs_insn *insn,int ends);
+    char *Translate (csh handle,const char *s, cs_insn *insn,int ends);
 };
 
 #endif // _LANG_X64_H
