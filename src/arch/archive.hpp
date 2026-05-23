@@ -27,6 +27,7 @@ class Archive {
         virtual struct _Section *GetSections(int *count) = 0;
 
         int Get_Address_At(uint64_t ptr,uint64_t *addr,int bits);
+        uint8_t *GetMemUtil(uint64_t addr,uint64_t *start,int *count);
 };
 
 #endif // _ARCHIVE_H

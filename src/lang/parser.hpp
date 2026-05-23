@@ -402,30 +402,36 @@ namespace lang {
         FLTVAR = 262,
         LF = 263,
         END = 264,
-        IF = 265,
-        THEN = 266,
-        ELSE = 267,
-        FI = 268,
-        LIST = 269,
-        NOT = 270,
-        EQUAL = 271,
-        NEQUAL = 272,
-        LT = 273,
-        GT = 274,
-        LTE = 275,
-        GTE = 276,
-        B_AND = 277,
-        B_OR = 278,
-        B_XOR = 279,
-        MUL = 280,
-        DIV = 281,
-        MOD = 282,
-        SHL = 283,
-        SHR = 284,
-        UMINUS = 285,
-        FACTORIAL = 286,
-        EXPONENT = 287,
-        INDENT = 288
+        JOIN = 265,
+        IF = 266,
+        THEN = 267,
+        ELSE = 268,
+        FI = 269,
+        GOTO = 270,
+        WHILE = 271,
+        DO = 272,
+        ENDW = 273,
+        BREAK = 274,
+        LIST = 275,
+        NOT = 276,
+        EQUAL = 277,
+        NEQUAL = 278,
+        LT = 279,
+        GT = 280,
+        LTE = 281,
+        GTE = 282,
+        B_AND = 283,
+        B_OR = 284,
+        B_XOR = 285,
+        MUL = 286,
+        DIV = 287,
+        MOD = 288,
+        SHL = 289,
+        SHR = 290,
+        UMINUS = 291,
+        FACTORIAL = 292,
+        EXPONENT = 293,
+        INDENT = 294
       };
     };
 
@@ -636,13 +642,13 @@ switch (yytype)
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == token::IF || tok == token::THEN || tok == token::ELSE || tok == token::FI || tok == 61 || tok == token::LIST || tok == token::NOT || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::SHL || tok == token::SHR || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == token::JOIN || tok == token::IF || tok == token::THEN || tok == token::ELSE || tok == token::FI || tok == token::GOTO || tok == token::WHILE || tok == token::DO || tok == token::ENDW || tok == token::BREAK || tok == 61 || tok == token::LIST || tok == token::NOT || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::SHL || tok == token::SHR || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41 || tok == 91 || tok == 93);
       }
 #else
       symbol_type (int tok)
         : super_type(token_type (tok))
       {
-        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == token::IF || tok == token::THEN || tok == token::ELSE || tok == token::FI || tok == 61 || tok == token::LIST || tok == token::NOT || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::SHL || tok == token::SHR || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41);
+        YYASSERT (tok == 0 || tok == token::LF || tok == token::END || tok == token::JOIN || tok == token::IF || tok == token::THEN || tok == token::ELSE || tok == token::FI || tok == token::GOTO || tok == token::WHILE || tok == token::DO || tok == token::ENDW || tok == token::BREAK || tok == 61 || tok == token::LIST || tok == token::NOT || tok == token::EQUAL || tok == token::NEQUAL || tok == token::LT || tok == token::GT || tok == token::LTE || tok == token::GTE || tok == 43 || tok == 45 || tok == token::B_AND || tok == token::B_OR || tok == token::B_XOR || tok == token::MUL || tok == token::DIV || tok == token::MOD || tok == token::SHL || tok == token::SHR || tok == token::UMINUS || tok == token::FACTORIAL || tok == token::EXPONENT || tok == token::INDENT || tok == 40 || tok == 41 || tok == 91 || tok == 93);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -841,6 +847,21 @@ switch (yytype)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_JOIN ()
+      {
+        return symbol_type (token::JOIN);
+      }
+#else
+      static
+      symbol_type
+      make_JOIN ()
+      {
+        return symbol_type (token::JOIN);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_IF ()
       {
         return symbol_type (token::IF);
@@ -896,6 +917,81 @@ switch (yytype)
       make_FI ()
       {
         return symbol_type (token::FI);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_GOTO ()
+      {
+        return symbol_type (token::GOTO);
+      }
+#else
+      static
+      symbol_type
+      make_GOTO ()
+      {
+        return symbol_type (token::GOTO);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_WHILE ()
+      {
+        return symbol_type (token::WHILE);
+      }
+#else
+      static
+      symbol_type
+      make_WHILE ()
+      {
+        return symbol_type (token::WHILE);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_DO ()
+      {
+        return symbol_type (token::DO);
+      }
+#else
+      static
+      symbol_type
+      make_DO ()
+      {
+        return symbol_type (token::DO);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_ENDW ()
+      {
+        return symbol_type (token::ENDW);
+      }
+#else
+      static
+      symbol_type
+      make_ENDW ()
+      {
+        return symbol_type (token::ENDW);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_BREAK ()
+      {
+        return symbol_type (token::BREAK);
+      }
+#else
+      static
+      symbol_type
+      make_BREAK ()
+      {
+        return symbol_type (token::BREAK);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -1501,12 +1597,12 @@ switch (yytype)
     enum
     {
       yyeof_ = 0,
-      yylast_ = 226,     ///< Last index in yytable_.
+      yylast_ = 403,     ///< Last index in yytable_.
       yynnts_ = 3,  ///< Number of nonterminal symbols.
-      yyfinal_ = 33, ///< Termination state number.
+      yyfinal_ = 42, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 39  ///< Number of tokens.
+      yyntokens_ = 47  ///< Number of tokens.
     };
 
 
@@ -1518,7 +1614,7 @@ switch (yytype)
 
 #line 15 "grammar.y" // lalr1.cc:401
 } // lang
-#line 1522 "parser.hpp" // lalr1.cc:401
+#line 1618 "parser.hpp" // lalr1.cc:401
 
 
 // //                    "%code provides" blocks.
@@ -1532,7 +1628,7 @@ switch (yytype)
 		void _emit(char *s, ...);
 	}
 
-#line 1536 "parser.hpp" // lalr1.cc:401
+#line 1632 "parser.hpp" // lalr1.cc:401
 
 
 #endif // !YY_YY_PARSER_HPP_INCLUDED

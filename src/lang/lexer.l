@@ -21,6 +21,11 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 "then"      return Parser::token::THEN;
 "else"      return Parser::token::ELSE;
 "fi"        return Parser::token::FI;
+"goto"      return Parser::token::GOTO;
+"while"     return Parser::token::WHILE;
+"do"        return Parser::token::DO;
+"endw"      return Parser::token::ENDW;
+"break"     return Parser::token::BREAK;
 {name}      yylval->emplace<std::string>(yytext); return Parser::token::NAME; 
 {integer}   yylval->emplace<long long>(strtoll(yytext, nullptr, 10)); return Parser::token::INT;
 {float}     yylval->emplace<double>(strtod(yytext, nullptr)); return Parser::token::FLT;
@@ -37,15 +42,16 @@ float           (({frac}{exp_opt})|({dseq}{exp}))
 ">"         return Parser::token::GT;
 "<="        return Parser::token::LTE;
 ">="        return Parser::token::GTE;
-";"         return Parser::token::END;
+"º"         return Parser::token::END;
 "."         return Parser::token::INDENT;
 ","			return Parser::token::LIST;
 ":"         return Parser::token::LF;
 "&"         return Parser::token::B_AND;
 "|"         return Parser::token::B_OR;
 "^"         return Parser::token::B_XOR;
-[-+()=]     return yytext[0];
-.           /* no action on unmatched input */
+";"         return Parser::token::JOIN;
+" "         /* ignore space */
+.           return yytext[0];
  
 %%
  

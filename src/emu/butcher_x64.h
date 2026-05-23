@@ -6,9 +6,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
+#include <inttypes.h>
 
 #define FALSE 	(0)
 #define TRUE	(-1)
+
+#define MAX_PANIC	(1024*10)
 
 struct _r8 {
 	uint8_t l;
@@ -89,18 +93,43 @@ union _eflags {
   	uint32_t r32;
 };
 
+union _freg {
+	uint64_t u;
+	double d;
+	float f;
+};
+
+struct _fpu {
+	union _freg r[8];
+	int top;
+};
+
 struct _mem {
 	uint64_t addr;
 	uint64_t size;
+	uint64_t real_size;
 	uint8_t *mem;
 };
+
+struct _error {
+	const char *code;
+	int num;
+	const char *msg;
+};
+
+#define MAX_ERRORS	20
 
 struct _cpu {
     union _reg rax,rbx,rcx,rdx,r8,r9,r10,r11,r12,r13,r14,r15,rdi,rsi,rbp,rsp;
 	union _xmm xmm0,xmm1,xmm2,xmm3,xmm4,xmm5,xmm6,xmm7;
 	union _eflags eflags;
 	struct _mem *mems;
+	struct _fpu fpu;
 	int mem_count;
+	__int128_t tmp;
+	__int128_t tmp2;
+	struct _error errors[MAX_ERRORS];
+	int num_errors;
 };
 
 // 64
@@ -256,10 +285,18 @@ struct _cpu {
 #define _xmm6	(cpu->xmm6.r128)
 #define _xmm7	(cpu->xmm7.r128)
 
+#define _st0	cpu->fpu.r[cpu->fpu.top].d
+#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8].d
+#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].d
+
+#define _tmp 	(cpu->tmp)
+#define _tmp2 	(cpu->tmp2)
+
 #define _get_byte_ptr(m)	byte_ptr(cpu,m)
 #define _get_word_ptr(m)	word_ptr(cpu,m)
 #define _get_dword_ptr(m)	dword_ptr(cpu,m)
 #define _get_qword_ptr(m)	qword_ptr(cpu,m)
+#define _get_xword_ptr(m)	xword_ptr(cpu,m)
 #define _get_dqword_ptr(m)	dqword_ptr(cpu,m)
 
 #define s_get_byte_ptr(m)	s_byte_ptr(cpu,m)
@@ -271,30 +308,23 @@ struct _cpu {
 #define _set_word_ptr(m,v)		set_word_ptr(cpu,m,v)
 #define _set_dword_ptr(m,v)		set_dword_ptr(cpu,m,v)
 #define _set_qword_ptr(m,v)		set_qword_ptr(cpu,m,v)
+#define _set_xword_ptr(m,v)		set_xword_ptr(cpu,m,v)
 #define _set_dqword_ptr(m,v)	set_dqword_ptr(cpu,m,v)
-
-/*
-#define _push_byte(v)		push(cpu,1,v)
-#define _push_word(v)		push(cpu,2,v)
-#define _push_dword(v)		push(cpu,4,v)
-#define _push_qword(v)		push(cpu,8,v)
-
-#define _pop_byte()			pop(cpu,1)
-#define _pop_word()			pop(cpu,2)
-#define _pop_dword()		pop(cpu,4)
-#define _pop_qword()		pop(cpu,8)
-*/
 
 void init(struct _cpu *cpu);
 void end(struct _cpu *cpu);
-void panic(char *str1,char *str2);
+//void panic(char *str1,char *str2);
+//void panic(const char *format,...);
+void panic(struct _cpu *cpu,const char *code,char *format,...);
 
 void call_from_iat (struct _cpu *cpu,char *lib,char *func);
+//void panic (int num,char *msg);
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func);
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
 uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
+uint64_t xword_ptr(struct _cpu *cpu,uint64_t addr);
 __uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr);
 int8_t s_byte_ptr(struct _cpu *cpu,uint64_t addr);
 int16_t s_word_ptr(struct _cpu *cpu,uint64_t addr);
@@ -303,35 +333,38 @@ int64_t s_qword_ptr(struct _cpu *cpu,uint64_t addr);
 void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
 void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
 void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
+void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value);
-/*
-void *get_reg(struct _cpu *cpu,char *reg,int *bits);
-uint8_t *get_reg_8(struct _cpu *cpu,char *reg);
-uint16_t *get_reg_16(struct _cpu *cpu,char *reg);
-uint32_t *get_reg_32(struct _cpu *cpu,char *reg);
-uint64_t *get_reg_64(struct _cpu *cpu,char *reg);
-*/
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
-uint64_t num_flag_c(struct _cpu *cpu);
+//uint64_t num_flag_c(struct _cpu *cpu);
 int flag_o(struct _cpu *cpu);
 int flag_s(struct _cpu *cpu);
+int flag_d(struct _cpu *cpu);
 void set_flag_z(struct _cpu *cpu,int value);
 void set_flag_s(struct _cpu *cpu,int value);
 void set_flag_c(struct _cpu *cpu,int value);
 void set_flag_o(struct _cpu *cpu,int value);
+void set_flag_d(struct _cpu *cpu,int value);
 void add_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2);
 void add_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 //void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2);
 void sub_flag_o(struct _cpu *cpu,int bits,int64_t op1,int64_t op2);
 void push(struct _cpu *cpu,int b,uint64_t n);
 uint64_t pop(struct _cpu *cpu,int b);
-uint64_t Pow(uint64_t b,uint64_t p);
+//uint64_t Pow(uint64_t b,uint64_t p);
 uint64_t neg(uint64_t b,uint64_t p);
 uint64_t not(uint64_t b,uint64_t p);
-uint64_t idiv(uint64_t a,uint64_t b);
+int64_t idiv(int64_t a,int64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
+void pushfpu(struct _cpu *cpu,double v);
+double popfpu(struct _cpu *cpu);
+uint64_t mask(int bits);
+double utod(uint64_t v);
+uint64_t dtou(double v);
+float utof(uint64_t v);
+uint64_t ftou(float v);
 
 void op(struct _cpu *cpu,char *op);
 void op_r(struct _cpu *cpu,char *op,char *reg);
@@ -348,24 +381,25 @@ void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps);
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i);
 
-/*
-int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
-char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max);
-char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max);
-char *uni16_to_str(char *str);
-*/
+#define EXTRA_MEM	(1024)
 
 void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size);
+void sort_mem (struct _cpu *cpu);
+int locate_mem (struct _cpu *cpu,uint64_t addr);
 void add_zero_mem (struct _cpu *cpu,uint64_t addr,int size);
 void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size);
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem);
+void del_mem(struct _cpu *cpu,int n);
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size);
+uint64_t get_free_chunk(struct _cpu *cpu,int size);
 uint64_t alloc_mem (struct _cpu *cpu,int size);
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
 void free_mem (struct _cpu *cpu,uint64_t addr);
 void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str);
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr);
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len);
+char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr);
+uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str);
 
 #endif // _BUTCHER_X64_H

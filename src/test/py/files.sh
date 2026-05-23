@@ -1,3 +1,0 @@
-#!/bin/bash
-
-../../../build/Butcher -lp "/home/alex/src/butcher/samples/api.node" 0x180002350 > test.py

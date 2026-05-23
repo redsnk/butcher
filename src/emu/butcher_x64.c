@@ -3,6 +3,8 @@
 void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
+	cpu->fpu.top = 0;
+	cpu->num_errors = 0;
 }
 
 void end(struct _cpu *cpu) {
@@ -12,9 +14,43 @@ void end(struct _cpu *cpu) {
 	free(cpu->mems);
 }
 
+/*
 void panic(char *str1,char *str2) {
 	printf("PANIC: %s - %s\n",str1,str2);
 	exit(0);
+}
+*/
+
+/*
+void panic(const char *format,...) {
+char buffer[MAX_PANIC];
+
+	va_list argptr;
+    va_start(argptr, format);
+    vsprintf(buffer,format, argptr);
+    va_end(argptr);
+	printf("PANIC: %s\n",buffer);
+	exit(0);
+}
+*/
+
+void panic(struct _cpu *cpu,const char *code,char *format,...) {
+int n;
+char buffer[MAX_PANIC];
+
+	va_list argptr;
+    va_start(argptr, format);
+    vsprintf(buffer,format, argptr);
+    va_end(argptr);
+
+	for (n=0;n<cpu->num_errors;n++) {
+		if (!strcmp(code,cpu->errors[n].code)) {
+			break;
+		}
+	}
+	if (n == cpu->num_errors) n--;	// Default error
+	fprintf(stderr,"ERROR|%i|%s|%s\n",cpu->errors[n].num,buffer,cpu->errors[n].msg);
+	exit(cpu->errors[n].num);
 }
 
 int locate_mem (struct _cpu *cpu,uint64_t addr) {
@@ -43,13 +79,36 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 	}
 	cpu->mems[cpu->mem_count].addr = addr;
 	cpu->mems[cpu->mem_count].size = size;
-	cpu->mems[cpu->mem_count].mem = (uint8_t *) malloc(size);
+	cpu->mems[cpu->mem_count].real_size = size+EXTRA_MEM;
+	cpu->mems[cpu->mem_count].mem = (uint8_t *) malloc(size+EXTRA_MEM);
 	if (mem == NULL) {
 		memset(cpu->mems[cpu->mem_count].mem,0,size);
 	} else {
 		memcpy(cpu->mems[cpu->mem_count].mem,mem,size);
 	}
 	cpu->mem_count++;
+	sort_mem(cpu);
+}
+
+void sort_mem (struct _cpu *cpu) {
+int n;
+int lexit;
+struct _mem m;
+
+	do {
+		lexit = TRUE;
+		for (n=0;n<(cpu->mem_count-1);n++) {
+			if (cpu->mems[n].addr > cpu->mems[n+1].addr) {
+				m = cpu->mems[n];
+				cpu->mems[n] = cpu->mems[n+1];
+				cpu->mems[n+1] = m;
+ 				lexit = FALSE;
+				break;
+			}
+		}
+
+	}
+	while (!lexit);
 }
 
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
@@ -65,23 +124,23 @@ uint64_t l;
 				if (!fseek(f,d_Offset,SEEK_SET)) {
 					l = fread(mem,1,d_Size,f);
 					if (l != d_Size) {
-						panic("load_mem","fread");
+						panic(cpu,"DEFAULT","load_mem-fread");
 					}
 				}
 				else {
-					panic("load_mem","fseek");
+					panic(cpu,"DEFAULT","load_mem-fseek");
 				}	
 				fclose(f);
 			}
 			else {
-				panic("load_mem","fopen");
+				panic(cpu,"DEFAULT","load_mem-fopen");
 			}
 		}
 		add_mem (cpu,v_Address,mem,v_Size);
 		free(mem);
 	}
 	else {
-		panic("load_mem","calloc");
+		panic(cpu,"DEFAULT","load_mem-calloc");
 	}
 }
 
@@ -95,7 +154,8 @@ void get_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 			return;
 		}
 	}
-	panic("get_mem","unable to find all memory");
+	//panic("get_mem error: 0x%" PRIx64 ":%li",addr,size);
+	panic(cpu,"GETMEM","0x%" PRIx64,addr);
 }
 
 int get_mem_dump (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
@@ -115,6 +175,11 @@ uint64_t last;
 }
 
 void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
+	/*
+	if ((addr <= 0x1faa008) && ((addr+size)>0x1faa008)) {
+		cpu->tmp2 = 0;
+	}
+	*/
 	for (int n=0;n<cpu->mem_count;n++) {
 		if ((addr >= cpu->mems[n].addr) && ((addr+size) <= (cpu->mems[n].addr+cpu->mems[n].size))) {
 			int o = addr - cpu->mems[n].addr;
@@ -122,7 +187,17 @@ void set_mem (struct _cpu *cpu,uint64_t addr,int size,uint8_t *mem) {
 			return;
 		}
 	}
-	panic("set_mem","");
+	//panic("set_mem error: 0x%" PRIx64 ":%li",addr,size);
+	panic(cpu,"SETMEM","0x%" PRIx64,addr);
+}
+
+void del_mem(struct _cpu *cpu,int n) {
+int m;
+
+	for (m=n;m<cpu->mem_count-1;m++) {
+		cpu->mems[m] = cpu->mems[m+1];
+	}
+	cpu->mem_count--;
 }
 
 #define DUMP_LINE (16)
@@ -139,6 +214,7 @@ char c;
 	n = 0;
 	hex[0] = 0;
 	str[0] = 0;
+	printf("hexdump: %" PRIi64 "(0x%" PRIx64 ") -------\n",off,off);
 	while (i < len) {
 		c = ((char *) addr)[i];
 		sprintf(buffer," %02x",(unsigned char )c);
@@ -157,13 +233,13 @@ char c;
 				strcat (str," ");
 				i++;
 			}
-			printf("0x%llx %s  %s\n",off,hex,str);
+			printf("0x%" PRIx64 " %s  %s\n",off,hex,str);
 			off += DUMP_LINE;
 			str[0] = 0;
 			hex[0] = 0;
 		}
 	}
-
+	printf("----------------------------\n");
 }
 
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
@@ -178,26 +254,27 @@ int n;
 	free(mem);
 }
 
-int unasigned_mem (struct _cpu *cpu,uint64_t addr,int size,uint64_t *next) {
+uint64_t get_free_chunk(struct _cpu *cpu,int size) {
+uint64_t i_addr,e_addr;
 int n;
 
+	i_addr = 0x1000;
 	for (n=0;n<cpu->mem_count;n++) {
-		if ((addr>=cpu->mems[n].addr) && (addr<(cpu->mems[n].addr+cpu->mems[n].size))) {
-			*next = cpu->mems[n].addr+cpu->mems[n].size;
-			return (FALSE);
+		e_addr = i_addr+size+EXTRA_MEM-1;
+		if (e_addr < cpu->mems[n].addr) {
+			return (i_addr);
 		}
+		i_addr = cpu->mems[n].addr+cpu->mems[n].real_size;
 	}
-	return (TRUE);
+	return (i_addr);
 }
 
 uint64_t alloc_mem (struct _cpu *cpu,int size) {
-uint64_t res = 0x1000,next;
+uint64_t addr;
 
-	while (!unasigned_mem(cpu,res,size,&next)) {
-		res = next;
-	}
-	add_mem(cpu,res,NULL,size);
-	return (res);
+	addr = get_free_chunk(cpu,size);
+	add_mem(cpu,addr,NULL,size);
+	return (addr);
 }
 
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size) {
@@ -206,19 +283,33 @@ uint64_t ret;
 
 	n = locate_mem(cpu,addr);
 	if (n >= 0) {
-		ret = alloc_mem(cpu,size);
-		m = locate_mem(cpu,ret);
-		if (m >= 0) {
-			set_mem (cpu,ret,cpu->mems[n].size,cpu->mems[n].mem);
-			free_mem(cpu,addr);
-			return (ret);
+		if (size >= cpu->mems[n].real_size) {
+			ret = alloc_mem(cpu,size);
+			m = locate_mem(cpu,ret);
+			if (m >= 0) {
+				set_mem (cpu,ret,cpu->mems[n].size,cpu->mems[n].mem);
+				del_mem(cpu,n);
+				return (ret);
+			}
+		}
+		else {
+			cpu->mems[n].size = size;
+			return(addr);
 		}
 	}
-	panic("realloc_mem","locate_mem");
+	panic(cpu,"DEFAULT","realloc_mem error: 0x%" PRIx64 ":%li",addr,size);
 }
 
 void free_mem (struct _cpu *cpu,uint64_t addr) {
-	// TODO
+int n;
+
+	n = locate_mem(cpu,addr);
+	if (n >= 0) {
+		del_mem(cpu,n);
+	}
+	else {
+		panic(cpu,"DEFAULT","free_mem error: 0x%" PRIx64,addr);
+	}
 }
 
 uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr) {
@@ -270,6 +361,13 @@ uint64_t value;
 	return (value);
 }
 
+uint64_t xword_ptr(struct _cpu *cpu,uint64_t addr) {
+uint64_t value;
+
+	get_mem (cpu,addr,10,(uint8_t *)&value);
+	return (value);
+}
+
 __uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr) {
 __uint128_t value;
 
@@ -300,6 +398,10 @@ void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 	set_mem (cpu,addr,8,(uint8_t *)&value);
 }
 
+void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
+	set_mem (cpu,addr,10,(uint8_t *)&value);
+}
+
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
 	set_mem (cpu,addr,16,(uint8_t *)&value);
 }
@@ -312,11 +414,11 @@ int n;
 	}
 }
 
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len) {
 int n;
 char *str,c;
 
-	str = (char *) malloc(1024);
+	str = (char *) malloc(1024*5);
 	n = 0;
 	while (TRUE) {
 		c = byte_ptr(cpu,addr);
@@ -327,9 +429,30 @@ char *str,c;
 		else {
 			break;
 		}
+		if ((len) && (n == len)) break;
 	}
 	str[n] = 0;
 	return (str);
+}
+
+char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+char *str;
+
+	str = get_unicode_ptr(cpu,addr,0);
+	if (str != NULL) {
+		printf("%s\n",str);
+		free(str);
+	}
+}
+
+uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str) {
+uint64_t m;
+
+	m = alloc_mem(cpu,8+(strlen(str)+1)*2);
+    _set_dword_ptr(m,0xffffffff);
+    _set_dword_ptr(m+4,strlen(str));
+    set_unicode_ptr(cpu,m+8,str);
+	return (m+8);
 }
 
 void set_z(struct _cpu *cpu,uint64_t i) {
@@ -348,9 +471,11 @@ int flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF);
 }
 
+/*
 uint64_t num_flag_c(struct _cpu *cpu) {
 	return(cpu->eflags.CF?1:0);
 }
+*/
 
 int flag_o(struct _cpu *cpu) {
 	return(cpu->eflags.OF);
@@ -358,6 +483,10 @@ int flag_o(struct _cpu *cpu) {
 
 int flag_s(struct _cpu *cpu) {
 	return(cpu->eflags.SF);
+}
+
+int flag_d(struct _cpu *cpu) {
+	return(cpu->eflags.DF);
 }
 
 void set_flag_z(struct _cpu *cpu,int value) {
@@ -374,6 +503,10 @@ void set_flag_c(struct _cpu *cpu,int value) {
 
 void set_flag_o(struct _cpu *cpu,int value) {
 	cpu->eflags.OF = value;
+}
+
+void set_flag_d(struct _cpu *cpu,int value) {
+	cpu->eflags.DF = value;
 }
 
 #define SIGN(a)	(a<0)
@@ -473,101 +606,8 @@ __int128 t;
 	}
 }
 
-/*
-char *get_mem_str (struct _cpu *cpu, uint64_t addr,int max) {
-char *m;
-int n;
-
-	m = (char *) malloc(max);
-	n = 0;
-	for (n=0;n<(max);n++) {
-		get_mem(cpu,addr+n,1,m+n);
-		if (!m[n]) {
-			break;
-		}
-	}
-	return (m);
-}
-
-char *get_mem_uni16 (struct _cpu *cpu, uint64_t addr,int max) {
-char *m;
-int n;
-
-	m = (char *) malloc(max);
-	n = 0;
-	for (n=0;n<(max);n+=2) {
-		get_mem(cpu,addr+n,2,m+n);
-		if (!m[n] && !m[n+1]) {
-			break;
-		}
-	}
-	return (m);
-}
-
-char *uni16_to_str(char *su) {
-char *str;
-int n;
-
-	// TODO: max
-	str = (char *) malloc(1024);
-	n = 0;
-	while (su[n] != 0) {
-		str[n/2] = su[n];
-		n += 2;
-	}
-	str[n/2] = 0;
-	return (str);
-}
-*/
-
-/*
-void sub_flag_c(struct _cpu *cpu,int bits,uint64_t op1,uint64_t op2) {
-__int128 t;
-
-	switch(bits) {
-		case 8:
-			t = (__int128) (uint8_t) op1 - (__int128) (uint8_t) op2;
-			cpu->eflags.CF = (t > 0xff);
-			break;
-		case 16:
-			t = (__int128) (uint16_t) op1 - (__int128) (uint16_t) op2;
-			cpu->eflags.CF = (t > 0xffff);
-			break;
-		case 32:
-			t = (__int128) (uint32_t) op1 - (__int128) (uint32_t) op2;
-			cpu->eflags.CF = (t > 0xffffffff);
-			break;
-		case 64:
-			t = (__int128) (uint64_t) op1 - (__int128) (uint64_t) op2;
-			cpu->eflags.CF = (t > 0xffffffffffffffff);
-			break;
-	}
-}
-*/
 
 void push(struct _cpu *cpu,int b,uint64_t n) {
-	/*
-	switch (bits) {
-		case 8:
-			cpu->rsp.r64 -= 1;
-			set_mem(cpu,cpu->rsp.r64,1,(uint8_t *)&n);
-			break;
-		case 16:
-			cpu->rsp.r64 -= 2;
-			set_mem(cpu,cpu->rsp.r64,2,(uint8_t *)&n);
-			break;
-		case 32:
-			cpu->rsp.r64 -= 4;
-			set_mem(cpu,cpu->rsp.r64,4,(uint8_t *)&n);
-			break;
-		case 64:
-			cpu->rsp.r64 -= 8;
-			set_mem(cpu,cpu->rsp.r64,8,(uint8_t *)&n);
-			break;
-		default:
-			panic("push bits","");
-	}
-	*/
 	cpu->rsp.r64 -= b/8;
 	set_mem(cpu,cpu->rsp.r64,b/8,(uint8_t *)&n);
 }
@@ -575,33 +615,12 @@ void push(struct _cpu *cpu,int b,uint64_t n) {
 uint64_t pop(struct _cpu *cpu,int b) {
 uint64_t ret=0;
 
-	/*
-	switch (bits) {
-		case 8:
-			get_mem(cpu,cpu->rsp.r64,1,(uint8_t*) &ret);
-			cpu->rsp.r64 += 1;
-			break;
-		case 16:
-			get_mem(cpu,cpu->rsp.r64,2,(uint8_t*) &ret);
-			cpu->rsp.r64 += 2;
-			break;
-		case 32:
-			get_mem(cpu,cpu->rsp.r64,4,(uint8_t*) &ret);
-			cpu->rsp.r64 += 4;
-			break;
-		case 64:
-			get_mem(cpu,cpu->rsp.r64,8,(uint8_t*) &ret);
-			cpu->rsp.r64 += 8;
-			break;
-		default:
-			panic("pop bits","");
-	}
-	*/
 	get_mem(cpu,cpu->rsp.r64,b/8,(uint8_t*) &ret);
 	cpu->rsp.r64 += b/8;
 	return (ret);
 }
 
+/*
 uint64_t Pow(uint64_t b,uint64_t p) {
 uint64_t n,r;
 
@@ -611,6 +630,7 @@ uint64_t n,r;
 	}
 	return (r);
 }
+*/
 
 uint64_t neg(uint64_t b,uint64_t p) {
 	return ((~p)+(uint64_t)1);
@@ -620,7 +640,7 @@ uint64_t not(uint64_t b,uint64_t p) {
 	return(~p);
 }
 
-uint64_t idiv(uint64_t a,uint64_t b) {
+int64_t idiv(int64_t a,int64_t b) {
 	return(a/b);
 }
 
@@ -640,592 +660,147 @@ uint8_t c;
 	return (r);
 }
 
+void pushfpu(struct _cpu *cpu,double v) {
+	cpu->fpu.top--;
+	if (cpu->fpu.top < 0) cpu->fpu.top = 7;
+	cpu->fpu.r[cpu->fpu.top].d = v;
+}
+
+double popfpu(struct _cpu *cpu) {
+uint64_t v;
+
+	v = cpu->fpu.r[cpu->fpu.top].d;
+	cpu->fpu.r[cpu->fpu.top].d = 0;
+	cpu->fpu.top++;
+	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
+	return (v);
+}
+
+double utod(uint64_t v) {
+union _freg c;
+
+	c.u = v;
+	return (c.d);
+}
+
+float utof(uint64_t v) {
+union _freg c;
+
+	c.u = v;
+	return (c.f);
+}
+
+uint64_t dtou(double v) {
+union _freg c;
+
+	c.d = v;
+	return (c.u);
+}
+
+uint64_t ftou(float v) {
+union _freg c;
+
+	c.f = v;
+	return (c.u);
+}
+
+uint64_t mask(int bits) {
+__uint128_t v;
+
+	v = (((__uint128_t)1) << bits);
+	v = v - 1;
+	return (v);
+}
+
 void call_from_iat (struct _cpu *cpu,char *lib,char *func) {
-	panic("call_from_iat not implemented",func);
+	panic(cpu,"IAT","call_from_iat not implemented - %s",func);
 }
 
 void jmp_from_iat (struct _cpu *cpu,char *lib,char *func) {
-	panic("jmp_from_iat not implemented",func);
+	panic(cpu,"IAT","jmp_from_iat not implemented - %s",func);
 }
 
-// ---------------------------------------------------------------------------------
-/*
-//TODO: The OF and CF flags are set to 0. The SF, ZF, and PF flags are set according to the result (see the “Operation” section above). The state of the AF flag is undefined.
-#define OP_TEST(bits) \
-void op_test_##bits(struct _cpu *cpu,uint##bits##_t d,uint##bits##_t s) {\
-	uint##bits##_t r = d & s;			\
-	set_z(cpu,r);						\
-}
-
-OP_TEST(8)
-OP_TEST(16)
-OP_TEST(32)
-OP_TEST(64)
-
-// ---------------------------------------------------------------------------------
-
-// TODO: The CF, OF, SF, ZF, AF, and PF flags are set according to the result.
-#define OP_CMP(bits) \
-void op_cmp_##bits(struct _cpu *cpu,uint##bits##_t d,uint##bits##_t s) {\
-	set_c(cpu,s > d);					\
-	set_z(cpu,d - s);					\
-}
-
-OP_CMP(8)
-OP_CMP(16)
-OP_CMP(32)
-OP_CMP(64)
-
-// ---------------------------------------------------------------------------------
-
-// TODO: The OF and CF flags are cleared; the SF, ZF, and PF flags are set according to the result. The state of the AF flag is undefined.
-#define OP_XOR(bits) \
-void op_xor_##bits(struct _cpu *cpu,uint##bits##_t d,uint##bits##_t s) {\
-	set_z(cpu,d ^ s);					\
-}
-
-OP_XOR(8)
-OP_XOR(16)
-OP_XOR(32)
-OP_XOR(64)
-
-// ---------------------------------------------------------------------------------
-*/
 void op(struct _cpu *cpu,char *op) {
-	printf("%s\n",op);
-	panic("op",op);
-	//print_cpu(cpu);
+	//printf("%s\n",op);
+	//panic("op");
+	panic(cpu,"OP","op: %s",op);
 }
-
-// ---------------------------------------------------------------------------------
-
-/*
-#define OP_R(bits) \
-void op_r_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r) {\
-	if (!strcmp(op,"push")) {		\
-		push(cpu,bits,*r);		\
-	}								\
-	else if(!strcmp(op,"pop")) {	\
-		*r = pop(cpu,bits);		\
-	}								\
-	else {							\
-		panic("op_r_"#bits" error",op);	\
-	}								\
-}
-
-OP_R(8)
-OP_R(16)
-OP_R(32)
-OP_R(64)
-*/
 
 void op_r(struct _cpu *cpu,char *op,char *reg) {
-	printf("%s %s\n",op,reg);
-/*
-void *r;
-int b;
-
-	printf("%s %s\n",op,reg);
-	r = get_reg(cpu,reg,&b);
-	switch (b) {
-		case 8:
-			op_r_8(cpu,op,(uint8_t *)r);
-			break;
-		case 16:
-			op_r_16(cpu,op,(uint16_t *)r);
-			break;
-		case 32:
-			op_r_32(cpu,op,(uint32_t *)r);
-			break;
-		case 64:
-			op_r_64(cpu,op,(uint64_t *)r);
-			break;
-		default:
-			panic("op_r bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_r","");
+	//printf("%s %s\n",op,reg);
+	//panic("op_r");
+	panic(cpu,"OP","op_r: %s %s",op,reg);
 }
 
-// ---------------------------------------------------------------------------------
-/*
-#define OP_RR(bits) \
-void op_rr_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs) {\
-	if (!strcmp(op,"mov")) {		\
-		*rd = *rs;					\
-	}								\
-	else if (!strcmp(op,"test")) {	\
-		op_test_##bits(cpu,*rd,*rs);	\
-	}								\
-	else if (!strcmp(op,"xor")) {	\
-		op_xor_##bits(cpu,*rd,*rs);	\
-		*(rd) ^= *(rs);				\
-	}								\
-	else {							\
-		panic("op_rr_"#bits" error",op);	\
-	}								\
-}
-
-OP_RR(8)
-OP_RR(16)
-OP_RR(32)
-OP_RR(64)
-*/
 
 void op_rr(struct _cpu *cpu,char *op,char *regd,char *regs) {
-	printf("%s %s,%s\n",op,regd,regs);
-/*
-void *rd,*rs;
-int bs,bd;
-
-	printf("%s %s,%s\n",op,regd,regs);
-	rd = get_reg(cpu,regd,&bd);
-	rs = get_reg(cpu,regs,&bs);
-	switch (bd) {
-		case 8:
-			op_rr_8(cpu,op,(uint8_t *)rd,(uint8_t *)rs);
-			break;
-		case 16:
-			op_rr_16(cpu,op,(uint16_t *)rd,(uint16_t *)rs);
-			break;
-		case 32:
-			op_rr_32(cpu,op,(uint32_t *)rd,(uint32_t *)rs);
-			break;
-		case 64:
-			op_rr_64(cpu,op,(uint64_t *)rd,(uint64_t *)rs);
-			break;
-		default:
-			panic("op_rr bits","");
-	}
-	print_cpu(cpu);	
-*/
-	panic("op_rr","");
+	//printf("%s %s,%s\n",op,regd,regs);
+	//panic("op_rr");
+	panic(cpu,"OP","op_rr: %s %s,%s",op,regd,regs);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_RI(bits) \
-void op_ri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r,uint##bits##_t i) {\
-	if (!strcmp(op,"mov") || !strcmp(op,"movabs")) {		\
-		*r = i;						\
-	}								\
-	else if (!strcmp(op,"cmp")) {	\
-		op_cmp_##bits(cpu,*r,i);	\
-	}								\
-	else if (!strcmp(op,"sub")) {	\
-		op_cmp_##bits(cpu,*r,i);	\
-		*r -= i;					\
-	}								\
-	else {							\
-		panic("op_rr_"#bits" error",op);	\
-	}								\
-}
-
-OP_RI(8)
-OP_RI(16)
-OP_RI(32)
-OP_RI(64)
-*/
 
 void op_ri(struct _cpu *cpu,char *op,char *reg,uint64_t i) {
-	printf("%s %s,0x%llx\n",op,reg,i);
-/*
-void *r;
-int b;
-
-	printf("%s %s,0x%llx\n",op,reg,i);
-	r = get_reg(cpu,reg,&b);
-	switch (b) {
-		case 8:
-			op_ri_8(cpu,op,(uint8_t *)r,(uint8_t) i);
-			break;
-		case 16:
-			op_ri_16(cpu,op,(uint16_t *)r,(uint16_t) i);
-			break;
-		case 32:
-			op_ri_32(cpu,op,(uint32_t *)r,(uint32_t) i);
-			break;
-		case 64:
-			op_ri_64(cpu,op,(uint64_t *)r,(uint64_t) i);
-			break;
-		default:
-			panic("op_ri bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_ri","");
+	//printf("%s %s,0x%" PRIx64 "\n",op,reg,i);
+	//panic("op_ri");
+	panic(cpu,"OP","op_ri: %s %s,0x%" PRIx64,op,reg,i);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_RM(bits) \
-void op_rm_##bits(struct _cpu *cpu,char *op,uint##bits##_t *r,uint64_t mem) {\
-	if (!strcmp(op,"mov")) {		\
-		uint##bits##_t i;						\
-		get_mem(cpu,mem,bits/8,(uint8_t *)&i);	\
-		*r = i;	\
-	}								\
-	else if (!strcmp(op,"lea")) {	\
-		*((uint##bits##_t *)r) = (uint##bits##_t) mem;	\
-	}								\
-	else {							\
-		panic("op_rm_"#bits" error",op);	\
-	}								\
-}
-
-OP_RM(8)
-OP_RM(16)
-OP_RM(32)
-OP_RM(64)
-*/
 
 void op_rm(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp) {
-	printf("%s %s,[%s+%s*%i+0x%llx]\n",op,reg,base,index,mult,disp);
-/*
-void *r;
-int b,bm;
-uint64_t mem;
-
-	printf("%s %s,[%s+%s*%i+0x%llx]\n",op,reg,base,index,mult,disp);
-	r = get_reg(cpu,reg,&b);
-	mem = get_ins_mem(cpu,base,index,mult,disp,&bm);
-	switch (b) {
-		case 16:
-			op_rm_16(cpu,op,(uint16_t *)r,mem);
-			break;
-		case 32:
-			op_rm_32(cpu,op,(uint32_t *)r,mem);
-			break;
-		case 64:
-			op_rm_64(cpu,op,(uint64_t *)r,mem);
-			break;
-		default:
-			panic("op_rm bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_rm","");
+	//printf("%s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,reg,base,index,mult,disp);
+	//panic("op_rm");
+	panic(cpu,"OP","op_rm: %s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "]",op,reg,base,index,mult,disp);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_MR(bits) \
-void op_mr_##bits(struct _cpu *cpu,char *op,uint64_t mem,uint##bits##_t *r) {\
-	if (!strcmp(op,"mov")) {				\
-		set_mem(cpu,mem,bits/8,(uint8_t *)r);	\
-	}										\
-	else if (!strcmp(op,"cmp")) {			\
-		uint##bits##_t i;					\
-		get_mem(cpu,mem,bits/8,(uint8_t *)&i);	\
-		op_cmp_##bits(cpu,i,*r);			\
-	} 										\
-	else {									\
-		panic("op_mr_"#bits" error",op);	\
-	}										\
-}
-
-OP_MR(8)
-OP_MR(16)
-OP_MR(32)
-OP_MR(64)
-*/
 
 void op_mr(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,char *reg) {
-	printf("%s [%s+%s*%i+0x%llx],%s\n",op,base,index,mult,disp,reg);
-/*
-void *r;
-int b,bm;
-uint64_t mem;
-
-	printf("%s [%s+%s*%i+0x%llx],%s\n",op,base,index,mult,disp,reg);
-	r = get_reg(cpu,reg,&b);
-	mem = get_ins_mem(cpu,base,index,mult,disp,&bm);
-	switch (b) {
-		case 8:
-			op_mr_8(cpu,op,mem,(uint8_t *)r);
-			break;
-		case 16:
-			op_mr_16(cpu,op,mem,(uint16_t *)r);
-			break;
-		case 32:
-			op_mr_32(cpu,op,mem,(uint32_t *)r);
-			break;
-		case 64:
-			op_mr_64(cpu,op,mem,(uint64_t *)r);
-			break;
-		default:
-			panic("op_mr bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_mr","");
+	//printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],%s\n",op,base,index,mult,disp,reg);
+	//panic("op_mr");
+	panic(cpu,"OP","op_mr: %s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],%s",op,base,index,mult,disp,reg); 
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_MI(bits) \
-void op_mi_##bits(struct _cpu *cpu,char *op,uint64_t mem,uint##bits##_t i) {\
-	if (!strcmp(op,"mov")) {				\
-		set_mem(cpu,mem,bits/8,(uint8_t *)&i);	\
-	} 										\
-	else {									\
-		panic("op_mi_"#bits" error",op);	\
-	}										\
-}
-
-OP_MI(8)
-OP_MI(16)
-OP_MI(32)
-OP_MI(64)
-*/
 
 void op_mi(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
-	printf("%s [%s+%s*%i+0x%llx],%llx\n",op,base,index,mult,disp,i);
-/*
-int b;
-uint64_t mem;
-
-	printf("%s [%s+%s*%i+0x%llx],%llx\n",op,base,index,mult,disp,i);
-	mem = get_ins_mem(cpu,base,index,mult,disp,&b);
-	switch (b) {
-		case 8:
-			op_mi_8(cpu,op,mem,(uint8_t)i);
-			break;
-		case 16:
-			op_mi_16(cpu,op,mem,(uint16_t)i);
-			break;
-		case 32:
-			op_mi_32(cpu,op,mem,(uint32_t)i);
-			break;
-		case 64:
-			op_mi_64(cpu,op,mem,i);
-			break;
-		default:
-			panic("op_mi bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_mi","");
+	//printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64 "\n",op,base,index,mult,disp,i);
+	//panic("op_mi");
+	panic(cpu,"OP","op_mi: %s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64,op,base,index,mult,disp,i);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_M(bits) \
-void op_m_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
-	panic("op_m_"#bits" error",op);	\
-}
-
-OP_M(8)
-OP_M(16)
-OP_M(32)
-OP_M(64)
-*/
 
 void op_m(struct _cpu *cpu,char *op,char *base,char *index,uint64_t mult,uint64_t disp) {
-	printf("%s [%s+%s*%i+0x%llx]\n",op,base,index,mult,disp);
-/*
-int b;
-uint64_t mem;
-
-	printf("%s [%s+%s*%i+0x%llx]\n",op,base,index,mult,disp);
-	mem = get_ins_mem(cpu,base,index,mult,disp,&b);
-	switch (b) {
-		case 8:
-			op_m_8(cpu,op,mem);
-			break;
-		case 16:
-			op_m_16(cpu,op,mem);
-			break;
-		case 32:
-			op_m_32(cpu,op,mem);
-			break;
-		case 64:
-			op_m_64(cpu,op,mem);
-			break;
-		default:
-			panic("op_m bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_m","");
+	//printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,base,index,mult,disp);
+	//panic("op_m");
+	panic(cpu,"OP","op_m: %s [%s+%s*%" PRIi64 "+0x%" PRIx64 "]",op,base,index,mult,disp);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_I(bits) \
-void op_i_##bits(struct _cpu *cpu,char *op,uint64_t mem) {\
-	panic("op_i_"#bits" error",op);	\
-}
-
-OP_I(8)
-OP_I(16)
-OP_I(32)
-OP_I(64)
-*/
 
 void op_i(struct _cpu *cpu,char *op,uint64_t i) {
-	printf("%s %llx\n",op,i);
-/*
-int b=0;
-
-	printf("%s %llx\n",op,i);
-	switch (b) {
-		case 8:
-			op_i_8(cpu,op,i);
-			break;
-		case 16:
-			op_i_16(cpu,op,i);
-			break;
-		case 32:
-			op_i_32(cpu,op,i);
-			break;
-		case 64:
-			op_i_64(cpu,op,i);
-			break;
-		default:
-			panic("op_i bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_i","");
+	//printf("%s 0x%" PRIx64 "\n",op,i);
+	//panic("op_i");
+	panic(cpu,"OP","op_i: %s 0x%" PRIx64,op,i);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_RRI(bits) \
-void op_rri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs,uint64_t i) {\
-	panic("op_rri_"#bits" error",op);	\
-}
-
-OP_RRI(8)
-OP_RRI(16)
-OP_RRI(32)
-OP_RRI(64)
-*/
 
 void op_rri(struct _cpu *cpu,char *op,char *regd,char *regs,uint64_t i) {
-	printf("%s %s,%s,%llx\n",op,regd,regs,i);
-/*
-void *rd,*rs;
-int bs,bd;
-
-	printf("%s %s,%s,%llx\n",op,regd,regs,i);
-	rd = get_reg(cpu,regd,&bd);
-	rs = get_reg(cpu,regs,&bs);
-	switch (bd) {
-		case 8:
-			op_rri_8(cpu,op,(uint8_t *)rd,(uint8_t *)rs,i);
-			break;
-		case 16:
-			op_rri_16(cpu,op,(uint16_t *)rd,(uint16_t *)rs,i);
-			break;
-		case 32:
-			op_rri_32(cpu,op,(uint32_t *)rd,(uint32_t *)rs,i);
-			break;
-		case 64:
-			op_rri_64(cpu,op,(uint64_t *)rd,(uint64_t *)rs,i);
-			break;
-		default:
-			panic("op_rri bits","");
-	}
-	print_cpu(cpu);	
-*/
-	panic("op_rri","");
+	//printf("%s %s,%s,0x%" PRIx64 "\n",op,regd,regs,i);
+	//panic("op_rri");
+	panic(cpu,"OP","op_rri: %s %s,%s,0x%" PRIx64,op,regd,regs,i);
 }
 
 void op_rrr(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege) {
-	printf("%s %s,%s,%s\n",op,regd,regs,rege);
-	panic("op_rrr","");
+	//printf("%s %s,%s,%s\n",op,regd,regs,rege);
+	//panic("op_rrr");
+	panic(cpu,"OP","op_rrr: %s %s,%s,%s",op,regd,regs,rege);
 }
 
 void op_rmi(struct _cpu *cpu,char *op,char *reg,char *base,char *index,uint64_t mult,uint64_t disp,uint64_t i) {
-	printf("%s %s,[%s+%s*%i+0x%llx],%llx\n",op,reg,base,index,mult,disp,i);
+	//printf("%s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64 "\n",op,reg,base,index,mult,disp,i);
+	//panic("op_rmi");
+	panic(cpu,"OP","op_rmi: %s %s,[%s+%s*%" PRIi64 "+0x%" PRIx64 "],0x%" PRIx64,op,reg,base,index,mult,disp,i);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_MM(bits) \
-void op_mm_##bits(struct _cpu *cpu,char *op,uint64_t memd,uint64_t mems) {\
-	panic("op_mm_"#bits" error",op);	\
-}
-
-OP_MM(8)
-OP_MM(16)
-OP_MM(32)
-OP_MM(64)
-*/
 
 void op_mm(struct _cpu *cpu,char *op,char *based,char *indexd,uint64_t multd,uint64_t dispd,char *bases,char *indexs,uint64_t mults,uint64_t disps) {
-	printf("%s [%s+%s*%i+0x%llx],[%s+%s*%i+0x%llx]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
-/*
-int bd,bs;
-uint64_t memd,mems;
-
-	printf("%s [%s+%s*%i+0x%llx],[%s+%s*%i+0x%llx]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
-	memd = get_ins_mem(cpu,based,indexd,multd,dispd,&bd);
-	mems = get_ins_mem(cpu,bases,indexs,mults,disps,&bs);
-	switch (bd) {
-		case 8:
-			op_mm_8(cpu,op,memd,mems);
-			break;
-		case 16:
-			op_mm_16(cpu,op,memd,mems);
-			break;
-		case 32:
-			op_mm_32(cpu,op,memd,mems);
-			break;
-		case 64:
-			op_mm_64(cpu,op,memd,mems);
-			break;
-		default:
-			panic("op_mm bits","");
-	}
-	print_cpu(cpu);
-*/
-	panic("op_mm","");
+	//printf("%s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],[%s+%s*%" PRIi64 "+0x%" PRIx64 "]\n",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
+	//panic("op_mm");
+	panic(cpu,"OP","op_mm: %s [%s+%s*%" PRIi64 "+0x%" PRIx64 "],[%s+%s*%" PRIi64 "+0x%" PRIx64 "]",op,based,indexd,multd,dispd,bases,indexs,mults,disps);
 }
-
-// ---------------------------------------------------------------------------------
-/*
-#define OP_RRRI(bits) \
-void op_rrri_##bits(struct _cpu *cpu,char *op,uint##bits##_t *rd,uint##bits##_t *rs,uint##bits##_t *re,uint64_t i) {\
-	panic("op_rrri_"#bits" error",op);	\
-}
-
-OP_RRRI(8)
-OP_RRRI(16)
-OP_RRRI(32)
-OP_RRRI(64)
-*/
 
 void op_rrri(struct _cpu *cpu,char *op,char *regd,char *regs,char *rege,uint64_t i) {
-	printf("%s %s,%s,%s,%llx\n",op,regd,regs,rege,i);
-/*
-void *rd,*rs,*re;
-int bs,bd,be;
-
-	printf("%s %s,%s,%s,%llx\n",op,regd,regs,rege,i);
-	rd = get_reg(cpu,regd,&bd);
-	rs = get_reg(cpu,regs,&bs);
-	re = get_reg(cpu,rege,&be);
-	switch (bd) {
-		case 8:
-			op_rrri_8(cpu,op,(uint8_t *)rd,(uint8_t *)rs,(uint8_t *)re,i);
-			break;
-		case 16:
-			op_rrri_16(cpu,op,(uint16_t *)rd,(uint16_t *)rs,(uint16_t *)re,i);
-			break;
-		case 32:
-			op_rrri_32(cpu,op,(uint32_t *)rd,(uint32_t *)rs,(uint32_t *)re,i);
-			break;
-		case 64:
-			op_rrri_64(cpu,op,(uint64_t *)rd,(uint64_t *)rs,(uint64_t *)re,i);
-			break;
-		default:
-			panic("op_rrri bits","");
-	}
-	print_cpu(cpu);	
-*/
-	panic("op_rrri","");
+	//printf("%s %s,%s,%s,0x%" PRIx64 "\n",op,regd,regs,rege,i);
+	//panic("op_rrri");
+	panic(cpu,"OP","op_rrri: %s %s,%s,%s,0x%" PRIx64,op,regd,regs,rege,i);
 }

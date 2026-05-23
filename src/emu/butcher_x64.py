@@ -59,10 +59,12 @@ class _xmm(Structure):
                 ("h",c_uint64)]
 
 class _mem:
-    def __init__(self, addr, data):
+    def __init__(self, addr, data, extra_mem):
         self.addr = addr
         self.size = len(data)
-        self.mem = data
+        extra = [0] * extra_mem
+        self.mem = list(data) + extra
+        self.real_size = self.size + extra_mem
 
 '''
 union _eflags {
@@ -89,6 +91,10 @@ class _eflags(Structure):
                 ("PF",c_bool),
                 ("ZF",c_bool),
                 ("SF",c_bool)]
+
+class _errors:
+    num = 0
+    msg = ""
 
 class _cpu:
     b32 = False
@@ -123,11 +129,28 @@ class _cpu:
 
     mems = []
 
+    tmp = 0
+    tmp2 = 0
+
+    errors =  dict()
+
+    EXTRA_MEM = 1024
+
+    '''
     def panic(self,text):
         for line in traceback.format_stack():
             print(line.strip())
-        print("panic: "+text)
+        print("PANIC: "+text)
         sys.exit(0)
+    '''
+
+    def panic(self,code,info):
+        if code in self.errors:
+            a = self.errors[code]
+        else:
+            a = self.error["DEFAULT"]
+        sys.stderr.write("ERROR|"+str(a[0])+"|"+info+"|"+a[1]+"\n")
+        sys.exit(a[0])
 
     def locate_mem(self,addr):
         for n in range(len(self.mems)):
@@ -142,7 +165,45 @@ class _cpu:
         return -1
 
     def add_mem(self,addr,data):
-        self.mems.append(_mem(addr,data))
+        self.mems.append(_mem(addr,data,self.EXTRA_MEM))
+        self.sort_mem()
+
+    '''
+    void sort_mem (struct _cpu *cpu) {
+    int n;
+    int lexit;
+    struct _mem m;
+
+        do {
+            lexit = TRUE;
+            for (n=0;n<(cpu->mem_count-1);n++) {
+                if (cpu->mems[n].addr > cpu->mems[n+1].addr) {
+                    m = cpu->mems[n];
+                    cpu->mems[n] = cpu->mems[n+1];
+                    cpu->mems[n+1] = m;
+                    lexit = FALSE;
+                    break;
+                }
+            }
+
+        }
+        while (!lexit);
+    }
+    '''
+
+    def sort_mem(self):
+        while True:
+            lexit = True
+            for n in range(len(self.mems)-1):
+                if self.mems[n].addr > self.mems[n+1].addr:
+                    m = self.mems[n]
+                    self.mems[n] = self.mems[n+1]
+                    self.mems[n+1] = m
+                    lexit = False
+                    break
+            if lexit:
+                break
+
 
     def add_zero_mem(self,addr,size):
         self.add_mem(addr,[0] * size)
@@ -154,7 +215,7 @@ class _cpu:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
                 return m.mem[start:start+size]
-        self.panic("get_mem - "+hex(addr))
+        self.panic("GETMEM",hex(addr))
 
     def get_mem_dump(self,addr,size):
         n = self.locate_addr_mem(addr)
@@ -176,7 +237,23 @@ class _cpu:
                 post = m.mem[start+size:]
                 m.mem = pre+data+post
                 return
-        self.panic("set_mem - "+hex(addr))
+        self.panic("SETMEM",hex(addr))
+    
+    '''
+    void del_mem(struct _cpu *cpu,int n) {
+    int m;
+
+        for (m=n;m<cpu->mem_count-1;m++) {
+            cpu->mems[m] = cpu->mems[m+1];
+        }
+        cpu->mem_count--;
+    }
+    '''
+
+    def del_mem(self,n):
+        for m in range(n,len(self.mems)-1):
+            self.mems[m] = self.mems[m+1]
+        self.mems = self.mems[0:len(self.mems)-1]
 
     def load_mem (self,name,d_Offset,d_Size,v_Address,v_Size):
         if d_Size > 0:
@@ -198,38 +275,77 @@ class _cpu:
         if len(mem) > 0:
             self.hexdump(addr,mem)
     
-    def unasigned_mem (self,addr,size):
-        for m in self.mems:
-            if (addr >= m.addr) and (addr<(m.addr+m.size)):
-                next = m.addr+m.size
-                return False,next
-        return True,0
+    '''
+    uint64_t get_free_chunk(struct _cpu *cpu,int size) {
+    uint64_t i_addr,e_addr;
+    int n;
+
+        i_addr = 0x1000;
+        for (n=0;n<cpu->mem_count;n++) {
+            e_addr = i_addr+size+EXTRA_MEM-1;
+            if (e_addr < cpu->mems[n].addr) {
+                return (i_addr);
+            }
+            i_addr = cpu->mems[n].addr+cpu->mems[n].real_size;
+        }
+        return (i_addr);
+    }
+    '''
+
+    def get_free_chunk (self,size):
+        i_addr = 0x1000
+        for n in range(len(self.mems)):
+            e_addr = i_addr + size + self.EXTRA_MEM-1
+            if e_addr < self.mems[n].addr:
+                return i_addr
+            i_addr = self.mems[n].addr + self.mems[n].real_size
+        return i_addr
+
+    '''
+    uint64_t alloc_mem (struct _cpu *cpu,int size) {
+    uint64_t addr;
+
+        addr = get_free_chunk(cpu,size);
+        add_mem(cpu,addr,NULL,size);
+        return (addr);
+    }
+
+    '''
 
     def alloc_mem (self,size):
-        res = 0x1000
-        while True:
-            done,next = self.unasigned_mem(res,size)
-            if done:
-                break
-            res = next
-        self.add_zero_mem(res,size)
-        return res 
+        addr = self.get_free_chunk(size)
+        self.add_zero_mem(addr,size)
+        return addr
     
     def realloc_mem (self,addr,size):
         n = self.locate_mem(addr)
         if n >= 0:
-            ret = self.alloc_mem(size)
-            m = self.locate_mem(ret)
-            if m >= 0:
-                self.set_mem(ret,self.mems[n].mem)
-                return ret
-        self.panic("realloc_mem")
+            # if (size >= cpu->mems[n].real_size) {
+            if size >= self.mems[n].real_size:
+                ret = self.alloc_mem(size)
+                m = self.locate_mem(ret)
+                if m >= 0:
+                    self.set_mem(ret,self.mems[n].mem)
+                    self.del_mem(n)
+                    return ret
+            else:
+                # cpu->mems[n].size = size;
+                self.mems[n].size = size
+                return addr
+        self.panic("DEFAULT","realloc_mem error: "+hex(addr)+":"+str(len(addr)))
+
+    def free_mem (self,addr):
+        n = self.locate_mem(addr)
+        if n >= 0:
+            self.del_mem(n)
+        else:
+            self.panic("DEFAULT","free_mem error: "+hex(addr))
 
     def call_from_iat (self,lib,func):
-        self.panic("call_from_iat")
+        self.panic("IAT","call_from_iat not implemented - "+func)
 
     def jmp_from_iat (self,lib,func):
-        self.panic("jmp_from_iat")
+        self.panic("IAT","jmp_from_iat not implemented - "+func)
 
     def get_byte_ptr(self,addr):
         data = self.get_mem(addr,1)
@@ -318,8 +434,8 @@ class _cpu:
             self.set_word_ptr(addr+(n*2),ord(c))
             n += 1
 
-    def get_unicode_ptr(self,addr):
-        n = 0;
+    def get_unicode_ptr(self,addr,len):
+        n = 0
         str = ""
         while True:
             c = self.get_byte_ptr(addr)
@@ -328,7 +444,20 @@ class _cpu:
                 addr += 2
             else:
                 break
+            if (len > 0) and (n == len):
+                break
         return str
+
+    def print_unicode_ptr(self,addr):
+        str = self.get_unicode_ptr(addr,0)
+        print(str)
+
+    def alloc_delphi_ustr(self,str):
+        m = self.alloc_mem(8+(len(str)+1)*2)
+        self.set_dword_ptr(m,0xffffffff)
+        self.set_dword_ptr(m+4,len(str))
+        self.set_unicode_ptr(m+8,str)
+        return m+8
 
     def push_byte(self,value):
         self.rsp.r64 = self.rsp.r64 - 1
@@ -397,12 +526,12 @@ class _cpu:
     
     def get_flag_c(self):
         return self.eflags.CF
-
+    '''
     def num_flag_c(self):
         if self.eflags.CF:
             return 1
         return 0
-    
+    '''
     def flag_o(self,b):
         self.eflags.OF = b
 
@@ -475,17 +604,22 @@ class _cpu:
         return ~c_uint64(p).value + c_uint64(1).value
 
     def idiv(self,a,b):
-        return int(a/b)
-        
+        return a//b
+        #return int(a/b)
+
+    '''
     def pow(self,b,p):
         r = 1
         for n in range(p):
             r = r * p
         return r
-
+    '''
+    
     def pshufd(self,op1,op2):
-        l = c_uint64(0).value
-        h = c_uint64(0).value
+        #l = c_uint64(0).value
+        #h = c_uint64(0).value
+        l = 0
+        h = 0
         c = op2 & 0b00000011
         if c < 2:
             d =  (op1[0] >> (32*c)) & 0xffffffff
@@ -511,6 +645,11 @@ class _cpu:
             d =  ((op1[1] >> (32*(c-2))) & 0xffffffff) << 32
         h = h | d
         return (l,h)
+
+    def mask(self,bits):
+        v = (1 << bits)
+        v = v - 1
+        return v
 
     #---------------------------------------------------------------
     # 64

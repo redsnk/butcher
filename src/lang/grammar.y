@@ -43,8 +43,9 @@
 %nterm <double>     fexp
 
 %precedence			LF
-%precedence         END
-%left				IF THEN ELSE FI
+%precedence         END JOIN
+%left				IF THEN ELSE FI GOTO
+%left               WHILE DO ENDW BREAK
 %precedence         '='
 %left				LIST
 %left               NOT EQUAL NEQUAL LT GT LTE GTE
@@ -76,9 +77,11 @@
 expr: 
 | NAME '('')'           { emit->emit_item_name(FUNC_VOID,"FUNC_VOID",$1.c_str()); }
 | NAME '(' expr ')'     { emit->emit_item_name(FUNCTION,"FUNCTION",$1.c_str()); }
+| NAME '[' expr ']'     { emit->emit_item_name(PTR,"PTR",$1.c_str()); }
 | '(' expr ')'          { emit->emit_item(ENC,"ENC"); };
 | NOT expr              { emit->emit_item(NOT,"NOT"); };
 | expr LIST expr        { emit->emit_item(LIST,"LIST"); }
+| expr JOIN expr        { emit->emit_item(JOIN,"JOIN"); }
 | expr '+' expr			{ emit->emit_item(ADD,"ADD"); }
 | expr '-' expr			{ emit->emit_item(SUB,"SUB"); }
 | expr B_AND expr       { emit->emit_item(AND,"AND"); }
@@ -90,19 +93,24 @@ expr:
 | expr SHL expr         { emit->emit_item(SHL,"SHL"); }
 | expr SHR expr         { emit->emit_item(SHR,"SHR"); }
 | NAME '=' expr			{ emit->emit_item_name(ASSIGN,"ASSIGN",$1.c_str()); }
+| expr '=' expr			{ emit->emit_item(ASSIGN_EXPR,"ASSIGN_EXPR"); }
 | expr EQUAL expr		{ emit->emit_item(EQUAL,"EQUAL"); }
 | expr NEQUAL expr      { emit->emit_item(NEQUAL,"NEQUAL"); }
 | expr LT expr          { emit->emit_item(LT,"LT"); }
 | expr GT expr          { emit->emit_item(GT,"GT"); }
 | expr LTE expr         { emit->emit_item(LTE,"LTE"); }
 | expr GTE expr         { emit->emit_item(GTE,"GTE"); }
+| NAME GOTO             { emit->emit_item_name(GOTOLABEL,"GOTOLABEL",$1.c_str()); }
+| GOTO expr             { emit->emit_item(GOTOEXPR,"GOTOEXPR"); }
 | NAME					{ emit->emit_item_name(NAME,"NAME",$1.c_str()); }
 | INT					{ emit->emit_item_number(NUMBER,"NUMBER",$1); }
 | END					{ emit->emit_item(END,"END"); }
 | INDENT                { emit->emit_item(INDENT,"INDENT"); }
 | LF                    { emit->emit_item(LF,"LF"); }
+| BREAK                 { emit->emit_item(BREAK,"BREAK"); }
 | IF expr THEN expr ELSE expr FI { emit->emit_item(IFTHENELSE,"IFTHENELS"); }
-| IF expr THEN expr FI    { emit->emit_item(IFTHEN,"IFTHEN"); }
+| IF expr THEN expr FI  { emit->emit_item(IFTHEN,"IFTHEN"); }
+| WHILE expr DO expr ENDW { emit->emit_item(WHILE,"WHILE"); }
 ;
 
 stmt_list: expr

@@ -37,10 +37,18 @@ enum _id_item {
     XOR,
     NOT,
     IFTHENELSE,
-    IFTHEN
+    IFTHEN,
+    PTR,
+    ASSIGN_EXPR,
+    GOTOLABEL,
+    GOTOEXPR,
+    JOIN,
+    WHILE,
+    ENDW,
+    BREAK
 }; 
 
-#define MAX_ITEM_NAME   (256)
+#define MAX_ITEM_NAME   (1024*5)
 
 union _v_item {
     uint64_t num;

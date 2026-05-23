@@ -1,24 +1,17 @@
 # Butcher
 A binary deconstructor
 ## What is Butcher?
-Butcher is a binary deconstructor, a tool to extract useful code from compiled programs.
-## What can I do with Butcher?
-With Butcher you can extract part of a binary as source code and use it in a new tool.
-## Can you put and example?
-Imagine you're analyzing a malware and you discover a function used to decrypt the configuration. With Butcher, you can extract this function as C or Python source code and use it into a different utility that decrypts malware configurations.
-## Is Butcher a decompiler?
-Yes, it could be called a generic decompiler.
+Butcher is a decompiler but also a binary deconstructor, a tool to extract useful code from compiled programs.
 # Tutorial
 
 ## Butchering the **GetSecret** function.
 
 Let's start with an easy example:
 1. Clone this project, compile it and move to the tutorial directory:
-```
+
+```bash
+sudo apt install git build-essential cmake libcapstone-dev libjsoncpp-dev unzip
 git clone https://github.com/redsnk/butcher
-sudo apt install build-essential
-sudo apt install cmake
-sudo apt-get install libcapstone-dev
 cd butcher/
 cmake CMakeLists.txt
 make
@@ -28,11 +21,11 @@ cd tutorial
 
 > zip protected with the password "*infected*"
 
-```
+```bash
 unzip -P infected libffi-6.zip
 ```
 
-> *libffi-6.dll* is a malware called *Grandoreiro*, a tipical Brasilian RAT compiled with **Delphi**
+> *libffi-6.dll* contains a malware called *Grandoreiro*, a tipical Brasilian RAT compiled with **Delphi**
 
 If we examine this malware with [IDR](https://github.com/crypto2011/IDR) we can identify two functions used to decrypt hidden strings:
 
@@ -51,7 +44,7 @@ The **GetSecret1** starts at **044FCB68**:
 
 3. Extract de **GetSecret** function from the malware:
 
-```
+```bash
 ../Butcher -lc -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.c
 ```
 
@@ -67,36 +60,24 @@ The **GetSecret1** starts at **044FCB68**:
 > -e0x40b830
 >> Exclude the address 0x40b830 from the analisis, this address is used to create an internal Delphi string that is no necessary in this case.
 
-4. Modify the **main** function at **secret.c** below the "*Insert code here ...*" lines:
+4. Modify the **main** function at **secret.c** below the "*Insert code here ...*" lines with new code:
 
-```
+```C
 int main (int argc, char **argv) {
 struct _cpu c,*cpu;
 
-    cpu = &c;
-    init(cpu);
-    add_mem(cpu,0xf000,NULL,10240);
-    load_mem(cpu,"libffi-6.dll",0x400,0x4458a00,0x401000,0x4459000);
-    load_mem(cpu,"libffi-6.dll",0x4458e00,0x8800,0x485a000,0x9000);
-    load_mem(cpu,"libffi-6.dll",0x4461600,0x22200,0x4863000,0x23000);
-    load_mem(cpu,"libffi-6.dll",0x0,0x0,0x4886000,0x9e000);
-    load_mem(cpu,"libffi-6.dll",0x4483800,0x4e00,0x4924000,0x5000);
-    load_mem(cpu,"libffi-6.dll",0x4488600,0x6400,0x4929000,0x7000);
-    load_mem(cpu,"libffi-6.dll",0x448ea00,0x600,0x4930000,0x1000);
-    load_mem(cpu,"libffi-6.dll",0x448f000,0x200,0x4931000,0x1000);
-    load_mem(cpu,"libffi-6.dll",0x448f200,0xb4800,0x4932000,0xb5000);
-    load_mem(cpu,"libffi-6.dll",0x4543a00,0x223000,0x49e7000,0x224000);
-    _rsp = 0x10400;
+    [ ... ]
+    _rsp = 0x1b800;
     _rbp = _rsp;
     /* Insert code here ... */
     if (argc > 1) {
         _eax = atoi(argv[1]);
     }
-    func_0x44fcb68(cpu);
+    /* .................... */
+    func_0x44fcb68(cpu,0);
     /* Insert code here ... */
-    char *str = get_unicode_ptr(cpu,_edx);
-    printf("%s\n",str);
-    free(str);
+    print_unicode_ptr(cpu,_edx);
+    /* .................... */
     end(cpu);
     return (0);
 }
@@ -104,71 +85,84 @@ struct _cpu c,*cpu;
 
 5. Compile the new tool:
 
-```
+```bash
 gcc -I../src/emu/ ../src/emu/butcher_x64.c secret.c -o secret
 ```
 
 6. Execute the new tool:
 
-```
+```bash
 ./secret 5
 ```
+Now we have the secret with index number 5:
 
 > MkIzMjk1QzMwQzRBRjkxNQ==
 
 7. Let's try with **Python**:
 
-> *** **Warning, this version only works with Python 3.7** ***
+> *** **Warning, this version only works with Python 3.7, install Python 3.7 if you don't have it** ***
+
+```bash
+#
+# If you don't have Python 3.7 install it
+#
+
+sudo apt install libssl-dev libffi-dev zlib1g-dev
+wget https://www.python.org/ftp/python/3.7.17/Python-3.7.17.tgz
+tar zxf Python-3.7.17.tgz
+cd Python-3.7.17/
+./configure --prefix=/usr/local
+make
+sudo make install
+cd ..
 
 ```
+Extract de **GetSecret** function from the malware but as Python source code now:
+
+```bash
 ../Butcher -lp -a -m -e0x40b830 "libffi-6.dll" "0x044FCB68" > secret.py
 ```
 
 > -lp
 >> Python source code.
 
-8. Modify the **main** function at **secret.py** below the "*Insert code here ...*" lines:
+8. Modify the **main** function at **secret.py**:
 
-```
+```Python
 def main():
-    cpu = _cpu()
-    cpu.b32 = True
-    cpu.add_zero_mem(0xf000,10240)
-    cpu.load_mem("libffi-6.dll",0x400,0x4458a00,0x401000,0x4459000)
-    cpu.load_mem("libffi-6.dll",0x4458e00,0x8800,0x485a000,0x9000)
-    cpu.load_mem("libffi-6.dll",0x4461600,0x22200,0x4863000,0x23000)
-    cpu.load_mem("libffi-6.dll",0x0,0x0,0x4886000,0x9e000)
-    cpu.load_mem("libffi-6.dll",0x4483800,0x4e00,0x4924000,0x5000)
-    cpu.load_mem("libffi-6.dll",0x4488600,0x6400,0x4929000,0x7000)
-    cpu.load_mem("libffi-6.dll",0x448ea00,0x600,0x4930000,0x1000)
-    cpu.load_mem("libffi-6.dll",0x448f000,0x200,0x4931000,0x1000)
-    cpu.load_mem("libffi-6.dll",0x448f200,0xb4800,0x4932000,0xb5000)
-    cpu.load_mem("libffi-6.dll",0x4543a00,0x223000,0x49e7000,0x224000)
-    cpu._rsp = 0x10400
+    [ ... ]
+    cpu._rsp = 0x1b800
     cpu._rbp = cpu._rsp
     # Insert code here ...
     import sys
     if len(sys.argv) > 1:
         cpu._eax = int(sys.argv[1])
-    func_0x44fcb68(cpu)
+    # ...
+    func_0x44fcb68(cpu,0)
     # Insert code here ...
-    str = cpu.get_unicode_ptr(cpu._edx)
-    print(str)
+    cpu.print_unicode_ptr(cpu._edx)
+    # ...
+    return 0
+
+if __name__=="__main__":
+    sys.exit(main())
 ```
 
 9. Execute the new **Python** tool:
 
-```
-sudo pip install goto-statement
+```bash
+sudo pip3.7 install goto-statement
 ln -s ../src/emu/butcher_x64.py .
-python3 secret.py 10
+python3.7 secret.py 5
 ```
+
+The same output but with Python source code:
 
 > MkIzMjk1QzMwQzRBRjkxNQ==
 
 ## Butchering the **Decrypt** function.
 
-Let's continue with a more complicated example.
+Let's go further.
 
 Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** and **DecryptDecoded** at **044FCB37**.
 
@@ -178,156 +172,161 @@ Inside the **Decrypt** function we identify two phases, **Base64 decoding** at *
 
 ![DecryptDecoded.](./tutorial/decdec.png "DecryptDecoded.")
 
+First of all we are going to add more symbols to the generated code, [IDR](https://github.com/crypto2011/IDR) contains an option to extract a map of symbols:
+
+![Decrypt.](./tutorial/map.png "Decrypt.")
+
+The file is called **libffi-6.map** and is included in the tutorial folder, execute this command to convert this map to a list of addresses/names:
+
+```bash
+python3.7 ../src/tools/idrmap_to_butcher.py libffi-6.map > libffi-6.txt
+
 ```
+**libfii-6.txt** now contains a list of named functions:
+
+```bash
+head libffi-6.txt
+
+0x4052b8,System_kernel32_CloseHandle
+0x4052c0,System_kernel32_GetStdHandle
+0x4052c8,System_kernel32_CreateFileW
+0x4052d0,System_kernel32_GetFileSize
+0x4052d8,System_kernel32_GetFileType
+0x4052e0,System_kernel32_ReadFile
+0x4052e8,System_kernel32_SetEndOfFile
+0x4052f0,System_kernel32_SetFilePointer
+0x4052f8,System_kernel32_WriteFile
+0x405300,System_kernel32_CreateDirectoryW
+
+```
+Let's extract the code:
+
+```bash
 ../Butcher -lc -a -m -n"libffi-6.txt" "libffi-6.dll" "0x044FC7AC" > decrypt.c
 ```
 
 > -n"libffi-6.txt"
->> **libffi-6.txt** it's a text list of named functions identified.
+>> **libffi-6.txt** it's the list of named functions generated previosly.
 
-```
-0x0040B440,__UStrClr
-0x00435B0C,__StringReplace
-0x0040B534,__LStrAddRef
-0x0042D4F4,__Format
-0x0040C5B0,__UStrCat
-[...]
-```
 
 Now we must patch some code inside the newly generated **decrypt.c**.
 
-11. Delphi has his own memory manager that he initializes at the start of the program, because we start directly without this initialization, we must patch this functions with the **butcher** native functions.
+11. Delphi has his own memory manager initialzed at the start of the program, because we have skipped it, we must patch this functions with **butcher** memory functions:
 
-### __GetMem:
+| Delphi function |
+| ------------- |
+| **System__GetMem** |
+| **System_AllocMem** |
+| **System__FreeMem** |
+| **System__ReallocMem** |
+
+Also **decrypt.c** uses some other **imported** functions that we must fill with our code:
+
+| System function |
+| ------------- |
+| **CharLowerBuffW** |
+| **CharUpperBuffW** |
+
+Fortunately, I have included a small script that patches all these functions:
+
+```bash
+bash ../src/sed/c/32/patch.sh decrypt.c
 
 ```
-void __GetMem(struct _cpu *cpu) {
-    // ---
-    // _eax = size
+
+Now we have the code patched:
+
+```C
+void System__GetMem(struct _cpu *cpu,uint64_t raddr) {
     _eax = alloc_mem(cpu,_eax);
     return;
-    // ---
-    push(cpu,32,0);                                                   // 0x407124:  test        eax, eax
-                                                                      // 0x407124:  test        eax, eax
-    if ((s_eax&s_eax)<=0) goto label_0x40713b;                        // 0x407126:  jle     0x40713b
-    func_0x405c00(cpu);                                               // 0x407128:  call        dword ptr [0x4863774]
+    [ ... ]
 ```
 
-### __ReallocMem:
+12. Finally, we must update de **main** function to accept one string and print the result:
 
+First af all, we save the original **decrypt.c** for future use in this tutorial:
+
+```bash
+cp decrypt.c decrypt.old.c
 ```
-void __ReallocMem(struct _cpu *cpu) {
-    // _eax = _ptr_mem
-    // _edx = size
-    uint64_t addr = _get_dword_ptr(_eax);
-    if (addr) {
-        _set_dword_ptr(_eax,realloc_mem(cpu,addr,_edx));
-    }
-    else {
-        _set_dword_ptr(_eax,alloc_mem(cpu,_edx));
-    }
-    return;
-    //
-    push(cpu,32,0);                                                   // 0x407158:  mov     ecx, dword ptr [eax]
-    _ecx = _get_dword_ptr(_eax);                                      // 0x407158:  mov     ecx, dword ptr [eax]
-                                                                      // 0x40715a:  test        ecx, ecx
-    if ((_ecx&_ecx)==0) goto label_0x407190;                          // 0x40715c:  je      0x407190
-```
+And then, update the file **decrypt.c**:
 
-### __FreeMem:
-
-```
-void __FreeMem(struct _cpu *cpu) {
-    // ---
-    return;
-    // ---
-    push(cpu,32,0);                                                   // 0x407140:  test        eax, eax
-                                                                      // 0x407140:  test        eax, eax
-    if ((_eax&_eax)==0) goto label_0x40714e;                          // 0x407142:  je      0x40714e
-    func_0x405f84(cpu);                                               // 0x407144:  call        dword ptr [0x4863778]
-                                                                      // 0x40714a:  test        eax, eax
-```
-
-12. There are also two calls to system functions that we don't need:
-
-### CharLowerBuffW
-
-```
-void func_0x419884(struct _cpu *cpu) {
-    // ---
-    _esp = _esp + 8;
-    return;
-    // ---
-    push(cpu,32,0);                                                   // 0x419884:  jmp     dword ptr [0x4924f20]
-    jmp_from_iat(cpu,"user32.dll","CharLowerBuffW");                  // 0x419884:  jmp     dword ptr [0x4924f20]
-}
-```
-
-### CharUpperBuffW
-
-```
-void func_0x4198b4(struct _cpu *cpu) {
-    // ---
-    _esp = _esp + 8;
-    return;
-    // ---
-    push(cpu,32,0);                                                   // 0x4198b4:  jmp     dword ptr [0x4925138]
-    jmp_from_iat(cpu,"user32.dll","CharUpperBuffW");                  // 0x4198b4:  jmp     dword ptr [0x4925138]
-}
-```
-
-13. Also, there are three jumps that **butcher** can not understand and must be patched:
-
-### 1)
-
-```
-    //op_r(cpu,"jmp","eax");                                            // 0x436161:    jmp     eax
-    // --------------------------------------------------------------
-label_0x43616a:
-    _edi = pop(cpu,32);                                               // 0x43616a:  pop     edi
-    _esi = pop(cpu,32);                                               // 0x43616b:  pop     esi
-    _ebx = pop(cpu,32);                                               // 0x43616c:  pop     ebx
-    _esp = _ebp;                                                      // 0x43616d:  mov     esp, ebp
-    _ebp = pop(cpu,32);                                               // 0x43616f:  pop     ebp
-    pop(cpu,32);                                                      // 0x436170:  ret     8
-    _esp = _esp+0x8;                                                  // 0x436170:  ret     8
-    return;
-```
-
-### 2)
-
-```
-    //op_r(cpu,"jmp","eax");                                            // 0x44fc626:   jmp     eax
-    // --------------------------------------------------------------
-label_0x44fc62f:
-    _esp = _ebp;                                                      // 0x44fc62f: mov     esp, ebp
-    _ebp = pop(cpu,32);                                               // 0x44fc631: pop     ebp
-    pop(cpu,32);                                                      // 0x44fc632: ret
-    return;                                                           // 0x44fc632: ret
-```
-
-### 3)
-
-```
-    //op_r(cpu,"jmp","eax");                                            // 0x44fcac0: jmp     eax
-    // --------------------------------------------------------------
-label_0x44fcac9:
-    _ebx = pop(cpu,32);                                               // 0x44fcac9: pop     ebx
-    _esp = _ebp;                                                      // 0x44fcaca: mov     esp, ebp
-    _ebp = pop(cpu,32);                                               // 0x44fcacc: pop     ebp
-    pop(cpu,32);                                                      // 0x44fcacd: ret
-    return;                                                           // 0x44fcacd: ret
-```
-
-14. Finally, we must patch de **main** function. Delphy strings have a 8 bytes header (4 bytes counter + 4 bytes length):
-
-```
+```C
 int main (int argc, char **argv) {
 struct _cpu c,*cpu;
 
     cpu = &c;
     init(cpu);
-    add_mem(cpu,0xf000,NULL,10240);
+
+    [ ... ]
+    
+    _rsp = 0x1b800;
+    _rbp = _rsp;
+    /* Insert code here ... */
+    char *secret = argv[1];
+    // Alloc delphi strings with 8 bytes header (4 bytes - counter + 4 bytes - length)
+    _edx = alloc_delphi_ustr(cpu,secret);
+    _esp += 0xfffffff4;
+    // (_ebp-0x0c) recieves the new unicode strings
+    _ecx = _ebp-0x0c;
+    /* .............. */
+    _Unit181_DecryptDecoded(cpu,0);
+    /* Insert code here ... */
+    uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
+    print_unicode_ptr(cpu,tmp);
+    /* .............. */
+    end(cpu);
+    return (0);
+}
+```
+
+15. Compile the new tool:
+
+```bash
+gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
+```
+
+16. Execute the decryptor:
+
+```bash
+./secret 5 | base64 -d
+```
+
+> 2B3295C30C4AF915
+
+```bash
+./decrypt 2B3295C30C4AF915
+```
+
+> Inbursa
+
+16. At the end, join all together in a new script called **tool.sh**:
+
+```bash
+#!/bin/bash
+
+secret=$(./secret $1 | base64 -d)
+./decrypt $secret
+```
+
+16. And execute:
+
+```bash
+chmod +x tool.sh
+./tool.sh 5
+Inbursa
+./tool.sh 6
+Bajionet
+./tool.sh 7
+BanCoppel
+```
+## Unleashing the tool from the original file.
+
+Until now, we have used **Butcher** with the **'-m'** option, this option tells the generated code to load the memory from the original file at the start:
+
+```C
+[ ... ]
     load_mem(cpu,"libffi-6.dll",0x400,0x4458a00,0x401000,0x4459000);
     load_mem(cpu,"libffi-6.dll",0x4458e00,0x8800,0x485a000,0x9000);
     load_mem(cpu,"libffi-6.dll",0x4461600,0x22200,0x4863000,0x23000);
@@ -338,65 +337,146 @@ struct _cpu c,*cpu;
     load_mem(cpu,"libffi-6.dll",0x448f000,0x200,0x4931000,0x1000);
     load_mem(cpu,"libffi-6.dll",0x448f200,0xb4800,0x4932000,0xb5000);
     load_mem(cpu,"libffi-6.dll",0x4543a00,0x223000,0x49e7000,0x224000);
-    _rsp = 0x10400;
-    _rbp = _rsp;
-    /* Insert code here ... */
-    _esp += 0xfffffff4;
-    char *secret = argv[1];
-    _edx = alloc_mem(cpu,8+strlen(secret)*2);
-    _set_dword_ptr(_edx,0xffffffff);
-    _set_dword_ptr(_edx+4,strlen(secret));
-    set_unicode_ptr(cpu,_edx+8,secret);
-    _ecx = _ebp-0x0c;
-    _edx += 8;
-    _eax = 0;
-    func_0x44fc7ac(cpu);
-    /* Insert code here ... */
-    uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
-    char *str = get_unicode_ptr(cpu,tmp);
-    printf("%s\n",str);
-    free(str);
-    end(cpu);
-    return (0);
-}
+[ ... ]
 ```
 
-15. Compile the new tool:
+This is not a good option if you want to create an independent tool free from the original file.
 
+17. Get a patch of the last modification:
+```bash
+diff -u decrypt.old.c decrypt.c > decrypt.patch
 ```
-gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
-```
+18. Create a new script called **decrypt.sh**:
 
-16. Execute the decryptor:
-
-```
-./secret 5 | base64 -d
-```
-
-> C74C9833A13BE413
-
-```
-./decrypt C74C9833A13BE413
-```
-
-> Banamex
-
-16. At the end, join all together in the script **tool.sh**:
-
-```
+```bash
 #!/bin/bash
 
-secret=$(./secret $1 | base64 -d)
-./decrypt $secret
+# butcher using an external named file instead the '-m' option
+../Butcher -lc -a -u"@dec_mem.txt" -n"libffi-6.txt" "libffi-6.dll" "0x044FC7AC" > decrypt.c
+# patch system functions
+bash ../src/sed/c/32/patch.sh decrypt.c
+# patch our modfications
+patch decrypt.c decrypt.patch
+# compile
+gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
+# test
+./decrypt 2B3295C30C4AF915
+```
+19. Execute it:
+
+```bash
+chmod +x ./decrypt.sh
+./decrypt.sh
+```
+>ERROR|2|0x435ae1|Read memory address not found.
+
+This error means that a memory from the original file (0x435ae1) is needed and has not been detected by **butcher** during the initial analysis.
+
+We can add this address to the **dec_mem.txt** file and restart the process, this file tells **Butcher** to add the contents of that memory to the source code:
+
+```bash
+echo "0x435ae1" >> dec_mem.txt
+./decrypt.sh
 ```
 
-16. And execute:
+> Inbursa
 
-```
+Great!, now we have a **decrypt** tool that is independent from the original file and much faster:
+
+```bash
 ./tool.sh 5
-Inbursa
-./tool.sh 6
-Bajionet
-./tool.sh 7
-BanCoppel
 ```
+
+> Inbursa
+
+>* **Note that the "secret" tool still depends on the original file**
+
+## I want to Encrypt!
+
+If you examine the **Decrypt** function more deeply, you realize that the **eax** is set to zero before **DecryptDecode**, actually, the function also encrypts, it does so when **eax** = 0x01.
+
+![Decrypt.](./tutorial/decrypt.png "Decrypt.")
+
+On the other hand, inside the code, we can see a call to a function that processes mindows messages, that is completely useless to us:
+
+![Message.](./tutorial/message.png "Message.")
+
+20. Firs of all, we are going to save **decrypt.c** for future use:
+
+```bash
+cp decrypt.c decrypt.old.2.c
+```
+
+21. Update **decrypt.c** to encrypt if we add one parameter more:
+
+```C
+    _rsp = 0x1b800;
+    _rbp = _rsp;
+    /* Insert code here ... */
+    char *secret = argv[1];
+    // Alloc delphi strings with 8 bytes header (4 bytes - counter + 4 bytes - length)
+    _edx = alloc_delphi_ustr(cpu,secret);
+    _esp += 0xfffffff4;
+    // (_ebp-0x0c) recieves the new unicode strings
+    _ecx = _ebp-0x0c;
+    /* if more than one parameter, encrypt */
+    if (argc > 2) {
+        _eax = 0x01;
+    }
+    /* .............. */
+    _Unit181_DecryptDecoded(cpu,0);
+    /* Insert code here ... */
+    uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
+    print_unicode_ptr(cpu,tmp);
+    /* .............. */
+    end(cpu);
+    return (0);
+```
+
+22. Save the modifications for future use:
+
+```bash
+diff -u decrypt.old.2.c decrypt.c > decrypt.2.patch
+```
+
+23. Update **decrypt.sh** to test the encryption functionality:
+
+```bash
+#!/bin/bash
+
+# Ignore the 'ProcessMessages', use '-e' option
+../Butcher -lc -a -e"0x66f388" -u"@dec_mem.txt" -n"libffi-6.txt" "libffi-6.dll" "0x044FC7AC" > decrypt.c
+# patch system functions
+bash ../src/sed/c/32/patch.sh decrypt.c
+# patch our modfications
+patch decrypt.c decrypt.patch
+patch decrypt.c decrypt.2.patch
+# compile
+gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
+# test with encription
+./decrypt "oi, f*ck off, you c*nts" 1
+```
+
+24. Execute:
+
+```bash
+./decrypt.sh
+```
+
+> ERROR|2|0x488cd10|Read memory address not found
+
+25. Add the new address to the memory file, and execute:
+
+```bash
+echo "0x488cd10" >> dec_mem.txt
+./decrypt.sh
+```
+
+> 0136AAE236A896B761D71FC66EDF46FB5888EE1F0737FD35
+
+26. Done!
+
+```bash
+./decrypt 0136AAE236A896B761D71FC66EDF46FB5888EE1F0737FD35
+```
+> oi, f\*ck off, you c\*nts

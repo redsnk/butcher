@@ -1,6 +1,7 @@
 // https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779
 // https://web.mit.edu/freebsd/head/sys/sys/elf32.h
 // https://web.mit.edu/freebsd/head/sys/sys/elf64.h
+// readelf
 
 #include "elf.hpp"
 
@@ -197,7 +198,7 @@ uint64_t start,end,index;
         // TODO; Elf32
         index = ((addr-start) / 8)+1;
         //strcpy (in->lib_name,"<none>");
-        *lib = strdup("<none>");
+        *lib = strdup("undefined");
         //strcpy (in->func_name,elf->DynStrTable+elf->DynSymTable[index].st_name);
         *func = strdup(elf->DynStrTable+elf->DynSymTable[index].st_name);
         return (true);

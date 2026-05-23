@@ -15,7 +15,7 @@
 #include "arch/archive.hpp"
 #include "lang/language.hpp"
 
-#define UNDEF_ADDR_JMP    0
+#define UNDEF_ADDR_JMP      0
 
 class Butcher {
     public:
@@ -25,18 +25,23 @@ class Butcher {
         int ltraces;
         int lasm;
         int loadm;
+        int lstack;
+        std::set<uint64_t> in;
         std::set<uint64_t> ex;
+        std::set<uint64_t> mi;
         std::map<uint64_t, std::string> named;
 
         virtual cs_err Cs_open(void) = 0;
         virtual int IsSubMem(cs_insn *insn, uint64_t *addr, uint8_t **mem, int *count) = 0;
-        virtual int IsRet(cs_insn *insn) = 0;
+        virtual int IsRet(cs_insn *insn,int *bytes) = 0;
         virtual int IsCall(cs_insn *insn, uint64_t *addr) = 0;
-        virtual int IsJmp(cs_insn *insn, int n, uint64_t *addr[],int *count) = 0;
+        virtual int IsJmp(cs_insn *insn, int n, uint64_t *addr[],int *count,int *anon) = 0;
         virtual int IsJcc(cs_insn *insn, uint64_t *addr) = 0;
+        virtual int IsJmpIAT(cs_insn *insn, char **lib, char **func) = 0;
         virtual int IsInt(cs_insn *insn, uint64_t *num) = 0;
         virtual int IsEnd(cs_insn *insn, int n, int count) = 0;
         //virtual int IsJmpIAT(cs_insn *insn) = 0;
+        virtual void AnalyzeCode(Code *c) = 0;
         virtual void PrintCode(Code *c) = 0;
         //
         Butcher(Archive *a,Language *l);
@@ -44,8 +49,11 @@ class Butcher {
         int IsGroup (cs_insn *insn, int group);
         int Excluded(uint64_t addr);
         int IsNamedFunction (uint64_t addr, char **func);
+        Code *Include(Code *c);
+        void IncludeMem(Code *c);
+        int CheckSubMems(Code *c,const char *text);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
-        void Cut(char *file_name,uint64_t address);
+        char *Cut(char *file_name,uint64_t address,int lstdout);
 };
 
 #endif // _BUTCHER_H
