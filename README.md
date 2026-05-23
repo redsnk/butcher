@@ -281,13 +281,13 @@ struct _cpu c,*cpu;
 }
 ```
 
-15. Compile the new tool:
+13. Compile the new tool:
 
 ```bash
 gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 ```
 
-16. Execute the decryptor:
+14. Execute the decryptor:
 
 ```bash
 ./secret 5 | base64 -d
@@ -301,7 +301,7 @@ gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 
 > Inbursa
 
-16. At the end, join all together in a new script called **tool.sh**:
+15. At the end, join all together in a new script called **tool.sh**:
 
 ```bash
 #!/bin/bash
