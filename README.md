@@ -162,7 +162,7 @@ The same output but with Python source code:
 
 ## Butchering the **Decrypt** function.
 
-Let's continue with a more complicated example.
+Let's go further.
 
 Inside the **Decrypt** function we identify two phases, **Base64 decoding** at **044FCB2A** and **DecryptDecoded** at **044FCB37**.
 
@@ -243,14 +243,14 @@ void System__GetMem(struct _cpu *cpu,uint64_t raddr) {
     [ ... ]
 ```
 
-12. Finally, we must patch de **main** function to accept one string and print the result:
+12. Finally, we must update de **main** function to accept one string and print the result:
 
 First af all, we save the original **decrypt.c** for future use in this tutorial:
 
 ```bash
 cp decrypt.c decrypt.old.c
 ```
-And then, patch the file **decrypt.c**:
+And then, update the file **decrypt.c**:
 
 ```C
 int main (int argc, char **argv) {
@@ -344,7 +344,7 @@ This is not a good option if you want to create an independent tool free from th
 
 17. Get a patch of the last modification:
 ```bash
-diff -u decrypt.old.c decrypt.c > decrypt.path
+diff -u decrypt.old.c decrypt.c > decrypt.patch
 ```
 18. Create a new script called **decrypt.sh**:
 
@@ -356,7 +356,7 @@ diff -u decrypt.old.c decrypt.c > decrypt.path
 # patch system functions
 bash ../src/sed/c/32/patch.sh decrypt.c
 # patch our modfications
-patch decrypt.c decrypt.path
+patch decrypt.c decrypt.patch
 # compile
 gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
 # test
@@ -389,4 +389,94 @@ Great!, now we have a **decrypt** tool that is independent from the original fil
 
 > Inbursa
 
->* **Note that the secret utility still depends on the original file**
+>* **Note that the "secret" tool still depends on the original file**
+
+## I want to Encrypt!
+
+If you examine the **Decrypt** function more deeply, you realize that the **eax** is set to zero before **DecryptDecode**, actually, the function also encrypts, it does so when **eax** = 0x01.
+
+![Decrypt.](./tutorial/decrypt.png "Decrypt.")
+
+On the other hand, inside the code, we can see a call to a function that processes mindows messages, that is completely useless to us:
+
+![Message.](./tutorial/message.png "Message.")
+
+20. Firs of all, we are going to save **decrypt.c** for future use:
+
+```bash
+cp decrypt.c decrypt.old.2.c
+```
+
+21. Update **decrypt.c** to encrypt if we add one parameter more:
+
+```C
+    _rsp = 0x1b800;
+    _rbp = _rsp;
+    /* Insert code here ... */
+    char *secret = argv[1];
+    // Alloc delphi strings with 8 bytes header (4 bytes - counter + 4 bytes - length)
+    _edx = alloc_delphi_ustr(cpu,secret);
+    _esp += 0xfffffff4;
+    // (_ebp-0x0c) recieves the new unicode strings
+    _ecx = _ebp-0x0c;
+    /* if more than one parameter, encrypt */
+    if (argc > 2) {
+        _eax = 0x01;
+    }
+    /* .............. */
+    _Unit181_DecryptDecoded(cpu,0);
+    /* Insert code here ... */
+    uint64_t tmp = _get_dword_ptr(_ebp-0x0c);
+    print_unicode_ptr(cpu,tmp);
+    /* .............. */
+    end(cpu);
+    return (0);
+```
+
+22. Save the modifications for future use:
+
+```bash
+diff -u decrypt.old.2.c decrypt.c > decrypt.2.patch
+```
+
+23. Update **decrypt.sh** to test the encryption functionality:
+
+```bash
+#!/bin/bash
+
+# Ignore the 'ProcessMessages', use '-e' option
+../Butcher -lc -a -e"0x66f388" -u"@dec_mem.txt" -n"libffi-6.txt" "libffi-6.dll" "0x044FC7AC" > decrypt.c
+# patch system functions
+bash ../src/sed/c/32/patch.sh decrypt.c
+# patch our modfications
+patch decrypt.c decrypt.patch
+patch decrypt.c decrypt.2.patch
+# compile
+gcc -I../src/emu/ ../src/emu/butcher_x64.c decrypt.c -o decrypt
+# test with encription
+./decrypt "oi, f*ck off, you c*nts" 1
+```
+
+24. Execute:
+
+```bash
+./decrypt.sh
+```
+
+> ERROR|2|0x488cd10|Read memory address not found
+
+25. Add the new address to the memory file, and execute:
+
+```bash
+echo "0x488cd10" >> dec_mem.txt
+./decrypt.sh
+```
+
+> 0136AAE236A896B761D71FC66EDF46FB5888EE1F0737FD35
+
+26. Done!
+
+```bash
+./decrypt 0136AAE236A896B761D71FC66EDF46FB5888EE1F0737FD35
+```
+> oi, f\*ck off, you c\*nts
