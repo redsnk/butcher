@@ -1589,8 +1589,24 @@ char buffer[256];
                 free(reg0);
             }
             break;
+        case X86_INS_SETGE:
+            reg0 = lang_x64->Translate(handle,"if get_sf() == get_of() then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_SETL:
             reg0 = lang_x64->Translate(handle,"if get_sf() != get_of() then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETA:
+            reg0 = lang_x64->Translate(handle,"if (!get_cf()) & (!get_zf()) then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
