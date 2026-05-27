@@ -37,6 +37,29 @@ int JccInst(cs_insn *insn) {
     return (false);
 }
 
+int CMoveInst(cs_insn *insn) {
+    switch(insn->id) {
+        case X86_INS_CMOVA:
+        case X86_INS_CMOVAE:
+        case X86_INS_CMOVB:
+        case X86_INS_CMOVBE:
+        case X86_INS_CMOVE:
+        case X86_INS_CMOVG:
+        case X86_INS_CMOVGE:
+        case X86_INS_CMOVL:
+        case X86_INS_CMOVLE:
+        case X86_INS_CMOVNE:
+        case X86_INS_CMOVNO:
+        case X86_INS_CMOVNP:
+        case X86_INS_CMOVNS:
+        case X86_INS_CMOVO:
+        case X86_INS_CMOVP:
+        case X86_INS_CMOVS:
+            return (true);
+    }
+    return (false);
+}
+
 int SetInst(cs_insn *insn) {
     switch (insn->id) {
         case X86_INS_SETA:
@@ -79,6 +102,7 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_ROR:
         case X86_INS_RCL:
         case X86_INS_RCR:
+        case X86_INS_BT:
         case X86_INS_JMP:
         case X86_INS_CALL:
             return (true);
@@ -87,7 +111,7 @@ int SetFlagInst(cs_insn *insn) {
 }
 
 int UseFlagInst(cs_insn *insn) {
-    if (JccInst(insn) || SetInst(insn)) {
+    if (JccInst(insn) || SetInst(insn) || CMoveInst(insn)) {
         return (true);
     }
     switch (insn->id) {
@@ -1147,7 +1171,15 @@ char buffer[256];
                                                     "fi",insn,true);
             }
             else {
-                reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  "zf(rax == op0);"
+                                                    "cf(op0 > rax);"
+                                                    "sf(s_rax < sop0);"
+                                                    "sub_of(bits,s_rax,sop0);"
+                                                    "if rax == op0 then "
+                                                        "op0 = op1 "
+                                                    "else "
+                                                        "rax = op0 "
+                                                    "fi",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
@@ -1297,6 +1329,14 @@ char buffer[256];
                                                     "zf(op0 == 0);"
                                                     "sf(sop0 < 0)",insn,true);
             }
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_BT:
+            reg0 = lang_x64->Translate(handle,"cf(op0 & (1 << op1))",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
