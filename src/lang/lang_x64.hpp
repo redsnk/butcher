@@ -71,4 +71,19 @@ class Lang_x64 : public Language {
     char *Translate (csh handle,const char *s, cs_insn *insn,int ends);
 };
 
+#define TEST_E      "get_zf()"
+#define TEST_NE     "!get_zf()"
+#define TEST_A      "(!get_cf()) & (!get_zf())"
+#define TEST_AE     "!get_cf()"
+#define TEST_L      "get_sf() != get_of()"
+#define TEST_LE     "get_zf() | (get_sf() != get_of())"
+#define TEST_G      "(!get_zf()) & (get_sf() == get_of())"
+#define TEST_GE     "get_sf() == get_of()"
+#define TEST_JO     "get_of()"
+#define TEST_JNO    "!get_of()"
+#define TEST_JS     "get_sf()"
+#define TEST_JNS    "!get_sf()"
+#define TEST_B      "get_cf()"
+#define TEST_BE     "get_cf() | get_zf()"
+
 #endif // _LANG_X64_H
