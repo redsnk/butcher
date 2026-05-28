@@ -230,11 +230,15 @@ char *mem;
     mem = (char *) malloc(strlen(buffer)+256);
     switch (insn->detail->x86.prefix[0]) {
         case X86_PREFIX_REP:
-            sprintf(mem,"while rcx != 0 do %s endw",buffer);
+            sprintf(mem,"while rcx != 0 do "
+                            "%s;"
+                            "rcx = rcx - 1 "
+                        "endw",buffer);
             break;
         case X86_PREFIX_REPNE:
             sprintf(mem,"while rcx != 0 do "
-                            "%s; "
+                            "%s;"
+                            "rcx = rcx - 1;"
                             "if get_zf() then break fi "
                         "endw",buffer);
             break;
@@ -1867,8 +1871,7 @@ char buffer[1024];
                                 "rdi = rdi - bytes0 "
                             "else "
                                 "rdi = rdi + bytes0 "
-                            "fi;"
-                            "rcx = rcx - 1");
+                            "fi");
             reg1 = AddREPX(buffer,insn);
             reg0 = lang_x64->Translate(handle,reg1,insn,true);
             PrintLine(insn,1,reg0);
@@ -1905,8 +1908,7 @@ char buffer[1024];
                                 "rdi = rdi - bytes0; rsi = rsi - bytes0 "
                             "else "
                                 "rdi = rdi + bytes0; rsi = rsi + bytes0 "
-                            "fi;"
-                            "rcx = rcx - 1");
+                            "fi");
             reg1 = AddREPX(buffer,insn);
             reg0 = lang_x64->Translate(handle,reg1,insn,true);
             PrintLine(insn,1,reg0);
@@ -1930,12 +1932,28 @@ char buffer[1024];
             }
             */
             break;
+        case X86_INS_STOSB:
+        case X86_INS_STOSW:
+        case X86_INS_STOSD:
+        case X86_INS_STOSQ:
+            strcpy (buffer, "op0 = op1;"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            break;
         case X86_INS_FILD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
-            break;
             break;
         case X86_INS_FLD:
             reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
