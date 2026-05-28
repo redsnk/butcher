@@ -37,6 +37,29 @@ int JccInst(cs_insn *insn) {
     return (false);
 }
 
+int CMoveInst(cs_insn *insn) {
+    switch(insn->id) {
+        case X86_INS_CMOVA:
+        case X86_INS_CMOVAE:
+        case X86_INS_CMOVB:
+        case X86_INS_CMOVBE:
+        case X86_INS_CMOVE:
+        case X86_INS_CMOVG:
+        case X86_INS_CMOVGE:
+        case X86_INS_CMOVL:
+        case X86_INS_CMOVLE:
+        case X86_INS_CMOVNE:
+        case X86_INS_CMOVNO:
+        case X86_INS_CMOVNP:
+        case X86_INS_CMOVNS:
+        case X86_INS_CMOVO:
+        case X86_INS_CMOVP:
+        case X86_INS_CMOVS:
+            return (true);
+    }
+    return (false);
+}
+
 int SetInst(cs_insn *insn) {
     switch (insn->id) {
         case X86_INS_SETA:
@@ -79,6 +102,15 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_ROR:
         case X86_INS_RCL:
         case X86_INS_RCR:
+        case X86_INS_BT:
+        case X86_INS_SCASB:
+        case X86_INS_SCASW:
+        case X86_INS_SCASD:
+        case X86_INS_SCASQ:
+        case X86_INS_CMPSB:
+        case X86_INS_CMPSW:
+        case X86_INS_CMPSD:
+        case X86_INS_CMPSQ:
         case X86_INS_JMP:
         case X86_INS_CALL:
             return (true);
@@ -87,7 +119,7 @@ int SetFlagInst(cs_insn *insn) {
 }
 
 int UseFlagInst(cs_insn *insn) {
-    if (JccInst(insn) || SetInst(insn)) {
+    if (JccInst(insn) || SetInst(insn) || CMoveInst(insn)) {
         return (true);
     }
     switch (insn->id) {
@@ -194,6 +226,31 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
             return (true);
     }
     return (false);
+}
+
+char *Base_x64::AddREPX(char *buffer,cs_insn *insn) {
+char *mem;
+
+    mem = (char *) malloc(strlen(buffer)+256);
+    switch (insn->detail->x86.prefix[0]) {
+        case X86_PREFIX_REP:
+            sprintf(mem,"while rcx != 0 do "
+                            "%s;"
+                            "rcx = rcx - 1 "
+                        "endw",buffer);
+            break;
+        case X86_PREFIX_REPNE:
+            sprintf(mem,"while rcx != 0 do "
+                            "%s;"
+                            "rcx = rcx - 1;"
+                            "if get_zf() then break fi "
+                        "endw",buffer);
+            break;
+        default:
+            strcpy(mem,buffer);
+            break;
+    }
+    return (mem);
 }
 
 #define VALID_CODE_LENGTH   16
@@ -556,7 +613,7 @@ char *lib,*func,*name;
 uint8_t *mem;
 int n,b,ldone;
 int bits;
-char buffer[256];
+char buffer[1024];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
@@ -657,8 +714,7 @@ char buffer[256];
             break;
         case X86_INS_JE:
             // (ZF=1)
-            reg0 = lang_x64->Translate(handle,"get_zf()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_E,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -667,9 +723,7 @@ char buffer[256];
             break;
         case X86_INS_JNE:
             // (ZF=0)
-            //PrintLine(insn,1,lang_x64->E_JNE,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"!get_zf()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_NE,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -678,9 +732,7 @@ char buffer[256];
             break;
         case X86_INS_JA:
             // (CF=0 and ZF=0)
-            //PrintLine(insn,1,lang_x64->E_JA,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"(!get_cf()) & (!get_zf())",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_A,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -689,9 +741,7 @@ char buffer[256];
             break;
         case X86_INS_JAE:
             // (CF=0)
-            //PrintLine(insn,1,lang_x64->E_JAE,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"!get_cf()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_AE,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -700,9 +750,7 @@ char buffer[256];
             break;
         case X86_INS_JL:
             // (SF!=OF)
-            //PrintLine(insn,1,lang_x64->E_JL,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"get_sf() != get_of()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_L,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -711,9 +759,7 @@ char buffer[256];
             break;
         case X86_INS_JLE:
             // (ZF=1 or SF!=OF)
-            //PrintLine(insn,1,lang_x64->E_JLE,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"get_zf() | (get_sf() != get_of())",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_LE,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -722,9 +768,7 @@ char buffer[256];
             break;
         case X86_INS_JG:
             // (ZF=0 and SF=OF)
-            //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"(!get_zf()) & (get_sf() == get_of())",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_G,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -733,9 +777,7 @@ char buffer[256];
             break;
         case X86_INS_JGE:
             // (SF=OF)
-            //PrintLine(insn,1,lang_x64->E_JGE,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"get_sf() == get_of()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_GE,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -744,9 +786,7 @@ char buffer[256];
             break;
         case X86_INS_JO:
             // (OF=1)
-            //PrintLine(insn,1,lang_x64->E_JO,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"get_of()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_O,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -755,9 +795,7 @@ char buffer[256];
             break;
         case X86_INS_JNO:
             // (OF=0)
-            //PrintLine(insn,1,lang_x64->E_JNO,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"!get_of()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_NO,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -766,9 +804,7 @@ char buffer[256];
             break;
         case X86_INS_JS:
             // (SF=1)
-            //PrintLine(insn,1,lang_x64->E_JS,insn->detail->x86.operands[0].imm);
-            reg0 = lang_x64->Translate(handle,"get_sf()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_S,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -777,8 +813,7 @@ char buffer[256];
             break;
         case X86_INS_JNS:
             // (SF=0)
-            reg0 = lang_x64->Translate(handle,"!get_sf()",insn,false);
-            //PrintLine(insn,1,lang_x64->E_JCC_GOTO(),reg0,insn->detail->x86.operands[0].imm);
+            reg0 = lang_x64->Translate(handle,TEST_NS,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -787,7 +822,7 @@ char buffer[256];
             break;
         case X86_INS_JB:
             // (CF=1)
-            reg0 = lang_x64->Translate(handle,"get_cf()",insn,false);
+            reg0 = lang_x64->Translate(handle,TEST_B,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -796,7 +831,7 @@ char buffer[256];
             break;
         case X86_INS_JBE:
             // (CF=1 or ZF=1)
-            reg0 = lang_x64->Translate(handle,"get_cf() | get_zf()",insn,false);
+            reg0 = lang_x64->Translate(handle,TEST_BE,insn,false);
             reg1 = GetGotoJCC(insn->detail->x86.operands[0].imm,reg0);
             PrintLine(insn,1,reg1);
             free(reg1);
@@ -1147,7 +1182,15 @@ char buffer[256];
                                                     "fi",insn,true);
             }
             else {
-                reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  "zf(rax == op0);"
+                                                    "cf(op0 > rax);"
+                                                    "sf((s_rax-sop0) < 0);"
+                                                    "sub_of(bits,s_rax,sop0);"
+                                                    "if rax == op0 then "
+                                                        "op0 = op1 "
+                                                    "else "
+                                                        "rax = op0 "
+                                                    "fi",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
@@ -1303,12 +1346,29 @@ char buffer[256];
                 free(reg0);
             }
             break;
+        case X86_INS_BT:
+            reg0 = lang_x64->Translate(handle,"cf(op0 & (1 << op1))",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_SHR:
+            // TODO: OF when op1 == 1
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,"op0 = op0 >> op1",insn,true);
             }
             else {
-                reg0 = NULL;
+                reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                    "while tmp2 > 0 do "
+                                                        "tmp = (op0 & 1);"
+                                                        "op0 = op0 >> 1;"
+                                                        "cf(tmp > 0);"
+                                                        "tmp2 = tmp2 - 1"
+                                                    "endw;"
+                                                    "zf(op0 == 0);"
+                                                    "sf(sop0 < 0)",insn,true);
             }
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
@@ -1359,6 +1419,7 @@ char buffer[256];
             }
             break;
         case X86_INS_SHLD:
+            // TODO: OF when op2 == 1
             if (FlagsNotUsed(sc,num)) {
                 reg0 = lang_x64->Translate(handle,  "tmp = op0;"
                                                     "tmp = tmp << bits0;"
@@ -1405,6 +1466,21 @@ char buffer[256];
                 free(reg0);
             }
             break;
+        case X86_INS_ROR:
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "cf(op0 & 1);"
+                                                    "op0 = op0 >> 1;"
+                                                    "if get_cf() then op0 = op0 | (1 << (bits0-1)) fi;"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_RCL:
             // TODO: OF when op1 == 1
             reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
@@ -1415,6 +1491,24 @@ char buffer[256];
                                                     "op0 = tmp & mask(bits0);"
                                                     "tmp = tmp >> bits0;"
                                                     "cf(tmp > 0);"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_RCR:
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "if get_cf() then tmp = 1 else tmp = 0 fi;"
+                                                    "tmp = tmp << bits0;" 
+                                                    "tmp = tmp | op0;"
+                                                    "cf(tmp & 1);"
+                                                    "tmp = tmp >> 1;"
+                                                    "op0 = tmp & mask(bits0);"
                                                     "tmp2 = tmp2 - 1"
                                                 "endw",insn,true);
             if (reg0 != NULL) {
@@ -1526,20 +1620,6 @@ char buffer[256];
             }
             break;
         case X86_INS_LEA:
-            /*
-            reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].reg);
-            if (IsRIP(insn->detail->x86.operands[1].mem.base)) {
-                // lea		rdx, qword ptr [rip + 0x199f7]
-                PrintLine(insn,1,lang_x64->E_MOV_RI,reg0,insn->address+insn->size+insn->detail->x86.operands[1].mem.disp);
-            }
-            else {
-                // lea		rbp, qword ptr [rsp - 0x78]
-                reg1 = lang_x64->reg_name(handle,insn->detail->x86.operands[1].mem.base);
-                PrintLine(insn,1,lang_x64->E_LEA_M,reg0,reg1,insn->detail->x86.operands[1].mem.disp);
-                free(reg1);
-            }
-            free(reg0);
-            */
             reg0 = lang_x64->Translate(handle,"op0 = mem1",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
@@ -1548,8 +1628,7 @@ char buffer[256];
             }
             break;
         case X86_INS_SETNE:
-            //reg0 = lang_x64->Translate(handle,".if get_zf()==false then op0 = 1 else op0 = 0 fi",insn,true);
-            reg0 = lang_x64->Translate(handle,"if !get_zf() then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_NE " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1557,8 +1636,7 @@ char buffer[256];
             }
             break;
         case X86_INS_SETE:
-            //reg0 = lang_x64->Translate(handle,".if get_zf()==true then op0 = 1 else op0 = 0 fi",insn,true);
-            reg0 = lang_x64->Translate(handle,"if get_zf() then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_E " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1566,7 +1644,7 @@ char buffer[256];
             }
             break;
         case X86_INS_SETB:
-            reg0 = lang_x64->Translate(handle,"if get_cf() then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_B " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1574,7 +1652,7 @@ char buffer[256];
             }
             break;
         case X86_INS_SETBE:
-            reg0 = lang_x64->Translate(handle,"if (get_cf() | get_zf()) then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_BE " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1582,7 +1660,15 @@ char buffer[256];
             }
             break;
         case X86_INS_SETG:
-            reg0 = lang_x64->Translate(handle,"if ((!get_zf()) & (get_sf() == get_of())) then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_G " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETGE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_GE " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1590,7 +1676,39 @@ char buffer[256];
             }
             break;
         case X86_INS_SETL:
-            reg0 = lang_x64->Translate(handle,"if get_sf() != get_of() then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_L " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETLE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_LE " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETS:
+            reg0 = lang_x64->Translate(handle,"if " TEST_S " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETNS:
+            reg0 = lang_x64->Translate(handle,"if " TEST_NS " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_SETA:
+            reg0 = lang_x64->Translate(handle,"if " TEST_A " then op0 = 1 else op0 = 0 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1598,7 +1716,87 @@ char buffer[256];
             }
             break;
         case X86_INS_SETAE:
-            reg0 = lang_x64->Translate(handle,"if !get_cf() then op0 = 1 else op0 = 0 fi",insn,true);
+            reg0 = lang_x64->Translate(handle,"if " TEST_AE " then op0 = 1 else op0 = 0 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVA:
+            reg0 = lang_x64->Translate(handle,"if " TEST_A " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVAE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_AE " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVG:
+            reg0 = lang_x64->Translate(handle,"if " TEST_G " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVGE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_GE " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVL:
+            reg0 = lang_x64->Translate(handle,"if " TEST_L " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVLE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_LE " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVB:
+            reg0 = lang_x64->Translate(handle,"if " TEST_B " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVBE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_BE " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_E " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVNE:
+            reg0 = lang_x64->Translate(handle,"if " TEST_NE " then op0 = op1 fi",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;
@@ -1606,11 +1804,6 @@ char buffer[256];
             }
             break;
         case X86_INS_XCHG:
-            /*
-            reg0 = lang_x64->Translate(handle,  "push(bits,op0);"
-                                                "op0 = op1;"
-                                                "op1 = pop(bits)",insn,true);
-            */
             reg0 = lang_x64->Translate(handle,  "tmp = op0;"
                                                 "op0 = op1;"
                                                 "op1 = tmp",insn,true);
@@ -1741,9 +1934,28 @@ char buffer[256];
         case X86_INS_SCASW:
         case X86_INS_SCASD:
         case X86_INS_SCASQ:
-            if (insn->detail->x86.prefix[0]== X86_PREFIX_REPNE) {
+            strcpy (buffer, "cf(op1 > op0);"
+                            "zf(op0 == op1);"
+                            "sub_of(bits,sop0,sop1);"
+                            "sf((sop0-sop1) < 0);"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            /*
+            if (insn->detail->x86.prefix[0] == X86_PREFIX_REPNE) {
                 reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
+                                                        "cf(op1 > op0);"
                                                         "zf(op0 == op1);"
+                                                        "sub_of(bits,sop0,sop1);"
+                                                        "sf((sop0-sop1) < 0);"
                                                         "if get_df() then "
                                                             "rdi = rdi - bytes0 "
                                                         "else "
@@ -1756,11 +1968,25 @@ char buffer[256];
                 free(reg0);
                 num++;
             }
+            */
             break;
         case X86_INS_MOVSB:
         case X86_INS_MOVSW:
         case X86_INS_MOVSD:
         case X86_INS_MOVSQ:
+            strcpy (buffer, "op0 = op1;"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0; rsi = rsi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0; rsi = rsi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            /*
             if (insn->detail->x86.prefix[0]== X86_PREFIX_REP) {
                 reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
                                                         "op0 = op1;"
@@ -1775,13 +2001,50 @@ char buffer[256];
                 free(reg0);
                 num++;
             }
+            */
+            break;
+        case X86_INS_CMPSB:
+        case X86_INS_CMPSW:
+        case X86_INS_CMPSD:
+        case X86_INS_CMPSQ:
+            strcpy (buffer, "cf(op1 > op0);"
+                            "zf(op0 == op1);"
+                            "sub_of(bits,sop0,sop1);"
+                            "sf((sop0-sop1) < 0);"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0; rsi = rsi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0; rsi = rsi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            break;
+        case X86_INS_STOSB:
+        case X86_INS_STOSW:
+        case X86_INS_STOSD:
+        case X86_INS_STOSQ:
+            strcpy (buffer, "op0 = op1;"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
             break;
         case X86_INS_FILD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
-            break;
             break;
         case X86_INS_FLD:
             reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "

@@ -27,6 +27,7 @@ class Base_x64 : public Butcher {
         int IsInt(cs_insn *insn, uint64_t *num);
         int IsEnd(cs_insn *insn, int n, int count);
         //int IsJmpIAT(cs_insn *insn);
+        char *AddREPX(char *buffer,cs_insn *insn);
 
         //using Butcher::Butcher;
         void PrintLine(cs_insn *insn,int indent,const char *format,...);
