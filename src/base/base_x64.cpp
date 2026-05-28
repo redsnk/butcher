@@ -1503,11 +1503,12 @@ char buffer[1024];
             // TODO: OF when op1 == 1
             reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
                                                 "while tmp2 > 0 do "
-                                                    "tmp = op0;"
-                                                    "if get_cf() then tmp = tmp | (1 << bits0) fi;"
+                                                    "if get_cf() then tmp = 1 else tmp = 0 fi;"
+                                                    "tmp = tmp << bits0;" 
+                                                    "tmp = tmp | op0;"
                                                     "cf(tmp & 1);"
                                                     "tmp = tmp >> 1;"
-                                                    "op0 = tmp;"
+                                                    "op0 = tmp & mask(bits0);"
                                                     "tmp2 = tmp2 - 1"
                                                 "endw",insn,true);
             if (reg0 != NULL) {
