@@ -103,6 +103,10 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_RCL:
         case X86_INS_RCR:
         case X86_INS_BT:
+        case X86_INS_SCASB:
+        case X86_INS_SCASW:
+        case X86_INS_SCASD:
+        case X86_INS_SCASQ:
         case X86_INS_JMP:
         case X86_INS_CALL:
             return (true);
@@ -218,6 +222,27 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
             return (true);
     }
     return (false);
+}
+
+char *Base_x64::AddREPX(char *buffer,cs_insn *insn) {
+char *mem;
+
+    mem = (char *) malloc(strlen(buffer)+256);
+    switch (insn->detail->x86.prefix[0]) {
+        case X86_PREFIX_REP:
+            sprintf(mem,"while rcx != 0 do %s endw",buffer);
+            break;
+        case X86_PREFIX_REPNE:
+            sprintf(mem,"while rcx != 0 do "
+                            "%s; "
+                            "if get_zf() then break fi "
+                        "endw",buffer);
+            break;
+        default:
+            strcpy(mem,buffer);
+            break;
+    }
+    return (mem);
 }
 
 #define VALID_CODE_LENGTH   16
@@ -580,7 +605,7 @@ char *lib,*func,*name;
 uint8_t *mem;
 int n,b,ldone;
 int bits;
-char buffer[256];
+char buffer[1024];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
@@ -1151,7 +1176,7 @@ char buffer[256];
             else {
                 reg0 = lang_x64->Translate(handle,  "zf(rax == op0);"
                                                     "cf(op0 > rax);"
-                                                    "sf(s_rax < sop0);"
+                                                    "sf((s_rax-sop0) < 0);"
                                                     "sub_of(bits,s_rax,sop0);"
                                                     "if rax == op0 then "
                                                         "op0 = op1 "
@@ -1834,9 +1859,29 @@ char buffer[256];
         case X86_INS_SCASW:
         case X86_INS_SCASD:
         case X86_INS_SCASQ:
-            if (insn->detail->x86.prefix[0]== X86_PREFIX_REPNE) {
+            strcpy (buffer, "cf(op1 > op0);"
+                            "zf(op0 == op1);"
+                            "sub_of(bits,sop0,sop1);"
+                            "sf((sop0-sop1) < 0);"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0 "
+                            "fi;"
+                            "rcx = rcx - 1");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            /*
+            if (insn->detail->x86.prefix[0] == X86_PREFIX_REPNE) {
                 reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
+                                                        "cf(op1 > op0);"
                                                         "zf(op0 == op1);"
+                                                        "sub_of(bits,sop0,sop1);"
+                                                        "sf((sop0-sop1) < 0);"
                                                         "if get_df() then "
                                                             "rdi = rdi - bytes0 "
                                                         "else "
@@ -1849,11 +1894,26 @@ char buffer[256];
                 free(reg0);
                 num++;
             }
+            */
             break;
         case X86_INS_MOVSB:
         case X86_INS_MOVSW:
         case X86_INS_MOVSD:
         case X86_INS_MOVSQ:
+            strcpy (buffer, "op0 = op1;"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0; rsi = rsi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0; rsi = rsi + bytes0 "
+                            "fi;"
+                            "rcx = rcx - 1");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            /*
             if (insn->detail->x86.prefix[0]== X86_PREFIX_REP) {
                 reg0 = lang_x64->Translate(handle,  "while rcx != 0 do "
                                                         "op0 = op1;"
@@ -1868,6 +1928,7 @@ char buffer[256];
                 free(reg0);
                 num++;
             }
+            */
             break;
         case X86_INS_FILD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
