@@ -1462,6 +1462,21 @@ char buffer[1024];
                 free(reg0);
             }
             break;
+        case X86_INS_ROR:
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "cf(op0 & 1);"
+                                                    "op0 = op0 >> 1;"
+                                                    "if get_cf() then op0 = op0 | (1 << (bits0-1)) fi;"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_RCL:
             // TODO: OF when op1 == 1
             reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
@@ -1472,6 +1487,23 @@ char buffer[1024];
                                                     "op0 = tmp & mask(bits0);"
                                                     "tmp = tmp >> bits0;"
                                                     "cf(tmp > 0);"
+                                                    "tmp2 = tmp2 - 1"
+                                                "endw",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_RCR:
+            // TODO: OF when op1 == 1
+            reg0 = lang_x64->Translate(handle,  "tmp2 = op1;"
+                                                "while tmp2 > 0 do "
+                                                    "tmp = op0;"
+                                                    "if get_cf() then tmp = tmp | (1 << bits0) fi;"
+                                                    "cf(tmp & 1);"
+                                                    "tmp = tmp >> 1;"
+                                                    "op0 = tmp;"
                                                     "tmp2 = tmp2 - 1"
                                                 "endw",insn,true);
             if (reg0 != NULL) {
