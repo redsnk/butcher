@@ -107,6 +107,10 @@ int SetFlagInst(cs_insn *insn) {
         case X86_INS_SCASW:
         case X86_INS_SCASD:
         case X86_INS_SCASQ:
+        case X86_INS_CMPSB:
+        case X86_INS_CMPSW:
+        case X86_INS_CMPSD:
+        case X86_INS_CMPSQ:
         case X86_INS_JMP:
         case X86_INS_CALL:
             return (true);
@@ -1997,6 +2001,26 @@ char buffer[1024];
                 num++;
             }
             */
+            break;
+        case X86_INS_CMPSB:
+        case X86_INS_CMPSW:
+        case X86_INS_CMPSD:
+        case X86_INS_CMPSQ:
+            strcpy (buffer, "cf(op1 > op0);"
+                            "zf(op0 == op1);"
+                            "sub_of(bits,sop0,sop1);"
+                            "sf((sop0-sop1) < 0);"
+                            "if get_df() then "
+                                "rdi = rdi - bytes0; rsi = rsi - bytes0 "
+                            "else "
+                                "rdi = rdi + bytes0; rsi = rsi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
             break;
         case X86_INS_STOSB:
         case X86_INS_STOSW:
