@@ -2040,6 +2040,23 @@ char buffer[1024];
             free(reg1);
             num++;
             break;
+        case X86_INS_LODSB:
+        case X86_INS_LODSW:
+        case X86_INS_LODSD:
+        case X86_INS_LODSQ:
+            strcpy (buffer, "op0 = op1;"
+                            "if get_df() then "
+                                "rsi = rsi - bytes0 "
+                            "else "
+                                "rsi = rsi + bytes0 "
+                            "fi");
+            reg1 = AddREPX(buffer,insn);
+            reg0 = lang_x64->Translate(handle,reg1,insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            free(reg1);
+            num++;
+            break;
         case X86_INS_FILD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
             PrintLine(insn,1,reg0);
