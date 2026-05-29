@@ -2201,12 +2201,14 @@ char buffer[1024];
             }
             break;
         case X86_INS_FNSTCW:
+            // TODO: ALL
             reg0 = lang_x64->Translate(handle,"op0 = 0",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
             break;
         case X86_INS_FLDCW:
+            // TODO: ALL
             if (insn->detail->x86.op_count == 1) {
                 PrintLine(insn,1,"");
                 num++;
