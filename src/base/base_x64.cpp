@@ -1847,6 +1847,7 @@ char buffer[1024];
             free(reg0);
             break;
         case X86_INS_CALL:
+            /*
             raddr = insn->address+insn->size;
             if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
                 // call            0x180002240
@@ -1883,17 +1884,6 @@ char buffer[1024];
                 else if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                         (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
                     if (arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
-                        /*
-                        if (arch->ValidMemory(addr)) {
-                            if (!Excluded(addr)) {
-                                PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr);
-                            }
-                            else {
-                                PrintLine(insn,0,lang_x64->E_SPACE());
-                            }
-                            num++;
-                        }
-                        */
                         if (!Excluded(addr)) {
                             if (ValidCode(addr)) {
                                 name = c->GetFunctionName(addr);
@@ -1923,6 +1913,67 @@ char buffer[1024];
             }
             else {
                 // Register
+                sprintf(buffer,"anoncall(op0,%llu)",raddr);
+                reg0 = lang_x64->Translate(handle,buffer,insn,true);
+                PrintLine(insn,1,reg0);
+                free(reg0);
+                num++;
+            }
+            */
+            raddr = insn->address+insn->size;
+            addr = 0;
+            if (insn->detail->x86.operands[0].type == X86_OP_IMM) {
+                // call            0x180002240
+                addr = insn->detail->x86.operands[0].imm;
+            }
+            else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+                // Memory
+                if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                    addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;  
+                }
+                else if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                        (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
+                    if (!arch->Get_Address_At(insn->detail->x86.operands[0].mem.disp,&addr,insn->detail->x86.addr_size*8)) {
+                        addr = 0;
+                    }
+                }
+            }
+            if (addr != 0) {
+                if (!Excluded(addr)) {
+                    if (arch->IsImportFunction(addr,&lib,&func)) {
+                        PrintLine(insn,1,lang_x64->E_CALL_FROM_IAT(),lib,func);
+                        free(lib);
+                        free(func);
+                        num++;
+                    } 
+                    else if (ValidCode(addr)) {
+                        name = c->GetFunctionName(addr);
+                        if (name != NULL) {
+                            PrintLine(insn,1,lang_x64->E_FUNC_NAME(),name,raddr);
+                            free(name);   
+                        }
+                        else {
+                            PrintLine(insn,1,lang_x64->E_FUNC_ADDR(),addr,raddr);
+                        }
+                        num++;
+                    }
+                    else {
+                        // Anon
+                        sprintf(buffer,"anoncall(op0,%llu)",raddr);
+                        reg0 = lang_x64->Translate(handle,buffer,insn,true);
+                        PrintLine(insn,1,reg0);
+                        free(reg0);
+                        num++; 
+                    }
+                }
+                else {
+                    // Excluded
+                    PrintLine(insn,0,lang_x64->E_SPACE());
+                    num++;
+                }             
+            }
+            else {
+                // Anon
                 sprintf(buffer,"anoncall(op0,%llu)",raddr);
                 reg0 = lang_x64->Translate(handle,buffer,insn,true);
                 PrintLine(insn,1,reg0);
