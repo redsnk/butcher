@@ -7,7 +7,7 @@
 #include "src/base/base_x64.hpp"
 #include "src/mcp/mcp_server.hpp"
 
-#define MY_VERSION  "v0.0.13"
+#define MY_VERSION  "v0.0.14"
 
 #define MAX_STR     (1024)
 

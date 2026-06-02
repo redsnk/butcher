@@ -4,6 +4,7 @@ void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
 	cpu->fpu.top = 0;
+	cpu->fpu.sw.r16 = 0;
 	cpu->num_errors = 0;
 }
 

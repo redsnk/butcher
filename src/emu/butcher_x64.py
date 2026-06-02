@@ -85,12 +85,79 @@ union _eflags {
   	uint32_t r32;
 };
 '''
-class _eflags(Structure):
-    _fields_ = [("CF",c_bool),
-                ("OF",c_bool),
-                ("PF",c_bool),
-                ("ZF",c_bool),
-                ("SF",c_bool)]
+
+class _eflag(Structure):
+    _fields_ = [("CF",c_uint32,1),
+                ("_u1",c_uint32,1),
+                ("PF",c_uint32,1),
+                ("_u2",c_uint32,1),
+                ("AF",c_uint32,1),
+                ("_u3",c_uint32,1),
+                ("ZF",c_uint32,1),
+                ("SF",c_uint32,1),
+                ("TF",c_uint32,1),
+                ("IF",c_uint32,1),
+                ("DF",c_uint32,1),
+                ("OF",c_uint32,1)]
+
+class _eflags(Union):
+    _fields_ = [("flags",_eflag),
+                ("r32",c_uint32)]
+
+'''
+union _freg {
+	uint64_t u;
+	double d;
+	float f;
+};
+'''
+
+class _freg(Union):
+    _fields_ = [("u",c_uint64),
+                ("d",c_double),
+                ("f",c_float)]
+
+'''
+union _sw {
+	struct {
+		uint16_t _u0 	: 8;
+		uint16_t C0 	: 1;
+		uint16_t C1 	: 1;
+		uint16_t C2 	: 1;
+		uint16_t _u1 	: 3;
+		uint32_t C3 	: 1;
+		uint16_t _u2 	: 1;
+	};
+	uint16_t r16;
+};
+'''
+
+class _swc(Structure):
+    _fields_ = [("_u0",c_uint16,8),
+                ("C0",c_uint16,1),
+                ("C1",c_uint16,1),
+                ("C2",c_uint16,1),
+                ("_u1",c_uint16,3),
+                ("C3",c_uint16,1),
+                ("_u2",c_uint16,1)]
+
+class _sw(Union):
+    _fields_ = [("sw",_swc),
+                ("r16",c_uint16)]
+
+'''
+struct _fpu {
+	union _freg r[8];
+	int top;
+	union _sw sw;
+};
+'''
+
+class _fpu:
+    r = [_freg] * 8
+    top = 0
+    sw = _sw()
+
 
 class _errors:
     num = 0
@@ -126,6 +193,8 @@ class _cpu:
     xmm7 = _xmm()
 
     eflags = _eflags()
+
+    fpu = _fpu()
 
     mems = []
 
@@ -516,34 +585,35 @@ class _cpu:
             return self.pop_qword()
         
     def flag_z(self,b):
-        self.eflags.ZF = b
+        self.eflags.flags.ZF = b
     
     def get_flag_z(self):
-        return self.eflags.ZF
+        return self.eflags.flags.ZF
 
     def flag_c(self,b):
-        self.eflags.CF = b
+        self.eflags.flags.CF = b
     
     def get_flag_c(self):
-        return self.eflags.CF
-    '''
-    def num_flag_c(self):
-        if self.eflags.CF:
-            return 1
-        return 0
-    '''
+        return self.eflags.flags.CF
+    
     def flag_o(self,b):
-        self.eflags.OF = b
+        self.eflags.flags.OF = b
 
     def get_flag_o(self):
-        return self.eflags.OF
+        return self.eflags.flags.OF
     
     def flag_s(self,b):
-        self.eflags.SF = b
+        self.eflags.flags.SF = b
 
     def get_flag_s(self):
-        return self.eflags.SF
+        return self.eflags.flags.SF
 
+    def flag_d(self,b):
+        self.eflags.flags.DF = b
+
+    def get_flag_d(self):
+        return self.eflags.flags.DF
+    
     def sign(self,n):
         return (n < 0)
 

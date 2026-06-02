@@ -99,9 +99,23 @@ union _freg {
 	float f;
 };
 
+union _sw {
+	struct {
+		uint16_t _u0 	: 8;
+		uint16_t C0 	: 1;
+		uint16_t C1 	: 1;
+		uint16_t C2 	: 1;
+		uint16_t _u1 	: 3;
+		uint32_t C3 	: 1;
+		uint16_t _u2 	: 1;
+	};
+	uint16_t r16;
+};
+
 struct _fpu {
 	union _freg r[8];
 	int top;
+	union _sw sw;
 };
 
 struct _mem {
