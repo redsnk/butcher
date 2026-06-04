@@ -341,8 +341,12 @@ const char *Lang_Py_x64::F_SUB_OF(void) {
     return ("cpu.sub_flag_o(");
 }
 
-const char *Lang_Py_x64::F_IDIV(void) {
-    return ("cpu.idiv(");
+const char *Lang_Py_x64::F_SDIV(void) {
+    return ("cpu.sdiv(");
+}
+
+const char *Lang_Py_x64::F_UDIV(void) {
+    return ("cpu.udiv(");
 }
 
 const char *Lang_Py_x64::EQUAL(void) {
@@ -462,7 +466,7 @@ const char *Lang_Py_x64::E_JCC_GOTO(void) {
 }
 
 const char *Lang_Py_x64::E_ANONC(void) {
-    return (ANON_CALL "(");
+    return (ANON_CALL "(cpu,");
 }
 
 const char *Lang_Py_x64::F_PUSHFPU(void) {

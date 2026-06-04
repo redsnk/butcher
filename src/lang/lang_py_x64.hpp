@@ -63,7 +63,8 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *F_ADD_CF(void);
     //const char *F_NUM_CF(void);
     const char *F_SUB_OF(void);
-    const char *F_IDIV(void);
+    const char *F_SDIV(void);
+    const char *F_UDIV(void);
 
     const char *EQUAL(void);
     const char *NEQUAL(void);

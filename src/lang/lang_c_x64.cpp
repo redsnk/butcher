@@ -359,8 +359,12 @@ const char *Lang_C_x64::F_SUB_OF(void) {
     return ("sub_flag_o(cpu,");
 }
 
-const char *Lang_C_x64::F_IDIV(void) {
-    return ("idiv(");
+const char *Lang_C_x64::F_SDIV(void) {
+    return ("sdiv(");
+}
+
+const char *Lang_C_x64::F_UDIV(void) {
+    return ("udiv(");
 }
 
 const char *Lang_C_x64::EQUAL(void) {

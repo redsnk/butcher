@@ -304,7 +304,10 @@ char buffer[MAX_STR_OP];
         return (strdup(F_SUB_OF()));
     }
     else if (!strcmp(name,"sdiv")) {
-        return (strdup(F_IDIV()));
+        return (strdup(F_SDIV()));
+    }
+    else if (!strcmp(name,"udiv")) {
+        return (strdup(F_UDIV()));
     }
     else if (!strcmp(name,"bits")) {
         char *buffer = (char *) malloc(32);

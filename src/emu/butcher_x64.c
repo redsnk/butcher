@@ -641,7 +641,11 @@ uint64_t not(uint64_t b,uint64_t p) {
 	return(~p);
 }
 
-int64_t idiv(int64_t a,int64_t b) {
+int64_t sdiv(int64_t a,int64_t b) {
+	return(a/b);
+}
+
+uint64_t udiv(uint64_t a,uint64_t b) {
 	return(a/b);
 }
 

@@ -1571,7 +1571,8 @@ char buffer[1024];
                                                 "tmp = tmp << bits0;"
                                                 "tmp = tmp | rax;"
                                                 "rdx = tmp % op0;"
-                                                "rax = tmp / op0",insn,true);
+                                                "rax = udiv(tmp,op0)",insn,true);
+                                                //"rax = tmp / op0",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 num++;

@@ -32,7 +32,8 @@ class Lang_x64 : public Language {
     virtual const char *F_ADD_CF(void) = 0;
     //virtual const char *F_NUM_CF(void) = 0;
     virtual const char *F_SUB_OF(void) = 0;
-    virtual const char *F_IDIV(void) = 0;
+    virtual const char *F_SDIV(void) = 0;
+    virtual const char *F_UDIV(void) = 0;
     virtual const char *F_PUSHFPU(void) = 0;
     virtual const char *F_POPFPU(void) = 0;
     virtual const char *E_ANONJ(void) = 0;

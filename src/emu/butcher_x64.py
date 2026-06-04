@@ -304,7 +304,7 @@ class _cpu:
                 start = addr-m.addr
                 pre = m.mem[:start]
                 post = m.mem[start+size:]
-                m.mem = pre+data+post
+                m.mem = pre+list(data)+post
                 return
         self.panic("SETMEM",hex(addr))
     
@@ -673,7 +673,10 @@ class _cpu:
     def f_neg(self,b,p):
         return ~c_uint64(p).value + c_uint64(1).value
 
-    def idiv(self,a,b):
+    def sdiv(self,a,b):
+        return a//b
+
+    def udiv(self,a,b):
         return a//b
         #return int(a/b)
 
