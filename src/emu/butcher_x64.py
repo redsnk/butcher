@@ -298,13 +298,15 @@ class _cpu:
     def set_mem(self,addr,data):
         if self.b32:
             addr = c_uint32(addr).value
+        if isinstance(data,str):
+            data = list(data.encode("utf-8"))
         size = len(data)
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
                 pre = m.mem[:start]
                 post = m.mem[start+size:]
-                m.mem = pre+list(data)+post
+                m.mem = pre+data+post
                 return
         self.panic("SETMEM",hex(addr))
     
@@ -497,10 +499,13 @@ class _cpu:
         self.set_mem(addr+14,[(value[1] >> 48) & 0xff])
         self.set_mem(addr+15,[(value[1] >> 56) & 0xff])
 
-    def set_unicode_ptr(self,addr,str):
+    def set_unicode_ptr(self,addr,data):
         n = 0
-        for c in str:
-            self.set_word_ptr(addr+(n*2),ord(c))
+        if isinstance(data,str):
+            data = list(data.encode("utf-8"))
+        for c in data:
+            #self.set_word_ptr(addr+(n*2),ord(c))
+            self.set_word_ptr(addr+(n*2),c)
             n += 1
 
     def get_unicode_ptr(self,addr,len):
