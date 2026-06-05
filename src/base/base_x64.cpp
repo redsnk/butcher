@@ -2109,6 +2109,30 @@ char buffer[1024];
             free(reg1);
             num++;
             break;
+        case X86_INS_STC:
+            reg0 = lang_x64->Translate(handle,"cf(true)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_CLC:
+            reg0 = lang_x64->Translate(handle,"cf(false)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_STD:
+            reg0 = lang_x64->Translate(handle,"df(true)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_CLD:
+            reg0 = lang_x64->Translate(handle,"df(false)",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;     
         case X86_INS_FILD:
             reg0 = lang_x64->Translate(handle,"pushfpu(op0)",insn,true);
             PrintLine(insn,1,reg0);
