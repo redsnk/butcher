@@ -99,9 +99,23 @@ union _freg {
 	float f;
 };
 
+union _sw {
+	struct {
+		uint16_t _u0 	: 8;
+		uint16_t C0 	: 1;
+		uint16_t C1 	: 1;
+		uint16_t C2 	: 1;
+		uint16_t _u1 	: 3;
+		uint32_t C3 	: 1;
+		uint16_t _u2 	: 1;
+	};
+	uint16_t r16;
+};
+
 struct _fpu {
 	union _freg r[8];
 	int top;
+	union _sw sw;
 };
 
 struct _mem {
@@ -356,7 +370,8 @@ uint64_t pop(struct _cpu *cpu,int b);
 //uint64_t Pow(uint64_t b,uint64_t p);
 uint64_t neg(uint64_t b,uint64_t p);
 uint64_t not(uint64_t b,uint64_t p);
-int64_t idiv(int64_t a,int64_t b);
+int64_t sdiv(int64_t a,int64_t b);
+uint64_t udiv(uint64_t a,uint64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
 void pushfpu(struct _cpu *cpu,double v);
 double popfpu(struct _cpu *cpu);

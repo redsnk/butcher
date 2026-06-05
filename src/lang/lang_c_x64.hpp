@@ -52,6 +52,7 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_SET_SF(void);
     const char *F_SET_CF(void);
     const char *F_SET_OF(void);
+    const char *F_SET_DF(void);
     const char *F_GET_ZF(void);
     const char *F_GET_SF(void);
     const char *F_GET_CF(void);
@@ -61,7 +62,8 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_ADD_CF(void);
     //onst char *F_NUM_CF(void);
     const char *F_SUB_OF(void);
-    const char *F_IDIV(void);
+    const char *F_SDIV(void);
+    const char *F_UDIV(void);
 
     const char *EQUAL(void);
     const char *NEQUAL(void);

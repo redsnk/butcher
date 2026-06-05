@@ -23,6 +23,7 @@ class Lang_x64 : public Language {
     virtual const char *F_SET_SF(void) = 0;
     virtual const char *F_SET_CF(void) = 0;
     virtual const char *F_SET_OF(void) = 0;
+    virtual const char *F_SET_DF(void) = 0;
     virtual const char *F_GET_ZF(void) = 0;
     virtual const char *F_GET_SF(void) = 0;
     virtual const char *F_GET_CF(void) = 0;
@@ -32,7 +33,8 @@ class Lang_x64 : public Language {
     virtual const char *F_ADD_CF(void) = 0;
     //virtual const char *F_NUM_CF(void) = 0;
     virtual const char *F_SUB_OF(void) = 0;
-    virtual const char *F_IDIV(void) = 0;
+    virtual const char *F_SDIV(void) = 0;
+    virtual const char *F_UDIV(void) = 0;
     virtual const char *F_PUSHFPU(void) = 0;
     virtual const char *F_POPFPU(void) = 0;
     virtual const char *E_ANONJ(void) = 0;

@@ -4,6 +4,7 @@ void init(struct _cpu *cpu) {
 	memset(cpu,0,sizeof(struct _cpu));
 	cpu->mem_count = 0;
 	cpu->fpu.top = 0;
+	cpu->fpu.sw.r16 = 0;
 	cpu->num_errors = 0;
 }
 
@@ -620,18 +621,6 @@ uint64_t ret=0;
 	return (ret);
 }
 
-/*
-uint64_t Pow(uint64_t b,uint64_t p) {
-uint64_t n,r;
-
-	r = 1;
-	for (n=0;n<p;n++) {
-		r = r * b;
-	}
-	return (r);
-}
-*/
-
 uint64_t neg(uint64_t b,uint64_t p) {
 	return ((~p)+(uint64_t)1);
 }
@@ -640,7 +629,11 @@ uint64_t not(uint64_t b,uint64_t p) {
 	return(~p);
 }
 
-int64_t idiv(int64_t a,int64_t b) {
+int64_t sdiv(int64_t a,int64_t b) {
+	return(a/b);
+}
+
+uint64_t udiv(uint64_t a,uint64_t b) {
 	return(a/b);
 }
 

@@ -85,12 +85,79 @@ union _eflags {
   	uint32_t r32;
 };
 '''
-class _eflags(Structure):
-    _fields_ = [("CF",c_bool),
-                ("OF",c_bool),
-                ("PF",c_bool),
-                ("ZF",c_bool),
-                ("SF",c_bool)]
+
+class _eflag(Structure):
+    _fields_ = [("CF",c_uint32,1),
+                ("_u1",c_uint32,1),
+                ("PF",c_uint32,1),
+                ("_u2",c_uint32,1),
+                ("AF",c_uint32,1),
+                ("_u3",c_uint32,1),
+                ("ZF",c_uint32,1),
+                ("SF",c_uint32,1),
+                ("TF",c_uint32,1),
+                ("IF",c_uint32,1),
+                ("DF",c_uint32,1),
+                ("OF",c_uint32,1)]
+
+class _eflags(Union):
+    _fields_ = [("flags",_eflag),
+                ("r32",c_uint32)]
+
+'''
+union _freg {
+	uint64_t u;
+	double d;
+	float f;
+};
+'''
+
+class _freg(Union):
+    _fields_ = [("u",c_uint64),
+                ("d",c_double),
+                ("f",c_float)]
+
+'''
+union _sw {
+	struct {
+		uint16_t _u0 	: 8;
+		uint16_t C0 	: 1;
+		uint16_t C1 	: 1;
+		uint16_t C2 	: 1;
+		uint16_t _u1 	: 3;
+		uint32_t C3 	: 1;
+		uint16_t _u2 	: 1;
+	};
+	uint16_t r16;
+};
+'''
+
+class _swc(Structure):
+    _fields_ = [("_u0",c_uint16,8),
+                ("C0",c_uint16,1),
+                ("C1",c_uint16,1),
+                ("C2",c_uint16,1),
+                ("_u1",c_uint16,3),
+                ("C3",c_uint16,1),
+                ("_u2",c_uint16,1)]
+
+class _sw(Union):
+    _fields_ = [("sw",_swc),
+                ("r16",c_uint16)]
+
+'''
+struct _fpu {
+	union _freg r[8];
+	int top;
+	union _sw sw;
+};
+'''
+
+class _fpu:
+    r = [_freg] * 8
+    top = 0
+    sw = _sw()
+
 
 class _errors:
     num = 0
@@ -126,6 +193,8 @@ class _cpu:
     xmm7 = _xmm()
 
     eflags = _eflags()
+
+    fpu = _fpu()
 
     mems = []
 
@@ -229,6 +298,8 @@ class _cpu:
     def set_mem(self,addr,data):
         if self.b32:
             addr = c_uint32(addr).value
+        if isinstance(data,str):
+            data = list(data.encode("utf-8"))
         size = len(data)
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
@@ -428,10 +499,13 @@ class _cpu:
         self.set_mem(addr+14,[(value[1] >> 48) & 0xff])
         self.set_mem(addr+15,[(value[1] >> 56) & 0xff])
 
-    def set_unicode_ptr(self,addr,str):
+    def set_unicode_ptr(self,addr,data):
         n = 0
-        for c in str:
-            self.set_word_ptr(addr+(n*2),ord(c))
+        if isinstance(data,str):
+            data = list(data.encode("utf-8"))
+        for c in data:
+            #self.set_word_ptr(addr+(n*2),ord(c))
+            self.set_word_ptr(addr+(n*2),c)
             n += 1
 
     def get_unicode_ptr(self,addr,len):
@@ -516,34 +590,35 @@ class _cpu:
             return self.pop_qword()
         
     def flag_z(self,b):
-        self.eflags.ZF = b
+        self.eflags.flags.ZF = b
     
     def get_flag_z(self):
-        return self.eflags.ZF
+        return self.eflags.flags.ZF
 
     def flag_c(self,b):
-        self.eflags.CF = b
+        self.eflags.flags.CF = b
     
     def get_flag_c(self):
-        return self.eflags.CF
-    '''
-    def num_flag_c(self):
-        if self.eflags.CF:
-            return 1
-        return 0
-    '''
+        return self.eflags.flags.CF
+    
     def flag_o(self,b):
-        self.eflags.OF = b
+        self.eflags.flags.OF = b
 
     def get_flag_o(self):
-        return self.eflags.OF
+        return self.eflags.flags.OF
     
     def flag_s(self,b):
-        self.eflags.SF = b
+        self.eflags.flags.SF = b
 
     def get_flag_s(self):
-        return self.eflags.SF
+        return self.eflags.flags.SF
 
+    def flag_d(self,b):
+        self.eflags.flags.DF = b
+
+    def get_flag_d(self):
+        return self.eflags.flags.DF
+    
     def sign(self,n):
         return (n < 0)
 
@@ -603,17 +678,11 @@ class _cpu:
     def f_neg(self,b,p):
         return ~c_uint64(p).value + c_uint64(1).value
 
-    def idiv(self,a,b):
+    def sdiv(self,a,b):
         return a//b
-        #return int(a/b)
 
-    '''
-    def pow(self,b,p):
-        r = 1
-        for n in range(p):
-            r = r * p
-        return r
-    '''
+    def udiv(self,a,b):
+        return a//b
     
     def pshufd(self,op1,op2):
         #l = c_uint64(0).value
@@ -645,6 +714,40 @@ class _cpu:
             d =  ((op1[1] >> (32*(c-2))) & 0xffffffff) << 32
         h = h | d
         return (l,h)
+
+    def pushfpu(self,v):
+        self.fpu.top -= 1
+        if self.fpu.top < 0:
+            self.fpu.top = 7
+        self.fpu.r[self.fpu.top].d = v
+    
+    def popfpu(self):
+        v = self.fpu.r[self.fpu.top].d
+        self.fpu.r[self.fpu.top].d = 0
+        self.fpu.top += 1
+        if self.fpu.top > 7:
+            self.fpu.top = 0
+        return v
+
+    def utod(self,v):
+        c = _freg()
+        c.u = v
+        return c.d
+
+    def utof(self,v):
+        c = _freg()
+        c.u = v
+        return c.f
+
+    def dtou(self,v):
+        c = _freg()
+        c.d = v
+        return c.u
+    
+    def ftou(self,v):
+        c = _freg()
+        c.f = v
+        return c.u
 
     def mask(self,bits):
         v = (1 << bits)
