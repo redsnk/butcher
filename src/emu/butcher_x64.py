@@ -683,15 +683,6 @@ class _cpu:
 
     def udiv(self,a,b):
         return a//b
-        #return int(a/b)
-
-    '''
-    def pow(self,b,p):
-        r = 1
-        for n in range(p):
-            r = r * p
-        return r
-    '''
     
     def pshufd(self,op1,op2):
         #l = c_uint64(0).value
@@ -723,6 +714,40 @@ class _cpu:
             d =  ((op1[1] >> (32*(c-2))) & 0xffffffff) << 32
         h = h | d
         return (l,h)
+
+    def pushfpu(self,v):
+        self.fpu.top -= 1
+        if self.fpu.top < 0:
+            self.fpu.top = 7
+        self.fpu.r[self.fpu.top].d = v
+    
+    def popfpu(self):
+        v = self.fpu.r[self.fpu.top].d
+        self.fpu.r[self.fpu.top].d = 0
+        self.fpu.top += 1
+        if self.fpu.top > 7:
+            self.fpu.top = 0
+        return v
+
+    def utod(self,v):
+        c = _freg()
+        c.u = v
+        return c.d
+
+    def utof(self,v):
+        c = _freg()
+        c.u = v
+        return c.f
+
+    def dtou(self,v):
+        c = _freg()
+        c.d = v
+        return c.u
+    
+    def ftou(self,v):
+        c = _freg()
+        c.f = v
+        return c.u
 
     def mask(self,bits):
         v = (1 << bits)

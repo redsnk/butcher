@@ -621,18 +621,6 @@ uint64_t ret=0;
 	return (ret);
 }
 
-/*
-uint64_t Pow(uint64_t b,uint64_t p) {
-uint64_t n,r;
-
-	r = 1;
-	for (n=0;n<p;n++) {
-		r = r * b;
-	}
-	return (r);
-}
-*/
-
 uint64_t neg(uint64_t b,uint64_t p) {
 	return ((~p)+(uint64_t)1);
 }
