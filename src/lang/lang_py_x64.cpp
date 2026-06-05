@@ -303,6 +303,10 @@ const char *Lang_Py_x64::F_SET_OF(void) {
     return ("cpu.flag_o(");
 }
 
+const char *Lang_Py_x64::F_SET_DF(void) {
+    return ("cpu.flag_d(");
+}
+
 const char *Lang_Py_x64::F_GET_ZF(void) {
     return ("cpu.get_flag_z(");
 }

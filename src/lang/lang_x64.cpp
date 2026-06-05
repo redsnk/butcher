@@ -274,6 +274,9 @@ char buffer[MAX_STR_OP];
     else if (!strcmp(name,"of")) {
         return (strdup(F_SET_OF()));
     }
+    else if (!strcmp(name,"df")) {
+        return (strdup(F_SET_DF()));
+    }
     else if (!strcmp(name,"get_zf")) {
         return (strdup(F_GET_ZF()));
     }

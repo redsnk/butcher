@@ -321,6 +321,10 @@ const char *Lang_C_x64::F_SET_OF(void) {
     return ("set_flag_o(cpu,");
 }
 
+const char *Lang_C_x64::F_SET_DF(void) {
+    return ("set_flag_d(cpu,");
+}
+
 const char *Lang_C_x64::F_GET_ZF(void) {
     return ("flag_z(cpu");
 }

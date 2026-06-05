@@ -54,6 +54,7 @@ class Lang_Py_x64 : public Lang_x64 {
     const char *F_SET_SF(void);
     const char *F_SET_CF(void);
     const char *F_SET_OF(void);
+    const char *F_SET_DF(void);
     const char *F_GET_ZF(void);
     const char *F_GET_SF(void);
     const char *F_GET_CF(void);
