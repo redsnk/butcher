@@ -177,7 +177,11 @@ int Base_x64::IsCall(cs_insn *insn, uint64_t *addr) {
                 return (true);
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-                if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                    *addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                    return (true);
+                }
+                else if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                     (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
                     /*
                     if (arch->ValidMemory(insn->detail->x86.operands[0].mem.disp)) {
@@ -403,19 +407,21 @@ int Base_x64::IsJcc(cs_insn *insn, uint64_t *addr) {
 int Base_x64::IsJmpIAT(cs_insn *insn,char **lib,char **func) {
 uint64_t addr;
 
-    if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-        if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
-            addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-            if (arch->IsImportFunction(addr,lib,func)) {
-                return (true);
-            }    
-        }
-        else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
-                (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
-                (insn->detail->x86.operands[0].mem.disp)) {
-            addr = insn->detail->x86.operands[0].mem.disp;
-            if (arch->IsImportFunction(addr,lib,func)) {
-                return (true);
+    if (insn->id == X86_INS_JMP) {
+        if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+            if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,lib,func)) {
+                    return (true);
+                }    
+            }
+            else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.disp)) {
+                addr = insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,lib,func)) {
+                    return (true);
+                }
             }
         }
     }

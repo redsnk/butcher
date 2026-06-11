@@ -99,7 +99,7 @@ struct _call *calls;
 int ncalls = 0;
 std::set<uint64_t> jmps;
 uint64_t addr,read,*addr_list;
-int max_subcode = INIT_MEM_GETCODE;
+int max_subcode = MAX_MEM_GETCODE; // INIT_MEM_GETCODE;
 uint8_t *mem;
 char *lib,*func;
 
@@ -126,21 +126,21 @@ char *lib,*func;
         if (m == NULL) {
             if (ltraces) lang->PrintF("%s *** GetMemory error. 0x%llx\n",lang->COMM(),sc.first);
         }
-        if (read != max_subcode) {
-            if (ltraces) lang->PrintF("%s *** read != max_subcode: %li\n",lang->COMM(),read);
+        if (read == max_subcode) {
+            if (ltraces) lang->PrintF("%s *** read == max_subcode: %li\n",lang->COMM(),read);
         }
-        // TODO: read < max_subcode
-        if ((m != NULL) && (read == max_subcode)) {
+        // TODO: read == max_subcode
+        if (m != NULL) {
             sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
             if (sc.count) {
                 for (n = 0; n < sc.count; n++) {
                     lend = false;
                     if (ltraces) lang->PrintF("%s 0x%llx:\t%s\t\t%s\n",lang->COMM(), sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    
+                    /*
                     if (sc.insn[n].address == 0x44fc5cb) {
                         lend = false;   /// test
                     }
-                    
+                    */
                     if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
                         // New submem
                         if (ltraces) lang->PrintF("%s *** Add submem 0x%llx(%li)\n",lang->COMM(),addr,count);
@@ -226,15 +226,20 @@ char *lib,*func;
                         break;
                     }
                 }
+                /*
                 if (max_subcode > MAX_MEM_GETCODE) {
                     // No more code, maximun reached
                     sc.last = sc.insn[n].address;
                     lexit = true;
                 }
+                */
                 if (!lexit) {
-                    // We need more code
-                    cs_free(sc.insn, sc.count);
-                    max_subcode += STEP_MEM_GETCODE;
+                    // We need more code, but exit
+                    //cs_free(sc.insn, sc.count);
+                    //max_subcode += STEP_MEM_GETCODE;
+                    if (ltraces) lang->PrintF("%s *** We need more code, but exit\n",lang->COMM());
+                    sc.last = sc.insn[n].address;
+                    c->AddSubcode(&sc);
                 } else {
                     // Done
                     if (ltraces) lang->PrintF("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM(),sc.first,sc.last-sc.first,sc.parent);
