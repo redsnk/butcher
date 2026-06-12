@@ -524,3 +524,7 @@ const char *Lang_Py_x64::F_UTOF(void) {
 const char *Lang_Py_x64::F_FTOU(void) {
      return ("cpu.ftou(");
 }
+
+const char *Lang_Py_x64::E_EFLAGS(void) {
+     return ("cpu.eflags.r32");
+}

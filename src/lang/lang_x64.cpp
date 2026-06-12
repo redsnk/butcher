@@ -217,19 +217,18 @@ char buffer[MAX_STR_OP];
         return(mem_str(handle,insn,1));
     }
     else if (!strcmp(name,"rax")) {
-        //return(Translate_reg(insn,"_al","_ax","_eax","_rax"));
         return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,false));
     }
+    else if (!strcmp(name,"eax")) {
+        return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_AL,X86_REG_AX,X86_REG_EAX,false));
+    }
     else if (!strcmp(name,"rbx")) {
-        //return(Translate_reg(insn,"_bl","_bx","_ebx","_rbx"));
         return(Translate_reg(handle,insn,X86_REG_BL,X86_REG_BX,X86_REG_EBX,X86_REG_RBX,false));
     }
     else if (!strcmp(name,"rcx")) {
-        //return(Translate_reg(insn,"_cl","_cx","_ecx","_rcx"));
         return(Translate_reg(handle,insn,X86_REG_CL,X86_REG_CX,X86_REG_ECX,X86_REG_RCX,false));
     }
     else if (!strcmp(name,"rdx")) {
-        //return(Translate_reg(insn,"_dl","_dx","_edx","_rdx"));
         return(Translate_reg(handle,insn,X86_REG_DL,X86_REG_DX,X86_REG_EDX,X86_REG_RDX,false));
     }
     else if (!strcmp(name,"rdi")) {
@@ -239,28 +238,28 @@ char buffer[MAX_STR_OP];
         return(Translate_reg(handle,insn,X86_REG_SIL,X86_REG_SI,X86_REG_ESI,X86_REG_RSI,false));
     }
     else if (!strcmp(name,"s_rax")) {
-        //return(Translate_reg(insn,"s_al","s_ax","s_eax","s_rax"));
         return(Translate_reg(handle,insn,X86_REG_AL,X86_REG_AX,X86_REG_EAX,X86_REG_RAX,true));
     }
+    else if (!strcmp(name,"s_eax")) {
+        return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_AL,X86_REG_AX,X86_REG_EAX,true));
+    }
     else if (!strcmp(name,"s_rbx")) {
-        //return(Translate_reg(insn,"s_bl","s_bx","s_ebx","s_rbx"));
         return(Translate_reg(handle,insn,X86_REG_BL,X86_REG_BX,X86_REG_EBX,X86_REG_RBX,true));
     }
     else if (!strcmp(name,"s_rcx")) {
-        //return(Translate_reg(insn,"s_cl","s_cx","s_ecx","s_rcx"));
         return(Translate_reg(handle,insn,X86_REG_CL,X86_REG_CX,X86_REG_ECX,X86_REG_RCX,true));
     }
     else if (!strcmp(name,"s_rdx")) {
-        //return(Translate_reg(insn,"s_dl","s_dx","s_edx","s_rdx"));
         return(Translate_reg(handle,insn,X86_REG_DL,X86_REG_DX,X86_REG_EDX,X86_REG_RDX,true));
     }
     else if (!strcmp(name,"rsp")) {
-        //return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
         return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_SP,X86_REG_ESP,X86_REG_RSP,false));
     }
     else if (!strcmp(name,"rbp")) {
-        //return(Translate_reg(insn,"<sp 8bits>","_sp","_esp","_rsp"));
         return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_BP,X86_REG_EBP,X86_REG_RBP,false));
+    }
+    else if (!strcmp(name,"eflags")) {
+        return (strdup(E_EFLAGS()));
     }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF()));

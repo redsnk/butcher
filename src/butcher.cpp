@@ -90,8 +90,65 @@ uint64_t read;
     return (true);
 }
 
+int Butcher::GetLengthCode(uint64_t address,int *memory) {
+int max_subcode = INIT_MEM_GETCODE;
+uint8_t *m;
+uint64_t read;
+cs_insn *insn;
+int n,lcount,ncount,count,anon,bytes;
+char *lib,*func;
+int lend;
+uint64_t addr,*addr_list;
+
+    lcount = 0;
+    lend = false;
+    while (true) {
+        m = arch->GetMemory(address,max_subcode,&read);
+        if (m == NULL) {
+            return (false);
+        }
+        ncount = cs_disasm(handle, m, max_subcode, address, 0, &insn);
+        free(m);
+        if (!ncount) {
+            return (false);
+        }
+        if ((lcount == ncount) || (read < max_subcode)) {
+            *memory = max_subcode;
+            cs_free(insn, ncount);
+            break;
+        }
+        for (n = 0; n < ncount; n++) {
+            if (IsJmpIAT(&insn[n],&lib,&func)) {
+                    free(lib);
+                    free(func);
+                    lend = true;
+            }
+            else if(IsJmp(insn,n,&addr_list,&count,&anon)) {
+                free (addr_list);
+                lend = true;
+            }
+            else if (IsRet(&insn[n],&bytes)) {
+                lend = true;
+            }
+            else if (IsInt(&insn[n],&addr) || IsEnd(insn,n,ncount)) {
+                lend = true;
+            }
+        }
+        cs_free(insn, ncount);
+        if (lend) {
+            *memory = max_subcode;
+            break;
+        }
+        max_subcode += STEP_MEM_GETCODE;
+        if (max_subcode > MAX_MEM_GETCODE) {
+            return (false);
+        }
+    }
+    return (true);
+}
+
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
-int lexit,lend;
+int lend;
 struct _subcode sc;
 int n,nn,count,anon,bytes;
 //std::set<uint64_t> calls;
@@ -99,9 +156,10 @@ struct _call *calls;
 int ncalls = 0;
 std::set<uint64_t> jmps;
 uint64_t addr,read,*addr_list;
-int max_subcode = INIT_MEM_GETCODE;
+int max_subcode;// = MAX_MEM_GETCODE; // INIT_MEM_GETCODE;
 uint8_t *mem;
 char *lib,*func;
+uint8_t *m;
 
     /*
     if (address == 0x44fc5cb) {
@@ -120,136 +178,140 @@ char *lib,*func;
     sc.parent = parent;
     sc.first = address;
     if (ltraces) lang->PrintF("%s *** GetCode 0x%llx (id=%i,parent=%i)\n",lang->COMM(),sc.first,sc.id,sc.parent);
-    lexit = false;
-    while (!lexit) {
-        uint8_t *m = arch->GetMemory(sc.first,max_subcode,&read);
-        if (m == NULL) {
-            if (ltraces) lang->PrintF("%s *** GetMemory error. 0x%llx\n",lang->COMM(),sc.first);
-        }
-        if (read != max_subcode) {
-            if (ltraces) lang->PrintF("%s *** read != max_subcode: %li\n",lang->COMM(),read);
-        }
-        // TODO: read < max_subcode
-        if ((m != NULL) && (read == max_subcode)) {
-            sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
-            if (sc.count) {
-                for (n = 0; n < sc.count; n++) {
-                    lend = false;
-                    if (ltraces) lang->PrintF("%s 0x%llx:\t%s\t\t%s\n",lang->COMM(), sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
-                    
-                    if (sc.insn[n].address == 0x44fc5cb) {
-                        lend = false;   /// test
-                    }
-                    
-                    if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
-                        // New submem
-                        if (ltraces) lang->PrintF("%s *** Add submem 0x%llx(%li)\n",lang->COMM(),addr,count);
-                        c->AddSubMem(addr,mem,count);
-                        free(mem);
-                    }
-                    if (IsCall(&sc.insn[n],&addr)) {
-                        if (!Excluded(addr)) {
-                            // New Function 
-                            if (!ncalls) {
-                                calls = (struct _call *) malloc(sizeof(struct _call));
-                            }
-                            else {
-                                calls = (struct _call *) realloc(calls,sizeof(struct _call)*(ncalls+1));
-                            }
-                            calls[ncalls].addr = addr;
-                            calls[ncalls].name = NULL;
-                            //if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
-                            if (IsNamedFunction(addr,&calls[ncalls].name)) {
-                                if (ltraces) lang->PrintF("%s *** Add call 0x%llx(%s)\n",lang->COMM(),addr,calls[ncalls].name);
-                            }
-                            else {
-                                if (ltraces) lang->PrintF("%s *** Add call 0x%llx\n",lang->COMM(),addr);
-                            }
-                            ncalls++;
+    if (!GetLengthCode(sc.first,&max_subcode)) {
+        if (ltraces) lang->PrintF("%s *** GetLengthCode error 0x%llx\n",lang->COMM(),sc.first);
+        return (c);
+    }
+    m = arch->GetMemory(sc.first,max_subcode,&read);
+    if (m == NULL) {
+        if (ltraces) lang->PrintF("%s *** GetMemory error. 0x%llx\n",lang->COMM(),sc.first);
+    }
+    /*
+    if (read == max_subcode) {
+        if (ltraces) lang->PrintF("%s *** read == max_subcode: %li\n",lang->COMM(),read);
+    }
+    */
+    if (m != NULL) {
+        sc.count = cs_disasm(handle, m, max_subcode, sc.first, 0, &sc.insn);
+        if (sc.count) {
+            for (n = 0; n < sc.count; n++) {
+                lend = false;
+                if (ltraces) lang->PrintF("%s 0x%llx:\t%s\t\t%s\n",lang->COMM(), sc.insn[n].address, sc.insn[n].mnemonic,sc.insn[n].op_str);
+                /*
+                if (sc.insn[n].address == 0x44fc5cb) {
+                    lend = false;   /// test
+                }
+                */
+                if (!loadm && IsSubMem(&sc.insn[n],&addr,&mem,&count)) {
+                    // New submem
+                    if (ltraces) lang->PrintF("%s *** Add submem 0x%llx(%li)\n",lang->COMM(),addr,count);
+                    c->AddSubMem(addr,mem,count);
+                    free(mem);
+                }
+                if (IsCall(&sc.insn[n],&addr)) {
+                    if (!Excluded(addr)) {
+                        // New Function 
+                        if (!ncalls) {
+                            calls = (struct _call *) malloc(sizeof(struct _call));
                         }
-                    }
-                    else if (IsJmpIAT(&sc.insn[n],&lib,&func)) {
-                        char *tmp = (char *)malloc(1024);
-                        sprintf(tmp,"__%s_%s",lib,func);
-                        char *p  = tmp;
-                        do {
-                            p=strchr(p,'.');
-                            if (p != NULL) {
-                                *p = '_';
-                            }
+                        else {
+                            calls = (struct _call *) realloc(calls,sizeof(struct _call)*(ncalls+1));
                         }
-                        while (p != NULL);
-                        while (c->ExistFunctionName(tmp)) {
-                            strcat(tmp,"_x");
+                        calls[ncalls].addr = addr;
+                        calls[ncalls].name = NULL;
+                        //if (IsNamedFunction(addr,&calls[ncalls].name) || arch->IsSymbolFunction(addr,&calls[ncalls].name)) {
+                        if (IsNamedFunction(addr,&calls[ncalls].name)) {
+                            if (ltraces) lang->PrintF("%s *** Add call 0x%llx(%s)\n",lang->COMM(),addr,calls[ncalls].name);
                         }
-                        // Function that calls IAT always with the same name
-                        c->RenameFunction(&sc,tmp,true);
-                        free(tmp);
-                        free(lib);
-                        free(func);
-                        lend = true;
-                    }
-                    else if (IsJcc(&sc.insn[n],&addr)) {
-                        // New conditional goto
-                        if (ltraces) lang->PrintF("%s *** Add jcc 0x%llx\n",lang->COMM(),addr);
-                        jmps.insert(addr);
-                        c->AddLabel(&sc,addr);
-                    }
-                    //else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
-                    else if(IsJmp(sc.insn,n,&addr_list,&count,&anon)) {
-                        if (anon) {
-                            // Funtion has indirect jmps
-                            c->SetAnonJmp(&sc);
+                        else {
+                            if (ltraces) lang->PrintF("%s *** Add call 0x%llx\n",lang->COMM(),addr);
                         }
-                        for (nn=0;nn<count;nn++) {
-                            if (addr_list[nn] != UNDEF_ADDR_JMP) {
-                                // New defined goto
-                                jmps.insert(addr_list[nn]);
-                                c->AddLabel(&sc,addr_list[nn]);
-                            }
-                        }
-                        free (addr_list);
-                        lend = true;
-                    }
-                    else if (IsRet(&sc.insn[n],&bytes)) {
-                        c->SetRetBytes(&sc,bytes);
-                        lend = true;
-                    }
-                    else if (IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
-                        lend = true;
-                    }
-                    if (lend) {
-                        // End Funtion
-                        if (ltraces) lang->PrintF("%s *** End of subcode 0x%llx\n",lang->COMM(),sc.first);
-                        sc.last = sc.insn[n].address;
-                        lexit = true;
-                        break;
+                        ncalls++;
                     }
                 }
-                if (max_subcode > MAX_MEM_GETCODE) {
-                    // No more code, maximun reached
+                else if (IsJmpIAT(&sc.insn[n],&lib,&func)) {
+                    char *tmp = (char *)malloc(1024);
+                    sprintf(tmp,"__%s_%s",lib,func);
+                    char *p  = tmp;
+                    do {
+                        p=strchr(p,'.');
+                        if (p != NULL) {
+                            *p = '_';
+                        }
+                    }
+                    while (p != NULL);
+                    while (c->ExistFunctionName(tmp)) {
+                        strcat(tmp,"_x");
+                    }
+                    // Function that calls IAT always with the same name
+                    c->RenameFunction(&sc,tmp,true);
+                    free(tmp);
+                    free(lib);
+                    free(func);
+                    lend = true;
+                }
+                else if (IsJcc(&sc.insn[n],&addr)) {
+                    // New conditional goto
+                    if (ltraces) lang->PrintF("%s *** Add jcc 0x%llx\n",lang->COMM(),addr);
+                    jmps.insert(addr);
+                    c->AddLabel(&sc,addr);
+                }
+                //else if(IsJmp(&sc.insn[n],&addr_list,&count)) {
+                else if(IsJmp(sc.insn,n,&addr_list,&count,&anon)) {
+                    if (anon) {
+                        // Funtion has indirect jmps
+                        c->SetAnonJmp(&sc);
+                    }
+                    for (nn=0;nn<count;nn++) {
+                        if (addr_list[nn] != UNDEF_ADDR_JMP) {
+                            // New defined goto
+                            jmps.insert(addr_list[nn]);
+                            c->AddLabel(&sc,addr_list[nn]);
+                        }
+                    }
+                    free (addr_list);
+                    lend = true;
+                }
+                else if (IsRet(&sc.insn[n],&bytes)) {
+                    c->SetRetBytes(&sc,bytes);
+                    lend = true;
+                }
+                else if (IsInt(&sc.insn[n],&addr) || IsEnd(sc.insn,n,sc.count)) {
+                    lend = true;
+                }
+                if (lend) {
+                    // End Funtion
+                    if (ltraces) lang->PrintF("%s *** End of subcode 0x%llx\n",lang->COMM(),sc.first);
                     sc.last = sc.insn[n].address;
-                    lexit = true;
+                    break;
                 }
-                if (!lexit) {
-                    // We need more code
-                    cs_free(sc.insn, sc.count);
-                    max_subcode += STEP_MEM_GETCODE;
-                } else {
-                    // Done
-                    if (ltraces) lang->PrintF("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM(),sc.first,sc.last-sc.first,sc.parent);
-                    if (sc.first == 0x9086c7) {
-                        lexit = true;// debug
-                    }
-                    c->AddSubcode(&sc);
-                }
-            } else {
-                if (ltraces) lang->PrintF("%s *** count = 0\n",lang->COMM());
-                break;
             }
+            /*
+            if (max_subcode > MAX_MEM_GETCODE) {
+                // No more code, maximun reached
+                sc.last = sc.insn[n].address;
+                lexit = true;
+            }
+            */
+            /*
+            if (!lexit) {
+                // We need more code, but exit
+                //cs_free(sc.insn, sc.count);
+                //max_subcode += STEP_MEM_GETCODE;
+                if (ltraces) lang->PrintF("%s *** We need more code, but exit\n",lang->COMM());
+                sc.last = sc.insn[n].address;
+                c->AddSubcode(&sc);
+            } else {
+            */
+            // Done
+            if (ltraces) lang->PrintF("%s *** Add subcode 0x%llx %li (parent=%i)\n",lang->COMM(),sc.first,sc.last-sc.first,sc.parent);
+            c->AddSubcode(&sc);
+            //}
         } else {
-            break;
+            if (ltraces) lang->PrintF("%s *** count = 0\n",lang->COMM());
+            //break;
         }
+        free(m);
     }
     for (uint64_t a : jmps) {
         if ((a < sc.first) || (a > sc.last)) {
@@ -257,12 +319,6 @@ char *lib,*func;
             c = GetCode(c,a,NULL,(parent==SUBCODE_TOP)?sc.id:parent);
         }
     }
-    /*
-    for (uint64_t a : calls) {
-        // Explore new addresses for calls
-        c = GetCode(c,a,NULL,SUBCODE_TOP);
-    }
-    */
     for (int n=0;n<ncalls;n++) {
         // Explore new addresses for calls
         c = GetCode(c,calls[n].addr,calls[n].name,SUBCODE_TOP);

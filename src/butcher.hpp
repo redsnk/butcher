@@ -52,6 +52,7 @@ class Butcher {
         Code *Include(Code *c);
         void IncludeMem(Code *c);
         int CheckSubMems(Code *c,const char *text);
+        int GetLengthCode(uint64_t address,int *memory);
         Code *GetCode(Code *c,uint64_t address,char *name,int parent);
         char *Cut(char *file_name,uint64_t address,int lstdout);
 };

@@ -542,3 +542,7 @@ const char *Lang_C_x64::F_UTOF(void) {
 const char *Lang_C_x64::F_FTOU(void) {
      return ("ftou(");
 }
+
+const char *Lang_C_x64::E_EFLAGS(void) {
+     return ("cpu->eflags.r32");
+}

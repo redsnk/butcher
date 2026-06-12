@@ -46,7 +46,7 @@ struct _call {
 
 #define INIT_MEM_GETCODE (1024)
 #define STEP_MEM_GETCODE (1024)
-#define MAX_MEM_GETCODE (10*1024)
+#define MAX_MEM_GETCODE (1024*1024)
 
 class Code {
     public:

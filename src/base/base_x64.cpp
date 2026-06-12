@@ -177,7 +177,11 @@ int Base_x64::IsCall(cs_insn *insn, uint64_t *addr) {
                 return (true);
             }
             else if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-                if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                    *addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                    return (true);
+                }
+                else if ((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                     (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID)) {
                     /*
                     if (arch->ValidMemory(insn->detail->x86.operands[0].mem.disp)) {
@@ -403,19 +407,21 @@ int Base_x64::IsJcc(cs_insn *insn, uint64_t *addr) {
 int Base_x64::IsJmpIAT(cs_insn *insn,char **lib,char **func) {
 uint64_t addr;
 
-    if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
-        if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
-            addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
-            if (arch->IsImportFunction(addr,lib,func)) {
-                return (true);
-            }    
-        }
-        else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
-                (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
-                (insn->detail->x86.operands[0].mem.disp)) {
-            addr = insn->detail->x86.operands[0].mem.disp;
-            if (arch->IsImportFunction(addr,lib,func)) {
-                return (true);
+    if (insn->id == X86_INS_JMP) {
+        if (insn->detail->x86.operands[0].type == X86_OP_MEM) {
+            if (IsRIP(insn->detail->x86.operands[0].mem.base)) {
+                addr = insn->address+insn->size+insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,lib,func)) {
+                    return (true);
+                }    
+            }
+            else if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.index == X86_REG_INVALID) && 
+                    (insn->detail->x86.operands[0].mem.disp)) {
+                addr = insn->detail->x86.operands[0].mem.disp;
+                if (arch->IsImportFunction(addr,lib,func)) {
+                    return (true);
+                }
             }
         }
     }
@@ -637,6 +643,19 @@ char buffer[1024];
         case X86_INS_WAIT:
             PrintLine(insn,1,"");
             num++;
+            break;
+        case X86_INS_PAUSE:
+            PrintLine(insn,1,"");
+            num++;
+            break;
+        case X86_INS_LEAVE:
+            reg0 = lang_x64->Translate(handle,  "rsp = rbp;"
+                                                "rbp = pop(bits)",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                free(reg0);
+                num++;
+            }
             break;
         case X86_INS_RET:
             // ret
@@ -1600,7 +1619,19 @@ char buffer[1024];
                 free(reg0);
             }
             break;
+        case X86_INS_CBW:
+        case X86_INS_CWDE:
+        case X86_INS_CDQE:
+            reg0 = lang_x64->Translate(handle,"s_rax = s_eax",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CWD:
         case X86_INS_CDQ:
+        case X86_INS_CQO:
             /*
             reg0 = lang_x64->Translate(handle,  "tmp = s_rax;"
                                                 "rax = tmp&mask(bits);"
@@ -1804,6 +1835,22 @@ char buffer[1024];
                 free(reg0);
             }
             break;
+        case X86_INS_CMOVS:
+            reg0 = lang_x64->Translate(handle,"if " TEST_S " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
+        case X86_INS_CMOVNS:
+            reg0 = lang_x64->Translate(handle,"if " TEST_NS " then op0 = op1 fi",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                num++;
+                free(reg0);
+            }
+            break;
         case X86_INS_XCHG:
             reg0 = lang_x64->Translate(handle,  "tmp = op0;"
                                                 "op0 = op1;"
@@ -1842,6 +1889,7 @@ char buffer[1024];
             }
             break;
         case X86_INS_MOVSX:
+        case X86_INS_MOVSXD:
             reg0 = lang_x64->Translate(handle,"sop0 = sop1",insn,true);
             PrintLine(insn,1,reg0);
             num++;
