@@ -258,6 +258,9 @@ char buffer[MAX_STR_OP];
     else if (!strcmp(name,"rbp")) {
         return(Translate_reg(handle,insn,X86_REG_INVALID,X86_REG_BP,X86_REG_EBP,X86_REG_RBP,false));
     }
+    else if (!strcmp(name,"eflags")) {
+        return (strdup(E_EFLAGS()));
+    }
     else if (!strcmp(name,"zf")) {
         return (strdup(F_SET_ZF()));
     }
