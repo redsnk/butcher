@@ -93,19 +93,26 @@ long l,s;
                                         if (fseek(f,elf->Ehdr.Ehdr64.e_shoff,SEEK_SET) != -1) {
                                             l = fread(elf->Shdr,1,s,f);
                                             if (l == s) {
-                                                // Section Headers string table
+                                                // Section Headers String Table (to locate sectio names)
                                                 elf->ShStrTable = (char *) GetSectionByIndex(elf,elf->Ehdr.Ehdr64.e_shstrndx,&elf->ShStrTable_size);
                                                 if (elf->ShStrTable != NULL) {
-                                                    // Dynamic linker symbol table
+                                                    // Dynamic linker symbol table ".dynsym"
                                                     elf->DynSymTable = (Elf64_Sym *) GetSectionByType(elf,SHT_DYNSYM,&elf->DynSymTable_size);
                                                     if (elf->DynSymTable != NULL) {
                                                         elf->DynSymTable_count = elf->DynSymTable_size/sizeof(Elf64_Sym);
-                                                        // Dynamic strings table
+                                                        // Dynamic strings table ".dynstr"
                                                         elf->DynStrTable = (char *) GetSectionByName(elf,".dynstr",&elf->DynStrTable_size);
                                                         if (elf->DynStrTable != NULL) {
-                                                            // Got.Plt Table
+                                                            // Got.Plt Table ".got.plt"
                                                             elf->GotPltTableIndex = GetSectionIndexByName(elf,".got.plt");
                                                             if (elf->GotPltTableIndex != -1) {
+                                                                // symbol table ".symtab"
+                                                                elf->SymTable = (Elf64_Sym *) GetSectionByName(elf,".symtab",&elf->SymTable_size);
+                                                                if (elf->SymTable != NULL) {
+                                                                    elf->SymTable_count = elf->SymTable_size/sizeof(Elf64_Sym);
+                                                                }
+                                                                // strings symbole table ".strtab"
+                                                                elf->StrTable = (char *) GetSectionByName(elf,".strtab",&elf->StrTable_size);
                                                                 elf->name = strdup(name);
                                                                 return (elf);
                                                             }
@@ -166,6 +173,8 @@ long l,s;
 void FreeELF (struct _ELF *elf) {
     if (elf != NULL) {
         free(elf->name);
+        if (elf->StrTable != NULL) free(elf->StrTable);
+        if (elf->SymTable != NULL) free(elf->SymTable);
         free(elf->DynStrTable);
         free(elf->DynSymTable);
         free(elf->ShStrTable);
@@ -180,6 +189,7 @@ uint8_t *GetMemoryELF (struct _ELF *elf, uint64_t addr, uint64_t size, uint64_t 
 int n;
 uint8_t *m;
 
+    // The program header table provides a segment view of the binary
     for (n=0;n<elf->Ehdr.Ehdr64.e_phnum;n++) {
         m = GetMemoryFile(elf->f,addr,size,elf->Phdr[n].p_vaddr,elf->Phdr[n].p_memsz,elf->Phdr[n].p_offset,elf->Phdr[n].p_filesz,read);
         if (m != NULL) {
@@ -208,13 +218,31 @@ uint64_t start,end,index;
 
 int GetSymbolELF (struct _ELF *elf,uint64_t addr,char **name,unsigned char *info) {
 int n;
+char *p;
 
     for (n=0;n<elf->DynSymTable_count;n++) {
         if (elf->DynSymTable[n].st_value == addr) {
-            //strcpy(name,elf->DynStrTable+elf->DynSymTable[n].st_name);
-            *name = strdup(elf->DynStrTable+elf->DynSymTable[n].st_name);
+            p = elf->DynStrTable+elf->DynSymTable[n].st_name;
+            *name = (char *) malloc(strlen(p)+16);
+            strcpy(*name,"dyn_");
+            strcat(*name,p);
+            //*name = strdup(elf->DynStrTable+elf->DynSymTable[n].st_name);
             *info = elf->DynSymTable[n].st_info;
             return (true);
+        }
+    }
+    if (elf->SymTable != NULL) {
+        for (n=0;n<elf->SymTable_count;n++) {
+            if (elf->SymTable[n].st_value == addr) {
+                //strcpy(name,elf->DynStrTable+elf->DynSymTable[n].st_name);
+                p = elf->StrTable+elf->SymTable[n].st_name;
+                //*name = strdup(elf->StrTable+elf->SymTable[n].st_name);
+                *name = (char *) malloc(strlen(p)+16);
+                strcpy(*name,"sym_");
+                strcat(*name,p);
+                *info = elf->DynSymTable[n].st_info;
+                return (true);
+            }
         }
     }
     return (false);

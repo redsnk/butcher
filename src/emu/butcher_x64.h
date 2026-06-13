@@ -268,6 +268,8 @@ struct _cpu {
 #define _r13b	(cpu->r13.r8.l)
 #define _r14b	(cpu->r14.r8.l)
 #define _r15b	(cpu->r15.r8.l)
+#define _sil	(cpu->rsi.r8.l)
+#define _dil	(cpu->rdi.r8.l)
 #define _bpl	(cpu->rbp.r8.l)
 #define _spl	(cpu->rsp.r8.l)
 
@@ -287,6 +289,8 @@ struct _cpu {
 #define s_r13b	(cpu->r13.s8.l)
 #define s_r14b	(cpu->r14.s8.l)
 #define s_r15b	(cpu->r15.s8.l)
+#define s_sil	(cpu->rsi.s8.l)
+#define s_dil	(cpu->rdi.s8.l)
 #define s_bpl	(cpu->rbp.s8.l)
 #define s_spl	(cpu->rsp.s8.l)
 

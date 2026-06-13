@@ -38,11 +38,11 @@ cs_x86_op op;
         buffer[0] = 0;
     }
     if (op.mem.index != X86_REG_INVALID) {
-        sprintf(tmp,"+%s*%i",reg_name(handle,op.mem.index),op.mem.scale);
+        sprintf(tmp,"+(%s*%i)",reg_name(handle,op.mem.index),op.mem.scale);
         strcat (buffer,tmp);
     }
     if (op.mem.disp) {
-        sprintf(tmp,"%+" PRId64,op.mem.disp);
+        sprintf(tmp," %+" PRId64 ,op.mem.disp);
         //sprintf(tmp,"+0x%llx",op.mem.disp);
         strcat (buffer,tmp);
     }
