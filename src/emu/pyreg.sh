@@ -126,7 +126,7 @@ echo "            self.$2.s8.l = v"
 echo ""
 }
 
-for x in al,rax bl,rbx cl,rcx dl,rdx r8b,r8 r9b,r9 r10b,r10 r11b,r11 r12b,r12 r13b,r13 r14b,r14 r15b,r15 bpl,rbp spl,rsp; do
+for x in al,rax bl,rbx cl,rcx dl,rdx r8b,r8 r9b,r9 r10b,r10 r11b,r11 r12b,r12 r13b,r13 r14b,r14 r15b,r15 sil,rsi dil,rdi bpl,rbp spl,rsp; do
     a=$(echo $x | awk -F "," '{print $1}')
     b=$(echo $x | awk -F "," '{print $2}')
     r8 $a $b

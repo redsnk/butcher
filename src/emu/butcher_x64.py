@@ -1959,6 +1959,46 @@ class _cpu:
             self.r15.s8.l = v
 
     @property
+    def _sil(self):
+        return self.rsi.r8.l
+    @_sil.setter
+    def _sil(self,v):
+        if type(v) == tuple:
+            self.rsi.r8.l = v[0]
+        else:
+            self.rsi.r8.l = v
+
+    @property
+    def s_sil(self):
+        return self.rsi.s8.l
+    @s_sil.setter
+    def s_sil(self,v):
+        if type(v) == tuple:
+            self.rsi.s8.l = v[0]
+        else:
+            self.rsi.s8.l = v
+
+    @property
+    def _dil(self):
+        return self.rdi.r8.l
+    @_dil.setter
+    def _dil(self,v):
+        if type(v) == tuple:
+            self.rdi.r8.l = v[0]
+        else:
+            self.rdi.r8.l = v
+
+    @property
+    def s_dil(self):
+        return self.rdi.s8.l
+    @s_dil.setter
+    def s_dil(self,v):
+        if type(v) == tuple:
+            self.rdi.s8.l = v[0]
+        else:
+            self.rdi.s8.l = v
+
+    @property
     def _bpl(self):
         return self.rbp.r8.l
     @_bpl.setter
@@ -2177,35 +2217,3 @@ class _cpu:
 
     #---------------------------------------------------------------
     
-'''
-@with_goto
-def test():
-    print("1")
-    label ._0x00001
-    print("2")
-    goto .next_step
-    print("3")
-    label .next_step
-    print("4")
-
-r = _reg()
-r.r64 = 0x0102030405060708
-r.r64 = r.r64 + 1
-s64 = c_int64(r.r64).value
-print(s64 + 1)
-print(hex(r.r64))
-print(hex(r.r32.h))
-print(hex(r.r32.l))
-print(hex(r.r16.h))
-print(hex(r.r8.h))
-print(hex(r.r8.l))
-#test()
-
-cpu = _cpu()
-cpu._rax = 0x0123456789ABCDEF
-print(hex(cpu._rax))
-print(hex(cpu._eax))
-print(hex(cpu._ax))
-print(hex(cpu._ah))
-print(hex(cpu._al))
-'''
