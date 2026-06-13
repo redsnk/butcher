@@ -161,11 +161,11 @@ uint8_t *mem;
 char *lib,*func;
 uint8_t *m;
 
-    /*
-    if (address == 0x44fc5cb) {
+    
+    if (address == 0x53610) {
         ncalls = 0; // test
     }
-    */
+    
     if (c == NULL) {
         c = new Code(address);
     }

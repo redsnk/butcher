@@ -28,9 +28,8 @@ void Code::AddSubcode (struct _subcode *sc) {
                     // Subcode included in the old one, discard it
                     return;
                 }
-                if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last)) {
-                    // Old subcode included in this one, replace it
-                    // TODO: displaced opcodes
+                if((subcodes[n].first >= sc->first) && (subcodes[n].last <= sc->last) && (subcodes[n].parent != SUBCODE_TOP)) {
+                    // Old subcode included in this one and the old one has parent, replace it
                     cs_free(subcodes[n].insn, subcodes[n].count);
                     subcodes[n] = *sc;
                     return;

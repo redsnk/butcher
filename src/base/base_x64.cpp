@@ -2448,6 +2448,9 @@ char *name;
     lang_x64->PrintF("\n");
     for (int n=0;n<c->subcod_count;n++) {
         if (c->subcodes[n].parent == SUBCODE_TOP) {
+            if (c->subcodes[n].first == 0x53610) {
+                count = 0;  // test
+            }
             PrintSubCode(c,n);
         }
     }
