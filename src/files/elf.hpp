@@ -479,6 +479,11 @@ struct _ELF {
   char *DynStrTable;
   uint64_t DynStrTable_size;
   int GotPltTableIndex;
+  Elf64_Sym *SymTable;
+  uint64_t SymTable_size;
+  int SymTable_count;
+  char *StrTable;
+  uint64_t StrTable_size;
 };
 
 #define MAX_IMPORT_NAME	(256)

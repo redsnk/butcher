@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/Butcher",
             //"args": ["-lc","-t","-a","-m","/home/alex/src/butcher/samples/api.node","0x180002350"],
-            "args": ["-lc","-t","-a","/home/alex/src/butcher/samples/bash","0x49E4"],
+            "args": ["-lc","-t","-a","/home/alex/src/butcher/samples/bash","0x2de30"],
             //"args": ["-lc","-t","-a","-m","-e0x40b830","/home/alex/src/butcher/samples/libffi-6.dll","0x044FCB68"],
             //"args": ["-lc","-t","-a","-m","-i0x409404,0x68e348,0x409950,0x68d9f4,0x68da74","/home/alex/src/butcher/samples/libffi-6.dll","0x044FCAF8"],
             //"args": ["-lc","-t","-a","-m","-n/home/alex/src/butcher/samples/libffi-6.txt","/home/alex/src/butcher/samples/libffi-6.dll","0x044FC7AC"],
