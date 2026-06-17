@@ -243,9 +243,10 @@ uint8_t *m;
                     while (c->ExistFunctionName(tmp)) {
                         strcat(tmp,"_x");
                     }
-                    // Function that calls IAT always with the same name, do not rename
-                    //c->RenameFunction(&sc,tmp,true);
-                    c->RenameFunction(&sc,tmp,false);
+                    // Function that calls IAT always with the same name
+                    c->RenameFunction(&sc,tmp,true);
+                    // TODO: only rename on 'pure' functions
+                    //c->RenameFunction(&sc,tmp,false);
                     free(tmp);
                     free(lib);
                     free(func);
