@@ -460,6 +460,24 @@ typedef struct
 
 //
 
+typedef struct {
+	Elf64_Half	vn_version;
+	Elf64_Half	vn_cnt;
+	Elf64_Word	vn_file;
+	Elf64_Word	vn_aux;
+	Elf64_Word	vn_next;
+} Elf64_Verneed;
+
+typedef struct {
+	Elf64_Word	vna_hash;
+	Elf64_Half	vna_flags;
+	Elf64_Half	vna_other;
+	Elf64_Word	vna_name;
+	Elf64_Word	vna_next;
+} Elf64_Vernaux;
+
+//
+
 union _Elf_Ehdr {
 	Elf32_Ehdr Ehdr32;
 	Elf64_Ehdr Ehdr64;
@@ -484,6 +502,12 @@ struct _ELF {
   int SymTable_count;
   char *StrTable;
   uint64_t StrTable_size;
+  char *VerNeed;
+  uint64_t VerNeed_size;
+  int VerNeed_count;
+  uint16_t *VerSym;
+  uint64_t VerSym_size;
+  int VerSym_count;
 };
 
 #define MAX_IMPORT_NAME	(256)

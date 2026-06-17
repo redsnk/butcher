@@ -245,6 +245,8 @@ uint8_t *m;
                     }
                     // Function that calls IAT always with the same name
                     c->RenameFunction(&sc,tmp,true);
+                    // TODO: only rename on 'pure' functions
+                    //c->RenameFunction(&sc,tmp,false);
                     free(tmp);
                     free(lib);
                     free(func);
