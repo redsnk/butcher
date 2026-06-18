@@ -72,6 +72,9 @@ class Language {
     virtual const char *E_ANONC(void) = 0;
     virtual const char *F_MASK(void) = 0;
 
+    virtual const char *E_ELSE(void) = 0;
+    virtual const char *E_PANIC_JMP_INDEX(void) = 0;
+
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintAnonCalls(Code *c) = 0;
     virtual void PrintMainOpen(Code *c) = 0;

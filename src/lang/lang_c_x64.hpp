@@ -105,6 +105,8 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_UTOF(void);
     const char *F_FTOU(void);
     const char *E_EFLAGS(void);
+    const char *E_ELSE(void);
+    const char *E_PANIC_JMP_INDEX(void);
 
     //char *mem_str(csh handle,cs_x86_op op);
     char *reg_name(csh handle,int id_reg);

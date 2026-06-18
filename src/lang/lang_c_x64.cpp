@@ -546,3 +546,12 @@ const char *Lang_C_x64::F_FTOU(void) {
 const char *Lang_C_x64::E_EFLAGS(void) {
      return ("cpu->eflags.r32");
 }
+
+const char *Lang_C_x64::E_ELSE(void) {
+     return ("else {");
+}
+
+const char *Lang_C_x64::E_PANIC_JMP_INDEX(void) {
+    return ("panic(cpu,\"JMP\",\"%s\");");
+}
+

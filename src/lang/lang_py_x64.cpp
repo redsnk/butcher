@@ -228,7 +228,7 @@ const char *Lang_Py_x64::E_RETURN(void) {
 }
 
 const char *Lang_Py_x64::E_JMP_FROM_IAT(void) {
-    return ("cpu.jmp_from_iat(\"%s\",\"%s\");");
+    return ("cpu.jmp_from_iat(\"%s\",\"%s\")");
 }
 
 const char *Lang_Py_x64::E_ENDIF(void) {
@@ -527,4 +527,12 @@ const char *Lang_Py_x64::F_FTOU(void) {
 
 const char *Lang_Py_x64::E_EFLAGS(void) {
      return ("cpu.eflags.r32");
+}
+
+const char *Lang_Py_x64::E_ELSE(void) {
+     return ("else:");
+}
+
+const char *Lang_Py_x64::E_PANIC_JMP_INDEX(void) {
+    return ("cpu.panic(cpu,\"JMP\",\"%s\")");
 }

@@ -308,6 +308,7 @@ cs_insn *insn;
                 if((insn->detail->x86.operands[0].mem.base == X86_REG_INVALID) && 
                                 (insn->detail->x86.operands[0].mem.index != X86_REG_INVALID) && 
                                 (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
+                    // Forward
                     for (n=0;n<MAX_JMPS;n++) {
                         a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                         b = insn->detail->x86.addr_size;
@@ -329,10 +330,35 @@ cs_insn *insn;
                         else {
                             break;
                         }
-                    }       
+                    }
+                    // Backward
+                    if ((insn->address+insn->size) < insn->detail->x86.operands[0].mem.disp) {
+                        for (n=-1;n>(-MAX_JMPS);n--) {
+                            a = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
+                            b = insn->detail->x86.addr_size;
+                            if (arch->Get_Address_At(a,&d,b*8)) {
+                                //if (arch->ValidMemory(d)) {
+                                if (ValidCode(d)) {
+                                    if (c == 0) {
+                                        *addr = (uint64_t *) malloc(sizeof(uint64_t));
+                                    }
+                                    else {
+                                        *addr = (uint64_t *) realloc(*addr,sizeof(uint64_t)*(c+1));
+                                    }
+                                    (*addr)[c++] = d;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
                 }
                 else {
-                // Undefined jmp
+                    // Undefined jmp
                     *addr = (uint64_t *) malloc(sizeof(uint64_t));
                     (*addr)[c++] = UNDEF_ADDR_JMP; 
                 }
@@ -617,7 +643,7 @@ char *reg0,*reg1,*mstr;
 uint64_t addr;
 char *lib,*func,*name;
 uint8_t *mem;
-int n,b,ldone;
+int n,b,ldone,lj;
 int bits;
 char buffer[1024];
 
@@ -694,13 +720,16 @@ char buffer[1024];
                         (insn->detail->x86.operands[0].mem.scale > 1) && (insn->detail->x86.operands[0].mem.disp)) {
                     // jmp             dword ptr [eax*4 + 0x44fcb89]
                     reg0 = lang_x64->reg_name(handle,insn->detail->x86.operands[0].mem.index);
+                    lj = false;
+                    // Forward
                     for (n=0;n<MAX_JMPS;n++) {
                         addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
                         b = insn->detail->x86.addr_size;
                         if (arch->Get_Address_At(addr,&d,b*8)) {
                             //if (arch->ValidMemory(d)) {
                             if (ValidCode(d)) {
-                                PrintLine(insn,1,(n==0)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
+                                PrintLine(insn,1,(!lj)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
+                                lj = true;
                                 //PrintLine(insn,2,lang_x64->E_GOTO(),d);
                                 reg1 = GetGoto(d);
                                 PrintLine(insn,2,reg1);
@@ -715,7 +744,37 @@ char buffer[1024];
                             break;
                         }
                     }
-                    // TODO: else panic()
+                    // Backward
+                    if ((insn->address+insn->size) < insn->detail->x86.operands[0].mem.disp) {
+                        for (n=-1;n>(-MAX_JMPS);n--) {
+                            addr = insn->detail->x86.operands[0].mem.disp + (insn->detail->x86.operands[0].mem.scale * n);
+                            b = insn->detail->x86.addr_size;
+                            if (arch->Get_Address_At(addr,&d,b*8)) {
+                                //if (arch->ValidMemory(d)) {
+                                if (ValidCode(d)) {
+                                    PrintLine(insn,1,(!lj)?lang_x64->E_IF_R_EQ_I():lang_x64->E_ELIF_R_EQ_I(),reg0,n);
+                                    lj = true;
+                                    //PrintLine(insn,2,lang_x64->E_GOTO(),d);
+                                    reg1 = GetGoto(d);
+                                    PrintLine(insn,2,reg1);
+                                    free(reg1);
+                                    PrintLine(insn,1,lang_x64->E_ENDIF());
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    }
+                    if (lj) {
+                        // else panic()
+                        PrintLine(insn,1,lang_x64->E_ELSE());
+                        PrintLine(insn,2,lang_x64->E_PANIC_JMP_INDEX(),reg0);
+                        PrintLine(insn,1,lang_x64->E_ENDIF());
+                    }
                     free(reg0);
                     //PrintLine(insn,1,lang_x64->E_ENDIF);
                     num++;
@@ -2214,6 +2273,16 @@ char buffer[1024];
                                                     "op0 = ftou(popfpu()) "
                                                 "else "
                                                     "op0 = dtou(popfpu()) "
+                                                "fi",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FST:
+            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                    "op0 = ftou(st0) "
+                                                "else "
+                                                    "op0 = dtou(st0) "
                                                 "fi",insn,true);
             PrintLine(insn,1,reg0);
             free(reg0);
