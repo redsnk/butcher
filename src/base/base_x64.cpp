@@ -149,6 +149,24 @@ cs_insn *insn;
     return (true);
 }
 
+int FlagsNotUsedAddress(struct Code *c,uint64_t addr) {
+int n,m;
+struct _subcode *sc;
+
+    for (n=0;n<c->subcod_count;n++) {
+        sc = &c->subcodes[n];
+        if ((addr >= sc->first) && (addr <= sc->last)) {
+            for (m=0;m<sc->count;m++) {
+                if (sc->insn[m].address == addr) {
+                    return (FlagsNotUsed(sc,m-1));
+                }
+            }
+            break;
+        }
+    }
+    return (false);
+}
+
 int IsRIP(int id) {
     return((id == X86_REG_EIP)||(id == X86_REG_RIP)||(id == X86_REG_IP));
 }
@@ -1137,7 +1155,7 @@ char buffer[1024];
                 switch (next->id) {
                     case X86_INS_JA:
                         // (CF=0 and ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s > %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 > op1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1153,7 +1171,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JGE:
                         // (SF=OF)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s >= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"sop0 >= sop1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1169,7 +1187,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JE:
                         // (ZF=1)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s == %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 == op1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1185,7 +1203,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JNE:
                         // (ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s != %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 != op1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1201,7 +1219,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JBE:
                         // (CF=1 or ZF=1)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s <= %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 <= op1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1217,7 +1235,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JB:
                         // (CF=1)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s < %s) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"op0 < op1",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1341,7 +1359,7 @@ char buffer[1024];
                 switch (next->id) {
                     case X86_INS_JNE:
                         // (ZF=0)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s != 0) goto label_0x%llx;";
                             reg0 = lang_x64->Translate(handle,"(op0&op1) != 0",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1357,7 +1375,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JE:
                         // (ZF=1)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s == 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(op0&op1) == 0",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
@@ -1373,7 +1391,7 @@ char buffer[1024];
                         break;
                     case X86_INS_JLE:
                         // (ZF=1 or SF!=OF)
-                        if (FlagsNotUsed(sc,num+1)) {
+                        if (FlagsNotUsed(sc,num+1) && FlagsNotUsedAddress(c,next->detail->x86.operands[0].imm)) {
                             // "if (%s <= 0) goto label_0x%llx;"
                             reg0 = lang_x64->Translate(handle,"(sop0&sop1) <= 0",insn,false);
                             PrintLine(insn,0,lang_x64->E_SPACE());
