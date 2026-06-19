@@ -2367,6 +2367,14 @@ char buffer[1024];
             free(reg0);
             num++;
             break;
+        case X86_INS_FINCSTP:
+            // TODO: ALL
+            reg0 = lang_x64->Translate(handle,"popfpu()",insn,true);
+            PrintLine(insn,1,reg0);
+            free(reg0);
+            num++;
+            break;
+        case X86_INS_FFREE:
         case X86_INS_FLDCW:
             // TODO: ALL
             if (insn->detail->x86.op_count == 1) {

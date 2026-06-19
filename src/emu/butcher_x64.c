@@ -653,6 +653,8 @@ uint8_t c;
 	return (r);
 }
 
+// TODO: 19703463121584185 bug
+
 void pushfpu(struct _cpu *cpu,double v) {
 	cpu->fpu.top--;
 	if (cpu->fpu.top < 0) cpu->fpu.top = 7;
