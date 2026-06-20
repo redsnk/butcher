@@ -171,6 +171,16 @@ int IsRIP(int id) {
     return((id == X86_REG_EIP)||(id == X86_REG_RIP)||(id == X86_REG_IP));
 }
 
+int IsSTX(int id) {
+    return ((id == X86_REG_ST0) ||
+            (id == X86_REG_ST1) ||
+            (id == X86_REG_ST2) ||
+            (id == X86_REG_ST3) ||
+            (id == X86_REG_ST4) ||
+            (id == X86_REG_ST5) ||
+            (id == X86_REG_ST6));
+}
+
 // ---------------------------------------------------------------------------------------------------------
 
 cs_err Base_x64::Cs_open(void) {
@@ -2265,11 +2275,20 @@ char buffer[1024];
             num++;
             break;
         case X86_INS_FLD:
-            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                    "pushfpu(utof(op0)) "
-                                                "else "
-                                                    "pushfpu(utod(op0)) "
-                                                "fi",insn,true);
+            if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                reg0 = lang_x64->Translate(handle,  "pushfpu(op0)",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "pushfpu(utof(op0)) "
+                                                    "fi;"
+                                                    "if bits0 == 64 then "
+                                                        "pushfpu(utod(op0)) "
+                                                    "fi;"
+                                                    "if bits0 > 64 then "
+                                                        "pushfpu(utol(op0)) "
+                                                    "fi",insn,true);
+            }
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -2287,21 +2306,39 @@ char buffer[1024];
             num++;
             break;
         case X86_INS_FSTP:
-            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                    "op0 = ftou(popfpu()) "
-                                                "else "
-                                                    "op0 = dtou(popfpu()) "
-                                                "fi",insn,true);
+            if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                reg0 = lang_x64->Translate(handle,  "op0 = popfpu()",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "op0 = ftou(popfpu()) "
+                                                    "fi;"
+                                                    "if bits0 == 64 then "
+                                                        "op0 = dtou(popfpu()) "
+                                                    "fi;"
+                                                    "if bits0 > 64 then "
+                                                        "op0 = ltou(popfpu()) "
+                                                    "fi",insn,true);
+            }
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
             break;
         case X86_INS_FST:
-            reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                    "op0 = ftou(st0) "
-                                                "else "
-                                                    "op0 = dtou(st0) "
-                                                "fi",insn,true);
+            if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                reg0 = lang_x64->Translate(handle,  "op0 = st0",insn,true);
+            }
+            else {
+                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                        "op0 = ftou(st0) "
+                                                    "fi;"
+                                                    "if bits0 == 64 then "
+                                                        "op0 = dtou(st0) "
+                                                    "fi;"
+                                                    "if bits0 > 64 then "
+                                                        "op0 = ltou(st0)  "
+                                                    "fi",insn,true);
+            }
             PrintLine(insn,1,reg0);
             free(reg0);
             num++;
@@ -2314,11 +2351,20 @@ char buffer[1024];
             break;
         case X86_INS_FADD:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                        "st0 = st0 + utof(op0) "
-                                                    "else "
-                                                        "st0 = st0 + utod(op0) "
-                                                    "fi",insn,true);
+                if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                    reg0 = lang_x64->Translate(handle,  "st0 = st0 + op0",insn,true);
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                            "st0 = st0 + utof(op0) "
+                                                        "fi;"
+                                                        "if bits0 == 64 then "
+                                                            "st0 = st0 + utod(op0) "
+                                                        "fi;"
+                                                        "if bits0 > 64 then "
+                                                            "st0 = st0 + utol(op0) "
+                                                        "fi",insn,true);
+                }                                        
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -2326,11 +2372,20 @@ char buffer[1024];
             break;
         case X86_INS_FSUB:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                        "st0 = st0 - utof(op0) "
-                                                    "else "
-                                                        "st0 = st0 - utod(op0) "
-                                                    "fi",insn,true);
+                if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                    reg0 = lang_x64->Translate(handle,  "st0 = st0 - op0",insn,true);
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                            "st0 = st0 - utof(op0) "
+                                                        "fi;"
+                                                        "if bits0 == 64 then "
+                                                            "st0 = st0 - utod(op0) "
+                                                        "fi;"
+                                                        "if bits0 > 64 then "
+                                                            "st0 = st0 - utol(op0) "
+                                                        "fi",insn,true);
+                }
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -2338,11 +2393,20 @@ char buffer[1024];
             break;
         case X86_INS_FDIV:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                        "st0 = st0 / utof(op0) "
-                                                    "else "
-                                                        "st0 = st0 / utod(op0) "
-                                                    "fi",insn,true);
+                if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                    reg0 = lang_x64->Translate(handle,  "st0 = st0 / op0",insn,true);
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                            "st0 = st0 / utof(op0) "
+                                                        "fi;"
+                                                        "if bits0 == 64 then "
+                                                            "st0 = st0 / utod(op0) "
+                                                        "fi;"
+                                                        "if bits0 > 64 then "
+                                                            "st0 = st0 / utol(op0) "
+                                                        "fi",insn,true);
+                }                                        
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;
@@ -2350,11 +2414,20 @@ char buffer[1024];
             break;
         case X86_INS_FMUL:
             if (insn->detail->x86.op_count == 1) {
-                reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
-                                                        "st0 = st0 * utof(op0) "
-                                                    "else "
-                                                        "st0 = st0 * utod(op0) "
-                                                    "fi",insn,true);
+                if (IsSTX(insn->detail->x86.operands[0].reg)) {
+                    reg0 = lang_x64->Translate(handle,  "st0 = st0 * op0",insn,true);
+                }
+                else {
+                    reg0 = lang_x64->Translate(handle,  "if bits0 == 32 then "
+                                                            "st0 = st0 * utof(op0) "
+                                                        "fi;"
+                                                        "if bits0 == 64 then "
+                                                            "st0 = st0 * utod(op0) "
+                                                        "fi;"
+                                                        "if bits0 > 64 then "
+                                                            "st0 = st0 * utol(op0) "
+                                                        "fi",insn,true);
+                }
                 PrintLine(insn,1,reg0);
                 free(reg0);
                 num++;

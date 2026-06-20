@@ -94,7 +94,8 @@ union _eflags {
 };
 
 union _freg {
-	uint64_t u;
+	__uint128_t u;
+	long double l;
 	double d;
 	float f;
 };
@@ -113,7 +114,8 @@ union _sw {
 };
 
 struct _fpu {
-	union _freg r[8];
+	//union _freg r[8];
+	long double r[8];
 	int top;
 	union _sw sw;
 };
@@ -303,9 +305,9 @@ struct _cpu {
 #define _xmm6	(cpu->xmm6.r128)
 #define _xmm7	(cpu->xmm7.r128)
 
-#define _st0	cpu->fpu.r[cpu->fpu.top].d
-#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8].d
-#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8].d
+#define _st0	cpu->fpu.r[cpu->fpu.top]
+#define _st1	cpu->fpu.r[(cpu->fpu.top+1)%8]
+#define _st2	cpu->fpu.r[(cpu->fpu.top+2)%8]
 
 #define _tmp 	(cpu->tmp)
 #define _tmp2 	(cpu->tmp2)
@@ -342,7 +344,7 @@ uint8_t byte_ptr(struct _cpu *cpu,uint64_t addr);
 uint16_t word_ptr(struct _cpu *cpu,uint64_t addr);
 uint32_t dword_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t qword_ptr(struct _cpu *cpu,uint64_t addr);
-uint64_t xword_ptr(struct _cpu *cpu,uint64_t addr);
+__uint128_t xword_ptr(struct _cpu *cpu,uint64_t addr);
 __uint128_t dqword_ptr(struct _cpu *cpu,uint64_t addr);
 int8_t s_byte_ptr(struct _cpu *cpu,uint64_t addr);
 int16_t s_word_ptr(struct _cpu *cpu,uint64_t addr);
@@ -351,8 +353,8 @@ int64_t s_qword_ptr(struct _cpu *cpu,uint64_t addr);
 void set_byte_ptr(struct _cpu *cpu,uint64_t addr,uint8_t value);
 void set_word_ptr(struct _cpu *cpu,uint64_t addr,uint16_t value);
 void set_dword_ptr(struct _cpu *cpu,uint64_t addr,uint32_t value);
-void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
 void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value);
+void set_xword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value);
 void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value);
 int flag_z(struct _cpu *cpu);
 int flag_c(struct _cpu *cpu);
@@ -377,9 +379,11 @@ uint64_t not(uint64_t b,uint64_t p);
 int64_t sdiv(int64_t a,int64_t b);
 uint64_t udiv(uint64_t a,uint64_t b);
 __uint128_t pshufd (__uint128_t op1,uint8_t op2);
-void pushfpu(struct _cpu *cpu,double v);
-double popfpu(struct _cpu *cpu);
+void pushfpu(struct _cpu *cpu,long double v);
+long double popfpu(struct _cpu *cpu);
 uint64_t mask(int bits);
+long double utol(__uint128_t v);
+__uint128_t ltou(long double v);
 double utod(uint64_t v);
 uint64_t dtou(double v);
 float utof(uint64_t v);

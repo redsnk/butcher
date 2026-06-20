@@ -5,6 +5,7 @@ src/test/c/*.orig
 src/test/c/*.patch
 src/test/c/butcher_x64.*
 src/test/c/build
+src/test/c/test
 src/test/py/test.py
 src/test/py/*.orig
 src/test/py/*.patch

@@ -715,6 +715,8 @@ class _cpu:
         h = h | d
         return (l,h)
 
+    # TODO: 19703463121584185 bug
+
     def pushfpu(self,v):
         self.fpu.top -= 1
         if self.fpu.top < 0:

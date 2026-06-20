@@ -104,6 +104,8 @@ class Lang_C_x64 : public Lang_x64 {
     const char *F_DTOU(void);
     const char *F_UTOF(void);
     const char *F_FTOU(void);
+    const char *F_UTOL(void);
+    const char *F_LTOU(void);
     const char *E_EFLAGS(void);
     const char *E_ELSE(void);
     const char *E_PANIC_JMP_INDEX(void);

@@ -45,6 +45,8 @@ class Lang_x64 : public Language {
     virtual const char *F_UTOF(void) = 0;
     virtual const char *F_DTOU(void) = 0;
     virtual const char *F_FTOU(void) = 0;
+    virtual const char *F_LTOU(void) = 0;
+    virtual const char *F_UTOL(void) = 0;
     virtual const char *E_EFLAGS(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
