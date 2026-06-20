@@ -28,7 +28,7 @@ class Lang_C_x64 : public Lang_x64 {
     const char *E_CALL_FROM_IAT(void);
     const char *E_FUNC_NAME(void);
     const char *E_FUNC_ADDR(void);
-    const char *E_RETURN(void);
+    //const char *E_RETURN(void);
     const char *E_GOTO(void);
     const char *E_JMP_FROM_IAT(void);
     const char *E_ENDIF(void);

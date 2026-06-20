@@ -241,9 +241,11 @@ const char *Lang_C_x64::E_FUNC_ADDR(void) {
     return ("func_0x%llx(cpu,0x%llx);");
 }
 
+/*
 const char *Lang_C_x64::E_RETURN(void) {
     return ("return;");
 }
+*/
 
 const char *Lang_C_x64::E_JMP_FROM_IAT(void) {
     return ("jmp_from_iat(cpu,\"%s\",\"%s\");");

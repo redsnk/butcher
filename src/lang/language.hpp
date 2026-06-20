@@ -63,7 +63,7 @@ class Language {
     virtual const char *E_CALL_FROM_IAT(void) = 0;
     virtual const char *E_FUNC_NAME(void) = 0;
     virtual const char *E_FUNC_ADDR(void) = 0;
-    virtual const char *E_RETURN(void) = 0;
+    //virtual const char *E_RETURN(void) = 0;
     virtual const char *E_GOTO(void) = 0;
     virtual const char *E_JMP_FROM_IAT(void) = 0;
     virtual const char *E_ENDIF(void) = 0;

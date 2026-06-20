@@ -752,7 +752,8 @@ char buffer[1024];
             break;
         case X86_INS_RET:
             // ret
-            reg0 = lang_x64->Translate(handle,"pop(bits)",insn,true);
+            //reg0 = lang_x64->Translate(handle,"pop(bits)",insn,true);
+            reg0 = lang_x64->Translate(handle,"anonjmp = pop(bits)",insn,true);
             if (reg0 != NULL) {
                 PrintLine(insn,1,reg0);
                 free(reg0);
@@ -764,7 +765,12 @@ char buffer[1024];
                     free(reg0);
                 }
             }
-            PrintLine(insn,1,lang_x64->E_RETURN());
+            //PrintLine(insn,1,lang_x64->E_RETURN());
+            reg0 = lang_x64->Translate(handle,"goto anonlabel",insn,true);
+            if (reg0 != NULL) {
+                PrintLine(insn,1,reg0);
+                free(reg0);
+            }
             num++;
             break;
         case X86_INS_JMP:
@@ -2596,8 +2602,9 @@ char *name;
         }
     }
     // Anno jmp var
-    if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
-        //printf("uint64_t anon;\n\n");
+    //if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
+    if (true) {
+        // Always print anon vars
         lang_x64->PrintAnonJmpVar();
     }
     for (int m=0;m<c->subcod_count;m++) {
@@ -2622,7 +2629,9 @@ char *name;
     }
     //printf(C_FUNC_FOOTER);
     // Anon jmps
-    if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
+    //if (c->subcodes[num].anonjmp && c->subcodes[num].l_count) {
+    if (true) {
+        // Always print anon jumps
         lang_x64->PrintSubCodeSep();
         lang_x64->PrintF(lang_x64->E_LABEL_ANON());
         for (int n=0;n<c->subcodes[num].l_count;n++) {
