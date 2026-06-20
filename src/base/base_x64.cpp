@@ -441,6 +441,45 @@ cs_insn *insn;
                 (*addr)[c++] = d;
             }
             break;
+        case X86_INS_RET:
+            // push <addr>
+            // [...]
+            // ret
+            *anon = true;
+            *addr = (uint64_t *) malloc(sizeof(uint64_t));
+            for (n=num-1;n>=0;n--) {
+                if (in[n].id == X86_INS_PUSH) {
+                    if (in[n].detail->x86.operands[0].type == X86_OP_IMM) {
+                        // push <addr>
+                        if (ValidCode(in[n].detail->x86.operands[0].imm)) {
+                            (*addr)[c++] = in[n].detail->x86.operands[0].imm;
+                            break;
+                        }
+                        else {
+                            // exit
+                            n = -1;
+                            break;
+                        }
+                    }
+                    else {
+                        // exit
+                        n = -1;
+                        break;
+                    }
+                }
+                else if (   (in[n].id == X86_INS_POP) ||
+                            (in[n].id == X86_INS_JMP) ||
+                            (in[n].id == X86_INS_RET) ||
+                            JccInst(&in[n])) {            
+                    // exit
+                    n = -1;
+                    break;
+                }
+            }
+            if (n < 0) {
+                (*addr)[c++] = UNDEF_ADDR_JMP;
+            }
+            break;
     }
     *count = c;
     return (c);
