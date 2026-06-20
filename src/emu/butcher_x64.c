@@ -362,7 +362,7 @@ uint64_t value;
 	return (value);
 }
 
-uint64_t xword_ptr(struct _cpu *cpu,uint64_t addr) {
+__uint128_t xword_ptr(struct _cpu *cpu,uint64_t addr) {
 uint64_t value;
 
 	get_mem (cpu,addr,10,(uint8_t *)&value);
@@ -399,7 +399,7 @@ void set_qword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
 	set_mem (cpu,addr,8,(uint8_t *)&value);
 }
 
-void set_xword_ptr(struct _cpu *cpu,uint64_t addr,uint64_t value) {
+void set_xword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
 	set_mem (cpu,addr,10,(uint8_t *)&value);
 }
 
@@ -653,17 +653,19 @@ uint8_t c;
 	return (r);
 }
 
-void pushfpu(struct _cpu *cpu,double v) {
+// TODO: 19703463121584185 bug
+
+void pushfpu(struct _cpu *cpu,long double v) {
 	cpu->fpu.top--;
 	if (cpu->fpu.top < 0) cpu->fpu.top = 7;
-	cpu->fpu.r[cpu->fpu.top].d = v;
+	cpu->fpu.r[cpu->fpu.top] = v;
 }
 
-double popfpu(struct _cpu *cpu) {
-uint64_t v;
+long double popfpu(struct _cpu *cpu) {
+long double v;
 
-	v = cpu->fpu.r[cpu->fpu.top].d;
-	cpu->fpu.r[cpu->fpu.top].d = 0;
+	v = cpu->fpu.r[cpu->fpu.top];
+	cpu->fpu.r[cpu->fpu.top] = 0;
 	cpu->fpu.top++;
 	if (cpu->fpu.top > 7) cpu->fpu.top = 0;
 	return (v);
@@ -683,6 +685,13 @@ union _freg c;
 	return (c.f);
 }
 
+long double utol(__uint128_t v) {
+union _freg c;
+
+	c.u = v;
+	return (c.l);
+}
+
 uint64_t dtou(double v) {
 union _freg c;
 
@@ -694,6 +703,13 @@ uint64_t ftou(float v) {
 union _freg c;
 
 	c.f = v;
+	return (c.u);
+}
+
+__uint128_t ltou(long double v) {
+union _freg c;
+
+	c.l = v;
 	return (c.u);
 }
 

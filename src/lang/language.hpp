@@ -63,7 +63,7 @@ class Language {
     virtual const char *E_CALL_FROM_IAT(void) = 0;
     virtual const char *E_FUNC_NAME(void) = 0;
     virtual const char *E_FUNC_ADDR(void) = 0;
-    virtual const char *E_RETURN(void) = 0;
+    //virtual const char *E_RETURN(void) = 0;
     virtual const char *E_GOTO(void) = 0;
     virtual const char *E_JMP_FROM_IAT(void) = 0;
     virtual const char *E_ENDIF(void) = 0;
@@ -71,6 +71,9 @@ class Language {
     virtual const char *E_SPACE(void) = 0;
     virtual const char *E_ANONC(void) = 0;
     virtual const char *F_MASK(void) = 0;
+
+    virtual const char *E_ELSE(void) = 0;
+    virtual const char *E_PANIC_JMP_INDEX(void) = 0;
 
     virtual void PrintHeader(Code *c) = 0;
     virtual void PrintAnonCalls(Code *c) = 0;

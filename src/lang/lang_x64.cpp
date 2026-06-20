@@ -399,11 +399,17 @@ char buffer[MAX_STR_OP];
     else if (!strcmp(name,"utof")) {
         return (strdup(F_UTOF()));
     }
+    else if (!strcmp(name,"utol")) {
+        return (strdup(F_UTOL()));
+    }
     else if (!strcmp(name,"dtou")) {
         return (strdup(F_DTOU()));
     }
     else if (!strcmp(name,"ftou")) {
         return (strdup(F_FTOU()));
+    }
+    else if (!strcmp(name,"ltou")) {
+        return (strdup(F_LTOU()));
     }
     else if (!strcmp(name,"break")) {
         return (strdup(E_BREAK()));

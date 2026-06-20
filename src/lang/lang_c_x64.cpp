@@ -241,9 +241,11 @@ const char *Lang_C_x64::E_FUNC_ADDR(void) {
     return ("func_0x%llx(cpu,0x%llx);");
 }
 
+/*
 const char *Lang_C_x64::E_RETURN(void) {
     return ("return;");
 }
+*/
 
 const char *Lang_C_x64::E_JMP_FROM_IAT(void) {
     return ("jmp_from_iat(cpu,\"%s\",\"%s\");");
@@ -543,6 +545,23 @@ const char *Lang_C_x64::F_FTOU(void) {
      return ("ftou(");
 }
 
+const char *Lang_C_x64::F_UTOL(void) {
+    return ("utol(");
+}
+
+const char *Lang_C_x64::F_LTOU(void) {
+     return ("ltou(");
+}
+
 const char *Lang_C_x64::E_EFLAGS(void) {
      return ("cpu->eflags.r32");
 }
+
+const char *Lang_C_x64::E_ELSE(void) {
+     return ("else {");
+}
+
+const char *Lang_C_x64::E_PANIC_JMP_INDEX(void) {
+    return ("panic(cpu,\"JMP\",\"%s\");");
+}
+

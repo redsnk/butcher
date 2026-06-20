@@ -130,10 +130,12 @@ void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
     PrintF(PY_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
+/*
 #define PY_FUNC_FOOTER "\
     label .label_return\n\
     return\n\
 \n"
+*/
 
 void Lang_Py_x64::PrintAnonJmpVar(void) {
     // None
@@ -151,7 +153,7 @@ void Lang_Py_x64::PrintAnonJmpEnd(void) {
 }
 
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
-    PrintF(PY_FUNC_FOOTER);
+    //PrintF(PY_FUNC_FOOTER);
 }
 
 void Lang_Py_x64::PrintSubCodeSep(void) {
@@ -223,12 +225,14 @@ const char *Lang_Py_x64::E_FUNC_ADDR(void) {
     return ("func_0x%llx(cpu,0x%llx)");
 }
 
+/*
 const char *Lang_Py_x64::E_RETURN(void) {
     return ("goto .label_return");
 }
+*/
 
 const char *Lang_Py_x64::E_JMP_FROM_IAT(void) {
-    return ("cpu.jmp_from_iat(\"%s\",\"%s\");");
+    return ("cpu.jmp_from_iat(\"%s\",\"%s\")");
 }
 
 const char *Lang_Py_x64::E_ENDIF(void) {
@@ -525,6 +529,22 @@ const char *Lang_Py_x64::F_FTOU(void) {
      return ("cpu.ftou(");
 }
 
+const char *Lang_Py_x64::F_LTOU(void) {
+     return ("cpu.ltou(");
+}
+
+const char *Lang_Py_x64::F_UTOL(void) {
+    return ("cpu.utol(");
+}
+
 const char *Lang_Py_x64::E_EFLAGS(void) {
      return ("cpu.eflags.r32");
+}
+
+const char *Lang_Py_x64::E_ELSE(void) {
+     return ("else:");
+}
+
+const char *Lang_Py_x64::E_PANIC_JMP_INDEX(void) {
+    return ("cpu.panic(cpu,\"JMP\",\"%s\")");
 }
