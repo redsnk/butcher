@@ -142,10 +142,6 @@ int n;
 
     for(n=0;n<subcod_count;n++) {
         if (subcodes[n].parent == SUBCODE_TOP) {
-            if (subcodes[n].id == 1007) {
-                n++;    // test
-                n -= 1;
-            }
             PackSubCode(subcodes[n].id);
         }
     }

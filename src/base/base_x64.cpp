@@ -293,11 +293,6 @@ int lok;
 int c;
 cs_insn *insn;
 
-    /*
-    if (arch->ValidMemory(addr)) {
-        return (true);
-    }
-    */
     lok = false;
     uint8_t *m = arch->GetMemory(addr,VALID_CODE_LENGTH,&read);
     if (m!= NULL) {
