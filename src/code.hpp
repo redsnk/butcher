@@ -27,6 +27,7 @@ struct _subcode {
     size_t count;
     //std::set<uint64_t> labels;
     uint64_t *labels;
+    int *used_labels;
     size_t l_count;
     int anonjmp;
     int ret_bytes;
@@ -62,6 +63,7 @@ class Code {
         ~Code();
         void NewSubCode (struct _subcode *sc);
         void AddSubcode (struct _subcode *sc);
+        void FreeSubCode (struct _subcode *sc);
         void DelSubCode (int n);
         struct _subcode *GetSubcode (uint64_t addr,int parent);
         int SubcodeHasAddr (struct _subcode *sc,uint64_t addr);
@@ -76,7 +78,8 @@ class Code {
         void Print (void);
         struct _subcode *GetParent(struct _subcode *sc);
         void AddLabel (struct _subcode *sc,uint64_t addr);
-        int ExistLabel (struct _subcode *sc,uint64_t addr);
+        int ExistLabel (struct _subcode *sc,uint64_t addr,int *used);
+        void UseLabel (struct _subcode *sc,uint64_t addr);
         void SetAnonJmp (struct _subcode *sc);
         void SetRetBytes (struct _subcode *sc,int bytes);
         char *GetFunctionName (uint64_t addr);

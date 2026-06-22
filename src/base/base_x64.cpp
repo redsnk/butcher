@@ -664,29 +664,17 @@ char *name;
 }
 
 
-//void Base_x64::PrintLabel(Code *c,uint64_t addr) {
 void Base_x64::PrintLabel(Code *c,struct _subcode *sc,uint64_t addr) {
 char *name;
-//struct _subcode *p; 
+int used;
 
-    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
-    //p = c->GetParent(sc);
-    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
-    //if (std::find(p->labels.begin(), p->labels.end(), addr) != p->labels.end()) {
-    if (c->ExistLabel(sc,addr)) {
-        // TODO: NamedFunction
-        /*
-        if (IsNamedFunction(addr,&name)) {
-            printf(lang_x64->E_LABEL_NAME,name);
-            free(name);
+    if (c->ExistLabel(sc,addr,&used)) {
+        if (!used) {
+            name = GetLabel(addr);
+            lang_x64->PrintF(lang_x64->E_LABEL(),name);
+            free (name);
+            c->UseLabel(sc,addr);
         }
-        else {
-        */
-        //    printf(lang_x64->E_LABEL(),addr);
-        //}
-        name = GetLabel(addr);
-        lang_x64->PrintF(lang_x64->E_LABEL(),name);
-        free (name);
     }
 }
 

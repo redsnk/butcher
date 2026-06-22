@@ -47,10 +47,22 @@ void Code::AddSubcode (struct _subcode *sc) {
     subcodes[subcod_count++] = *sc;
 }
 
+void Code::FreeSubCode (struct _subcode *sc) {
+    cs_free(sc->insn, sc->count);
+    if (sc->name != NULL) {
+        free(sc->name);
+    }
+    if (sc->labels != NULL) {
+        free(sc->labels);
+        free(sc->used_labels);
+    }
+}
+
 void Code::DelSubCode (int n) {
 int m;
 
-    cs_free(subcodes[n].insn, subcodes[n].count);
+    //cs_free(subcodes[n].insn, subcodes[n].count);
+    FreeSubCode(&subcodes[n]);
     for (m=n+1;m<subcod_count;m++) {
         subcodes[m-1] = subcodes[m];
     }
@@ -394,30 +406,49 @@ int n;
 
 void Code::AddLabel (struct _subcode *sc,uint64_t addr) {
 struct _subcode *p;
+int used;
 
     p = GetParent(sc);
-    if (!ExistLabel(p,addr)) {
+    if (!ExistLabel(p,addr,&used)) {
         if (!p->l_count) {
             p->labels = (uint64_t *) malloc(sizeof(uint64_t));
+            p->used_labels = (int *) malloc(sizeof(int));
         }
         else {
             p->labels = (uint64_t *) realloc(p->labels,sizeof(uint64_t)*(p->l_count+1));
+            p->used_labels = (int *) realloc(p->used_labels,sizeof(int)*(p->l_count+1));
         }
-        p->labels[p->l_count++] = addr;
+        p->labels[p->l_count] = addr;
+        p->used_labels[p->l_count] = false;
+        p->l_count++;
     }
 }
 
-int Code::ExistLabel (struct _subcode *sc,uint64_t addr) {
+int Code::ExistLabel (struct _subcode *sc,uint64_t addr,int *used) {
 int n;
 struct _subcode *p;
 
     p = GetParent(sc);
     for (n=0;n<p->l_count;n++) {
         if (p->labels[n] == addr) {
+            *used = p->used_labels[n];
             return (true);
         }
     }
     return (false);
+}
+
+void Code::UseLabel (struct _subcode *sc,uint64_t addr) {
+int n;
+struct _subcode *p;
+
+    p = GetParent(sc);
+    for (n=0;n<p->l_count;n++) {
+        if (p->labels[n] == addr) {
+            p->used_labels[n] = true;
+            return;
+        }
+    }
 }
 
 void Code::SetAnonJmp (struct _subcode *sc) {
@@ -476,6 +507,7 @@ int n;
 
     if (subcod_count > 0) {
         for (n=0;n<subcod_count;n++) {
+            /*
             cs_free(subcodes[n].insn, subcodes[n].count);
             if (subcodes[n].name != NULL) {
                 free(subcodes[n].name);
@@ -483,6 +515,8 @@ int n;
             if (subcodes[n].labels != NULL) {
                 free(subcodes[n].labels);
             }
+            */
+            FreeSubCode(&subcodes[n]);
         }
         free(subcodes);
     }
