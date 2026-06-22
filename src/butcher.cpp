@@ -169,7 +169,8 @@ uint8_t *m;
     if (c == NULL) {
         c = new Code(address);
     }
-    if (c->HasAddr(address,parent)) {
+    //if (c->HasAddr(address,parent)) {
+    if (c->GetSubcode(address,parent) != NULL) {
         if (ltraces) lang->PrintF("%s *** GetCode repeated 0x%llx, exit ...\n",lang->COMM(),address);
         return (c);
     }
@@ -342,6 +343,7 @@ char *name;
             IsNamedFunction(address,&name);
             Code *c = GetCode(NULL,address,name,SUBCODE_TOP);
             c = Include(c);
+            c->PackSubCodes();
             AnalyzeCode(c);
             if (!loadm) {
                 IncludeMem(c);
