@@ -102,6 +102,10 @@ uint64_t addr,*addr_list;
 
     lcount = 0;
     lend = false;
+    if (address == 0x1000100) {
+        // test
+        read = 0;
+    }
     while (true) {
         m = arch->GetMemory(address,max_subcode,&read);
         if (m == NULL) {
@@ -113,10 +117,12 @@ uint64_t addr,*addr_list;
             return (false);
         }
         if ((lcount == ncount) || (read < max_subcode)) {
+            // No more opcodes or memory
             *memory = max_subcode;
             cs_free(insn, ncount);
             break;
         }
+        lcount = ncount;
         for (n = 0; n < ncount; n++) {
             if (IsJmpIAT(&insn[n],&lib,&func)) {
                     free(lib);
@@ -288,6 +294,10 @@ uint8_t *m;
                     sc.last = sc.insn[n].address;
                     break;
                 }
+            }
+            if (n == sc.count) {
+                // No end instruction reached
+                sc.last = sc.insn[n-1].address;
             }
             /*
             if (max_subcode > MAX_MEM_GETCODE) {

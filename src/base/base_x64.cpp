@@ -236,6 +236,10 @@ int Base_x64::IsInt(cs_insn *insn, uint64_t *num) {
 }
 
 int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
+    if (insn[n].id == X86_INS_INVALID) {
+        // Invalid
+        return (true);
+    }
     if (insn[n].id == X86_INS_NOP) {
         if (insn[n].detail->x86.op_count > 0) {
             // nop             word ptr [rax + rax]
@@ -665,9 +669,11 @@ int used;
 
     if (c->ExistLabel(sc,addr,&used)) {
         if (!used) {
+            // Print only once
             name = GetLabel(addr);
             lang_x64->PrintF(lang_x64->E_LABEL(),name);
             free (name);
+            // Mark as printed
             c->UseLabel(sc,addr);
         }
     }
@@ -699,7 +705,7 @@ char buffer[1024];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x771b36) {
+    if (insn->address == 0x1000100) {
         // test
         n = 0;
     }
