@@ -236,6 +236,10 @@ int Base_x64::IsInt(cs_insn *insn, uint64_t *num) {
 }
 
 int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
+    if (insn[n].id == X86_INS_INVALID) {
+        // Invalid
+        return (true);
+    }
     if (insn[n].id == X86_INS_NOP) {
         if (insn[n].detail->x86.op_count > 0) {
             // nop             word ptr [rax + rax]
@@ -293,11 +297,6 @@ int lok;
 int c;
 cs_insn *insn;
 
-    /*
-    if (arch->ValidMemory(addr)) {
-        return (true);
-    }
-    */
     lok = false;
     uint8_t *m = arch->GetMemory(addr,VALID_CODE_LENGTH,&read);
     if (m!= NULL) {
@@ -664,29 +663,19 @@ char *name;
 }
 
 
-//void Base_x64::PrintLabel(Code *c,uint64_t addr) {
 void Base_x64::PrintLabel(Code *c,struct _subcode *sc,uint64_t addr) {
 char *name;
-//struct _subcode *p; 
+int used;
 
-    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
-    //p = c->GetParent(sc);
-    //if (std::find(c->labels.begin(), c->labels.end(), addr) != c->labels.end()) {
-    //if (std::find(p->labels.begin(), p->labels.end(), addr) != p->labels.end()) {
-    if (c->ExistLabel(sc,addr)) {
-        // TODO: NamedFunction
-        /*
-        if (IsNamedFunction(addr,&name)) {
-            printf(lang_x64->E_LABEL_NAME,name);
-            free(name);
+    if (c->ExistLabel(sc,addr,&used)) {
+        if (!used) {
+            // Print only once
+            name = GetLabel(addr);
+            lang_x64->PrintF(lang_x64->E_LABEL(),name);
+            free (name);
+            // Mark as printed
+            c->UseLabel(sc,addr);
         }
-        else {
-        */
-        //    printf(lang_x64->E_LABEL(),addr);
-        //}
-        name = GetLabel(addr);
-        lang_x64->PrintF(lang_x64->E_LABEL(),name);
-        free (name);
     }
 }
 
@@ -716,7 +705,7 @@ char buffer[1024];
 
     insn = &sc->insn[num];
     bits = insn->detail->x86.addr_size*8;
-    if (insn->address == 0x771b36) {
+    if (insn->address == 0x1000100) {
         // test
         n = 0;
     }

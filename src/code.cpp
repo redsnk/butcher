@@ -20,6 +20,7 @@ void Code::NewSubCode (struct _subcode *sc) {
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
+    /*
     if (sc->parent != SUBCODE_TOP) {
         for (int n=0;n<subcod_count;n++) {
             if ((sc->parent == subcodes[n].id) || (sc->parent == subcodes[n].parent)) {
@@ -37,12 +38,113 @@ void Code::AddSubcode (struct _subcode *sc) {
             }
         }
     }
+    */
     if (!subcod_count) {
         subcodes = (struct _subcode *) malloc(sizeof(struct _subcode));
     } else {
         subcodes = (struct _subcode *) realloc(subcodes, sizeof(struct _subcode)*(subcod_count+1));
     }
     subcodes[subcod_count++] = *sc;
+}
+
+void Code::FreeSubCode (struct _subcode *sc) {
+    cs_free(sc->insn, sc->count);
+    if (sc->name != NULL) {
+        free(sc->name);
+    }
+    if (sc->labels != NULL) {
+        free(sc->labels);
+        free(sc->used_labels);
+    }
+}
+
+void Code::DelSubCode (int n) {
+int m;
+
+    //cs_free(subcodes[n].insn, subcodes[n].count);
+    FreeSubCode(&subcodes[n]);
+    for (m=n+1;m<subcod_count;m++) {
+        subcodes[m-1] = subcodes[m];
+    }
+    subcod_count--;
+}
+
+struct _subcode *Code::GetSubcode (uint64_t addr,int parent) {
+int n;
+
+    for (n=0;n<subcod_count;n++) {
+        if ((subcodes[n].first == addr) && (subcodes[n].parent == parent)) {
+            return (&subcodes[n]);
+        }
+    }
+    return(NULL);
+}
+
+int Code::SubcodeHasAddr (struct _subcode *sc,uint64_t addr) {
+int n;
+uint64_t d;
+
+    for (n=0;n<sc->count;n++) {
+        d = sc->insn[n].address;
+        if (d == addr) {
+            return (true);
+        }
+        if (d > addr) {
+            return (false);
+        }
+        if (d == sc->last) {
+            return (false);
+        }
+    }
+    return (false);
+}
+
+int Code::MixSubCodes (int n,int m) {
+    if (SubcodeHasAddr(&subcodes[m],subcodes[n].first) && SubcodeHasAddr(&subcodes[m],subcodes[n].last)) {
+        // n inside m
+        if (subcodes[n].parent != SUBCODE_TOP) {
+            DelSubCode(n);
+            return (true);
+        }
+    }
+    if (SubcodeHasAddr(&subcodes[n],subcodes[m].first) && SubcodeHasAddr(&subcodes[n],subcodes[m].last)) {
+        // m inside n
+        if (subcodes[m].parent != SUBCODE_TOP) {
+            DelSubCode(m);
+            return (true);
+        }
+    }
+    return (false);
+}
+
+void Code::PackSubCode (int id) {
+int n,m,lmix;
+
+    do {
+        lmix = false;
+        for (n=0;(n<subcod_count) && (!lmix);n++) {
+            if (((subcodes[n].parent == SUBCODE_TOP) && (subcodes[n].id == id)) || (subcodes[n].parent == id)) {
+                for (m=n+1;(m<subcod_count) && (!lmix);m++) {
+                    if (((subcodes[m].parent == SUBCODE_TOP) && (subcodes[m].id == id)) || (subcodes[m].parent == id)) {
+                        if (MixSubCodes(n,m)) {
+                            lmix = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    while (lmix);
+}
+
+void Code::PackSubCodes (void) {
+int n;
+
+    for(n=0;n<subcod_count;n++) {
+        if (subcodes[n].parent == SUBCODE_TOP) {
+            PackSubCode(subcodes[n].id);
+        }
+    }
 }
 
 void Code::AddSubMem (uint64_t address,uint8_t *mem,uint64_t size) {
@@ -247,6 +349,7 @@ int n,m,lmix;
     while (lmix);
 }
 
+/*
 int Code::HasAddr (uint64_t addr,int parent) {
     if (parent != SUBCODE_TOP) {
         // jmp
@@ -268,6 +371,7 @@ int Code::HasAddr (uint64_t addr,int parent) {
     }
     return (false);
 }
+*/
 
 void Code::Print (void) {
 int n,i;
@@ -298,30 +402,49 @@ int n;
 
 void Code::AddLabel (struct _subcode *sc,uint64_t addr) {
 struct _subcode *p;
+int used;
 
     p = GetParent(sc);
-    if (!ExistLabel(p,addr)) {
+    if (!ExistLabel(p,addr,&used)) {
         if (!p->l_count) {
             p->labels = (uint64_t *) malloc(sizeof(uint64_t));
+            p->used_labels = (int *) malloc(sizeof(int));
         }
         else {
             p->labels = (uint64_t *) realloc(p->labels,sizeof(uint64_t)*(p->l_count+1));
+            p->used_labels = (int *) realloc(p->used_labels,sizeof(int)*(p->l_count+1));
         }
-        p->labels[p->l_count++] = addr;
+        p->labels[p->l_count] = addr;
+        p->used_labels[p->l_count] = false;
+        p->l_count++;
     }
 }
 
-int Code::ExistLabel (struct _subcode *sc,uint64_t addr) {
+int Code::ExistLabel (struct _subcode *sc,uint64_t addr,int *used) {
 int n;
 struct _subcode *p;
 
     p = GetParent(sc);
     for (n=0;n<p->l_count;n++) {
         if (p->labels[n] == addr) {
+            *used = p->used_labels[n];
             return (true);
         }
     }
     return (false);
+}
+
+void Code::UseLabel (struct _subcode *sc,uint64_t addr) {
+int n;
+struct _subcode *p;
+
+    p = GetParent(sc);
+    for (n=0;n<p->l_count;n++) {
+        if (p->labels[n] == addr) {
+            p->used_labels[n] = true;
+            return;
+        }
+    }
 }
 
 void Code::SetAnonJmp (struct _subcode *sc) {
@@ -380,6 +503,7 @@ int n;
 
     if (subcod_count > 0) {
         for (n=0;n<subcod_count;n++) {
+            /*
             cs_free(subcodes[n].insn, subcodes[n].count);
             if (subcodes[n].name != NULL) {
                 free(subcodes[n].name);
@@ -387,6 +511,8 @@ int n;
             if (subcodes[n].labels != NULL) {
                 free(subcodes[n].labels);
             }
+            */
+            FreeSubCode(&subcodes[n]);
         }
         free(subcodes);
     }

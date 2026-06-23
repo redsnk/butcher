@@ -102,6 +102,10 @@ uint64_t addr,*addr_list;
 
     lcount = 0;
     lend = false;
+    if (address == 0x1000100) {
+        // test
+        read = 0;
+    }
     while (true) {
         m = arch->GetMemory(address,max_subcode,&read);
         if (m == NULL) {
@@ -113,10 +117,12 @@ uint64_t addr,*addr_list;
             return (false);
         }
         if ((lcount == ncount) || (read < max_subcode)) {
+            // No more opcodes or memory
             *memory = max_subcode;
             cs_free(insn, ncount);
             break;
         }
+        lcount = ncount;
         for (n = 0; n < ncount; n++) {
             if (IsJmpIAT(&insn[n],&lib,&func)) {
                     free(lib);
@@ -169,7 +175,8 @@ uint8_t *m;
     if (c == NULL) {
         c = new Code(address);
     }
-    if (c->HasAddr(address,parent)) {
+    //if (c->HasAddr(address,parent)) {
+    if (c->GetSubcode(address,parent) != NULL) {
         if (ltraces) lang->PrintF("%s *** GetCode repeated 0x%llx, exit ...\n",lang->COMM(),address);
         return (c);
     }
@@ -288,6 +295,10 @@ uint8_t *m;
                     break;
                 }
             }
+            if (n == sc.count) {
+                // No end instruction reached
+                sc.last = sc.insn[n-1].address;
+            }
             /*
             if (max_subcode > MAX_MEM_GETCODE) {
                 // No more code, maximun reached
@@ -342,6 +353,7 @@ char *name;
             IsNamedFunction(address,&name);
             Code *c = GetCode(NULL,address,name,SUBCODE_TOP);
             c = Include(c);
+            c->PackSubCodes();
             AnalyzeCode(c);
             if (!loadm) {
                 IncludeMem(c);
