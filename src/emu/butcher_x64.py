@@ -2,6 +2,9 @@
 import sys
 import traceback
 from ctypes import *
+import numpy as np
+import math
+import struct
 #from goto import with_goto
 
 class _r8(Structure):
@@ -154,7 +157,7 @@ struct _fpu {
 '''
 
 class _fpu:
-    r = [_freg] * 8
+    r = [np.longdouble] * 8
     top = 0
     sw = _sw()
 
@@ -240,39 +243,33 @@ class _cpu:
     '''
     void sort_mem (struct _cpu *cpu) {
     int n;
-    int lexit;
     struct _mem m;
 
-        do {
-            lexit = TRUE;
-            for (n=0;n<(cpu->mem_count-1);n++) {
-                if (cpu->mems[n].addr > cpu->mems[n+1].addr) {
-                    m = cpu->mems[n];
-                    cpu->mems[n] = cpu->mems[n+1];
-                    cpu->mems[n+1] = m;
-                    lexit = FALSE;
-                    break;
-                }
+        n = cpu->mem_count-1;
+        while (n > 0) {
+            if (cpu->mems[n].addr < cpu->mems[n-1].addr) {
+                m = cpu->mems[n-1];
+                cpu->mems[n-1] = cpu->mems[n];
+                cpu->mems[n] = m;
+                n--;
             }
-
+            else {
+                break;
+            }
         }
-        while (!lexit);
     }
     '''
 
     def sort_mem(self):
-        while True:
-            lexit = True
-            for n in range(len(self.mems)-1):
-                if self.mems[n].addr > self.mems[n+1].addr:
-                    m = self.mems[n]
-                    self.mems[n] = self.mems[n+1]
-                    self.mems[n+1] = m
-                    lexit = False
-                    break
-            if lexit:
+        n = len(self.mems)-1
+        while n > 0:
+            if self.mems[n].addr < self.mems[n-1].addr:
+                m = self.mems[n-1]
+                self.mems[n-1] = self.mems[n]
+                self.mems[n] = m
+                n -= 1
+            else:
                 break
-
 
     def add_zero_mem(self,addr,size):
         self.add_mem(addr,[0] * size)
@@ -304,9 +301,22 @@ class _cpu:
         for m in self.mems:
             if (addr >= m.addr) and ((addr+size) <= (m.addr + m.size)):
                 start = addr-m.addr
+                '''
                 pre = m.mem[:start]
                 post = m.mem[start+size:]
                 m.mem = pre+data+post
+                '''
+                if size <= 1024:
+                    # bytes
+                    n = 0
+                    while n < size:
+                        m.mem[start+n] = data[n]
+                        n += 1
+                else:
+                    # block
+                    pre = m.mem[:start]
+                    post = m.mem[start+size:]
+                    m.mem = pre+data+post
                 return
         self.panic("SETMEM",hex(addr))
     
@@ -721,11 +731,11 @@ class _cpu:
         self.fpu.top -= 1
         if self.fpu.top < 0:
             self.fpu.top = 7
-        self.fpu.r[self.fpu.top].d = v
+        self.fpu.r[self.fpu.top] = v
     
     def popfpu(self):
-        v = self.fpu.r[self.fpu.top].d
-        self.fpu.r[self.fpu.top].d = 0
+        v = self.fpu.r[self.fpu.top]
+        self.fpu.r[self.fpu.top] = 0
         self.fpu.top += 1
         if self.fpu.top > 7:
             self.fpu.top = 0
@@ -2216,6 +2226,27 @@ class _cpu:
         else:
             self.xmm7.l = v
             self.xmm7.h = 0
+
+    @property
+    def _st0(self):
+        return self.fpu.r[(self.fpu.top+0)%8]
+    @_st0.setter
+    def _st0(self,v):
+        self.fpu.r[(self.fpu.top+0)%8] = v
+
+    @property
+    def _st1(self):
+        return self.fpu.r[(self.fpu.top+1)%8]
+    @_st1.setter
+    def _st1(self,v):
+        self.fpu.r[(self.fpu.top+1)%8] = v
+
+    @property
+    def _st2(self):
+        return self.fpu.r[(self.fpu.top+2)%8]
+    @_st2.setter
+    def _st2(self,v):
+        self.fpu.r[(self.fpu.top+2)%8] = v
 
     #---------------------------------------------------------------
     
