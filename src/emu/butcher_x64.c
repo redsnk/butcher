@@ -91,6 +91,7 @@ void add_mem (struct _cpu *cpu,uint64_t addr,const char *mem,int size) {
 	sort_mem(cpu);
 }
 
+/*
 void sort_mem (struct _cpu *cpu) {
 int n;
 int lexit;
@@ -110,6 +111,25 @@ struct _mem m;
 
 	}
 	while (!lexit);
+}
+*/
+
+void sort_mem (struct _cpu *cpu) {
+int n;
+struct _mem m;
+
+	n = cpu->mem_count-1;
+	while (n > 0) {
+		if (cpu->mems[n].addr < cpu->mems[n-1].addr) {
+			m = cpu->mems[n-1];
+			cpu->mems[n-1] = cpu->mems[n];
+			cpu->mems[n] = m;
+			n--;
+		}
+		else {
+			break;
+		}
+	}
 }
 
 void load_mem (struct _cpu *cpu,char *name,uint64_t d_Offset,uint64_t d_Size,uint64_t v_Address,uint64_t v_Size) {
@@ -652,8 +672,6 @@ uint8_t c;
 	r |= (__uint128_t)((op1 >> (32*c)) & 0xffffffff) << 96;
 	return (r);
 }
-
-// TODO: 19703463121584185 bug
 
 void pushfpu(struct _cpu *cpu,long double v) {
 	cpu->fpu.top--;

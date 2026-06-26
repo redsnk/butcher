@@ -186,4 +186,18 @@ for x in 0 1 2 3 4 5 6 7; do
     r128 $x
 done
 
+st() {
+echo "    @property"
+echo "    def _st$1(self):"
+echo "        return self.fpu.r[(self.fpu.top+$1)%8]"
+echo "    @_st$1.setter"
+echo "    def _st$1(self,v):"
+echo "        self.fpu.r[(self.fpu.top+$1)%8] = v"
+echo ""
+}
+
+for x in 0 1 2; do
+    st $x
+done
+
 echo "    #---------------------------------------------------------------"

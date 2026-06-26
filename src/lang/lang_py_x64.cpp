@@ -130,12 +130,8 @@ void Lang_Py_x64::PrintFuncHeaderAddr(Code *c,int num) {
     PrintF(PY_FUNC_HEADER_ADDR,c->subcodes[num].first);
 }
 
-/*
 #define PY_FUNC_FOOTER "\
-    label .label_return\n\
-    return\n\
 \n"
-*/
 
 void Lang_Py_x64::PrintAnonJmpVar(void) {
     // None
@@ -153,7 +149,7 @@ void Lang_Py_x64::PrintAnonJmpEnd(void) {
 }
 
 void Lang_Py_x64::PrintFuncFooter(Code *c,int num) {
-    //PrintF(PY_FUNC_FOOTER);
+    PrintF(PY_FUNC_FOOTER);
 }
 
 void Lang_Py_x64::PrintSubCodeSep(void) {
