@@ -151,7 +151,7 @@ if __name__=="__main__":
 9. Execute the new **Python** tool:
 
 ```bash
-sudo pip3.7 install numpy struct math goto-statement
+sudo pip3.7 install goto-statement numpy
 ln -s ../src/emu/butcher_x64.py .
 python3.7 secret.py 5
 ```
