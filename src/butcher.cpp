@@ -3,6 +3,20 @@
 
 #include "butcher.hpp"
 
+int Butcher::SameInsn (cs_insn *insn1, cs_insn *insn2) {
+int n;
+
+    if (insn1->size != insn2->size) {
+        return (false);
+    }
+    for (n=0;n<insn1->size;n++) {
+        if (insn1->bytes[n] != insn2->bytes[n]) {
+            return (false);
+        }
+    }
+    return (true);
+}
+
 int Butcher::IsGroup (cs_insn *insn, int group) {
     if (insn->detail->groups_count > 0) {
         for (int i=0;i <  insn->detail->groups_count;i++) {

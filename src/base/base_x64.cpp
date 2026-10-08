@@ -236,6 +236,8 @@ int Base_x64::IsInt(cs_insn *insn, uint64_t *num) {
 }
 
 int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
+int m;
+
     if (insn[n].id == X86_INS_INVALID) {
         // Invalid
         return (true);
@@ -260,6 +262,45 @@ int Base_x64::IsEnd(cs_insn *insn, int n, int count) {
         case X86_INS_OUTSW:
         case X86_INS_OUTSD:
             return (true);
+    }
+    // Patterns
+    if (((count-n) >= 18) && (n > 18)) {
+        // (ins1) * 18
+        for (m=1;m<18;m++) {
+            if (!SameInsn(&insn[0],&insn[m])) {
+                break;
+            }
+        }
+        if (m == 18) {
+            return (true);
+        }
+        // (ins1,ins2) * 9
+        for (m=2;m<18;m+=2) {
+            if (!SameInsn(&insn[0],&insn[m])) {
+                break;
+            }
+            if (!SameInsn(&insn[1],&insn[m+1])) {
+                break;
+            }
+        }
+        if (m == 18) {
+            return (true);
+        }
+        // (ins1,ins2,ins3) * 6
+        for (m=3;m<18;m+=3) {
+            if (!SameInsn(&insn[0],&insn[m])) {
+                break;
+            }
+            if (!SameInsn(&insn[1],&insn[m+1])) {
+                break;
+            }
+            if (!SameInsn(&insn[2],&insn[m+2])) {
+                break;
+            }
+        }
+        if (m == 18) {
+            return (true);
+        }
     }
     return (false);
 }
