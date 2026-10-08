@@ -16,7 +16,8 @@ void Code::NewSubCode (struct _subcode *sc) {
     sc->labels = NULL;
     sc->l_count = 0;
     sc->anonjmp = false;
-    sc->ret_bytes =0;
+    sc->ret_bytes = 0;
+    sc->count = 0;
 }
 
 void Code::AddSubcode (struct _subcode *sc) {
@@ -48,7 +49,9 @@ void Code::AddSubcode (struct _subcode *sc) {
 }
 
 void Code::FreeSubCode (struct _subcode *sc) {
-    cs_free(sc->insn, sc->count);
+    if (sc->count > 0) {
+        cs_free(sc->insn, sc->count);
+    }
     if (sc->name != NULL) {
         free(sc->name);
     }
