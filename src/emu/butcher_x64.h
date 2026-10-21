@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <iconv.h>
+#include <errno.h>
 
 #define FALSE 	(0)
 #define TRUE	(-1)
@@ -420,8 +422,12 @@ uint64_t get_free_chunk(struct _cpu *cpu,int size);
 uint64_t alloc_mem (struct _cpu *cpu,int size);
 uint64_t realloc_mem (struct _cpu *cpu,uint64_t addr,int size);
 void free_mem (struct _cpu *cpu,uint64_t addr);
+char *get_str_ptr(struct _cpu *cpu,uint64_t addr);
+int get_unicode_length(struct _cpu *cpu,uint64_t addr);
 void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str);
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len);
+int set_unicode_ptr_code_len (struct _cpu *cpu,uint64_t addr,char *str,char *code,int len);
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr);
+char *get_unicode_ptr_code_len(struct _cpu *cpu,uint64_t addr,char *code,int len,int *size);
 char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr);
 uint64_t alloc_delphi_ustr(struct _cpu *cpu, char *str);
 
