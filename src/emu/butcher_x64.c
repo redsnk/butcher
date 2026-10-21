@@ -35,6 +35,48 @@ char buffer[MAX_PANIC];
 }
 */
 
+#define DUMP_LINE (16)
+
+void hexdump (uint64_t off,void *addr,int len) {
+char *p;
+char hex[256];
+char str[256];
+int i,n;
+char buffer[16];
+char c;
+
+	i = 0;
+	n = 0;
+	hex[0] = 0;
+	str[0] = 0;
+	printf("hexdump: %" PRIi64 "(0x%" PRIx64 ") -------\n",off,off);
+	while (i < len) {
+		c = ((char *) addr)[i];
+		sprintf(buffer," %02x",(unsigned char )c);
+		strcat (hex,buffer);
+		if ((c>=0x20) && (c<=0x7e)) {
+			sprintf(buffer,"%c",c);
+			strcat(str,buffer);
+		}
+		else {
+			strcat(str,".");
+		}
+		i++;
+		if ((i == len) || ((i % DUMP_LINE) == 0)) {
+			while (i % DUMP_LINE) {
+				strcat (hex,"   ");
+				strcat (str," ");
+				i++;
+			}
+			printf("0x%" PRIx64 " %s  %s\n",off,hex,str);
+			off += DUMP_LINE;
+			str[0] = 0;
+			hex[0] = 0;
+		}
+	}
+	printf("----------------------------\n");
+}
+
 void panic(struct _cpu *cpu,const char *code,char *format,...) {
 int n;
 char buffer[MAX_PANIC];
@@ -52,6 +94,67 @@ char buffer[MAX_PANIC];
 	if (n == cpu->num_errors) n--;	// Default error
 	fprintf(stderr,"ERROR|%i|%s|%s\n",cpu->errors[n].num,buffer,cpu->errors[n].msg);
 	exit(cpu->errors[n].num);
+}
+
+char *linux_iconvert (struct _cpu *cpu,char *str,int len,char *from,char *to,int *size) {
+iconv_t cd;
+char *buffer,*in_b,*out_b;
+size_t l,w,m,r;
+
+	m = (len+1)*4;
+	buffer = malloc(m);
+	if (buffer != NULL) {
+		in_b = str;
+		l = len;
+		out_b = buffer;
+		w = m;
+		cd = iconv_open (to,from);
+		if (cd != (iconv_t) -1) {
+			while (TRUE) {
+				r = iconv(cd,&in_b,&l,&out_b,&w);
+				if (r != (size_t) -1) {
+					iconv_close (cd);
+					*size = m-w;
+					//hexdump(0,str,len);
+					//hexdump(0,buffer,*size);
+					return(buffer);
+				}
+				else {
+					if ((errno == EINVAL) || (errno == EILSEQ)) {
+						if (!strcmp(to,"UTF16LE") && !strcmp(from,"CP1252")) {
+							// Control code 
+							*out_b = *in_b;
+							out_b++;		// TODO: overflow
+							*out_b = 0;
+							out_b++;
+							w -= 2;
+							in_b++;
+							l--;
+						}
+						else {
+							// Ignore
+							*out_b = *in_b;
+							out_b++;
+							in_b++;
+							l--;
+							w--;
+						} 
+					}
+					else {
+						// Error
+						panic(cpu,"DEFAULT","iconv error: %li",errno);
+						break;
+					}
+				}
+			}
+			iconv_close (cd);
+		}
+		else {
+			panic(cpu,"DEFAULT","iconv_open error: %li",errno);
+		}
+		free(buffer);
+	}
+	return (NULL);
 }
 
 int locate_mem (struct _cpu *cpu,uint64_t addr) {
@@ -221,48 +324,6 @@ int m;
 	cpu->mem_count--;
 }
 
-#define DUMP_LINE (16)
-
-void hexdump (uint64_t off,void *addr,int len) {
-char *p;
-char hex[256];
-char str[256];
-int i,n;
-char buffer[16];
-char c;
-
-	i = 0;
-	n = 0;
-	hex[0] = 0;
-	str[0] = 0;
-	printf("hexdump: %" PRIi64 "(0x%" PRIx64 ") -------\n",off,off);
-	while (i < len) {
-		c = ((char *) addr)[i];
-		sprintf(buffer," %02x",(unsigned char )c);
-		strcat (hex,buffer);
-		if ((c>=0x20) && (c<=0x7e)) {
-			sprintf(buffer,"%c",c);
-			strcat(str,buffer);
-		}
-		else {
-			strcat(str,".");
-		}
-		i++;
-		if ((i == len) || ((i % DUMP_LINE) == 0)) {
-			while (i % DUMP_LINE) {
-				strcat (hex,"   ");
-				strcat (str," ");
-				i++;
-			}
-			printf("0x%" PRIx64 " %s  %s\n",off,hex,str);
-			off += DUMP_LINE;
-			str[0] = 0;
-			hex[0] = 0;
-		}
-	}
-	printf("----------------------------\n");
-}
-
 void dump_mem (struct _cpu *cpu,uint64_t addr,int size) {
 char *mem;
 int n;
@@ -427,39 +488,96 @@ void set_dqword_ptr(struct _cpu *cpu,uint64_t addr,__uint128_t value) {
 	set_mem (cpu,addr,16,(uint8_t *)&value);
 }
 
-void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str) {
-int n;
+int set_unicode_ptr_code_len (struct _cpu *cpu,uint64_t addr,char *str,char *code,int len) {
+char *buffer;
+int l;
 
-	for (n=0;n<strlen(str);n++) {
-		set_word_ptr (cpu,addr+(n*2),str[n]);
+	if (!len) {
+		len = strlen(str)+1;
 	}
+	//buffer = linux_iconvert (cpu,str,len,"CP1252","UTF16LE",&l);
+	buffer = linux_iconvert (cpu,str,len,code,"UTF16LE",&l);
+	if (buffer != NULL) {
+		if (addr) {
+			set_mem (cpu,addr,l,(uint8_t *)buffer);
+		}
+		free(buffer);
+	}
+	return (l);
 }
 
-char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr,int len) {
-int n;
-char *str,c;
+char *get_str_ptr(struct _cpu *cpu,uint64_t addr) {
+int maxlen = 1024*100;
+char *mem;
+int lmem;
+int len;
 
-	str = (char *) malloc(1024*5);
-	n = 0;
-	while (TRUE) {
-		c = byte_ptr(cpu,addr);
-		if (c) {
-			str[n++] = c;
-			addr += 2;
-		}
-		else {
-			break;
-		}
-		if ((len) && (n == len)) break;
+	mem = malloc(maxlen + 1);
+	mem[maxlen] = 0;
+	lmem = get_mem_dump (cpu,addr,maxlen,mem);
+	if (lmem) {
+		len = strlen(mem);
+		mem = realloc(mem,len);
 	}
-	str[n] = 0;
-	return (str);
+	return ("");
+}
+
+void set_unicode_ptr (struct _cpu *cpu,uint64_t addr,char *str) {
+	set_unicode_ptr_code_len(cpu,addr,str,"CP1252",0);
+}
+
+int get_unicode_length(struct _cpu *cpu,uint64_t addr) {
+int maxlen = 1024*100;
+char *mem;
+int lmem;
+int c,n;
+
+	mem = malloc(maxlen + 1);
+	lmem = get_mem_dump (cpu,addr,maxlen,mem);
+	n = 0;
+	c = 0;
+	if (lmem) {
+		lmem = (lmem/2)*2;
+		for (n=0;n<lmem;n+=2) {
+			if (!mem[n] && !mem[n+1]) {
+				// Include null termination
+				c++;
+				break;
+			}
+			c++;
+		}
+	}
+	free(mem);
+	return (c);
+}
+
+char *get_unicode_ptr_code_len(struct _cpu *cpu,uint64_t addr,char *code,int len,int *size) {
+char *mem,*ret;
+int lmem;
+
+	if (!len) {
+		len = get_unicode_length(cpu,addr)*2;
+	}
+	mem = malloc(len);
+	get_mem(cpu,addr,len,mem);
+	ret = linux_iconvert (cpu,mem,len,"UTF16LE",code,&lmem);
+	//hexdump(0,mem,len);
+	//hexdump(0,ret,lmem);
+	*size = lmem;
+	free(mem);
+	return (ret);
+}
+
+char *get_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
+int size;
+
+	return (get_unicode_ptr_code_len(cpu,addr,"CP1252",0,&size));
 }
 
 char *print_unicode_ptr(struct _cpu *cpu,uint64_t addr) {
 char *str;
 
-	str = get_unicode_ptr(cpu,addr,0);
+	str = get_unicode_ptr(cpu,addr);
 	if (str != NULL) {
 		printf("%s\n",str);
 		free(str);

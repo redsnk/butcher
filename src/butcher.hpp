@@ -46,6 +46,7 @@ class Butcher {
         //
         Butcher(Archive *a,Language *l);
         ~Butcher();
+        int SameInsn (cs_insn *insn1, cs_insn *insn2);
         int IsGroup (cs_insn *insn, int group);
         int Excluded(uint64_t addr);
         int IsNamedFunction (uint64_t addr, char **func);

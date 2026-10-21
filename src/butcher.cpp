@@ -3,6 +3,20 @@
 
 #include "butcher.hpp"
 
+int Butcher::SameInsn (cs_insn *insn1, cs_insn *insn2) {
+int n;
+
+    if (insn1->size != insn2->size) {
+        return (false);
+    }
+    for (n=0;n<insn1->size;n++) {
+        if (insn1->bytes[n] != insn2->bytes[n]) {
+            return (false);
+        }
+    }
+    return (true);
+}
+
 int Butcher::IsGroup (cs_insn *insn, int group) {
     if (insn->detail->groups_count > 0) {
         for (int i=0;i <  insn->detail->groups_count;i++) {
@@ -90,6 +104,7 @@ uint64_t read;
     return (true);
 }
 
+/*
 int Butcher::GetLengthCode(uint64_t address,int *memory) {
 int max_subcode = INIT_MEM_GETCODE;
 uint8_t *m;
@@ -102,7 +117,7 @@ uint64_t addr,*addr_list;
 
     lcount = 0;
     lend = false;
-    if (address == 0x1000100) {
+    if (address == 0x1024748b) {
         // test
         read = 0;
     }
@@ -152,6 +167,76 @@ uint64_t addr,*addr_list;
     }
     return (true);
 }
+*/
+
+int Butcher::GetLengthCode(uint64_t address,int *memory) {
+//int max_subcode = INIT_MEM_GETCODE;
+uint8_t *m;
+uint64_t read;
+cs_insn *insn;
+int n,lcount,ncount,count,anon,bytes;
+char *lib,*func;
+int lend;
+uint64_t addr,*addr_list;
+
+    lcount = 0;
+    lend = false;
+    if (address == 0x1024748b) {
+        // test
+        read = 0;
+    }
+    *memory = STEP_MEM_GETCODE;
+    while (true) {
+        m = arch->GetMemory(address, STEP_MEM_GETCODE, &read);
+        if (m == NULL) {
+            return (false);
+        }
+        ncount = cs_disasm(handle, m, STEP_MEM_GETCODE, address, 0, &insn);
+        free(m);
+        if (!ncount) {
+            return (false);
+        }
+        if ((lcount == ncount) || (read < STEP_MEM_GETCODE)) {
+            // No more opcodes or memory
+            cs_free(insn, ncount);
+            break;
+        }
+        //lcount = ncount;
+        for (n = 0; (n < ncount) && (!lend); n++) {
+            if (IsJmpIAT(&insn[n],&lib,&func)) {
+                    free(lib);
+                    free(func);
+                    lend = true;
+            }
+            else if(IsJmp(insn,n,&addr_list,&count,&anon)) {
+                free (addr_list);
+                lend = true;
+            }
+            else if (IsRet(&insn[n],&bytes)) {
+                lend = true;
+            }
+            else if (IsInt(&insn[n],&addr) || IsEnd(insn,n,ncount)) {
+                lend = true;
+            }
+        }
+        if (!lend) {
+            lcount = 1;
+            address = insn[ncount-1].address;
+        }
+        cs_free(insn, ncount);
+        if (lend) {
+            break;
+        }
+        // More codes
+        *memory += STEP_MEM_GETCODE;
+        if (*memory > MAX_MEM_GETCODE) {
+            // too much memory
+            return (false);
+        }
+    }
+    return (true);
+}
+
 
 Code *Butcher::GetCode(Code *c,uint64_t address,char *name,int parent) {
 int lend;
@@ -187,6 +272,8 @@ uint8_t *m;
     if (ltraces) lang->PrintF("%s *** GetCode 0x%llx (id=%i,parent=%i)\n",lang->COMM(),sc.first,sc.id,sc.parent);
     if (!GetLengthCode(sc.first,&max_subcode)) {
         if (ltraces) lang->PrintF("%s *** GetLengthCode error 0x%llx\n",lang->COMM(),sc.first);
+        // Empty subcode
+        sc.last = sc.first;
         return (c);
     }
     m = arch->GetMemory(sc.first,max_subcode,&read);
